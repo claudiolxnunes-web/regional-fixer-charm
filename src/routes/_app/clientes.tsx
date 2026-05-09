@@ -13,7 +13,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { ImportDialog } from "@/components/ImportDialog";
@@ -41,12 +41,28 @@ const TYPE_LABEL: Record<string, string> = {
   revenda_agropecuaria: "Revenda",
 };
 
+const LINE_LABEL: Record<string, string> = {
+  nutricao_ruminantes: "Nutrição Ruminantes",
+  revenda_ruminantes: "Revenda Ruminantes",
+  aditivos: "Aditivos",
+  indefinido: "Indefinido",
+};
+const LINE_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
+  nutricao_ruminantes: "default",
+  revenda_ruminantes: "secondary",
+  aditivos: "default",
+  indefinido: "outline",
+};
+
+type ClientLine = { id: string; client_id: string; line: keyof typeof LINE_LABEL; line_code: string; is_primary: boolean };
+
 function ClientesPage() {
   const qc = useQueryClient();
   const { isStaff } = useAuth();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
+  const [linesFor, setLinesFor] = useState<Client | null>(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["clients"],
@@ -57,6 +73,20 @@ function ClientesPage() {
     },
   });
 
+  const { data: lines = [] } = useQuery({
+    queryKey: ["client_lines"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("client_lines" as any).select("*");
+      if (error) throw error;
+      return (data as unknown) as ClientLine[];
+    },
+  });
+
+  const linesByClient = lines.reduce<Record<string, ClientLine[]>>((acc, l) => {
+    (acc[l.client_id] ||= []).push(l);
+    return acc;
+  }, {});
+
   const del = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("clients").delete().eq("id", id);
@@ -66,9 +96,10 @@ function ClientesPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const filtered = clients.filter((c) =>
-    [c.name, c.client_code, c.city, c.cnpj].some((v) => (v ?? "").toLowerCase().includes(q.toLowerCase()))
-  );
+  const filtered = clients.filter((c) => {
+    const codes = (linesByClient[c.id] ?? []).map((l) => l.line_code).join(" ");
+    return [c.name, c.client_code, c.city, c.cnpj, codes].some((v) => (v ?? "").toLowerCase().includes(q.toLowerCase()));
+  });
 
   return (
     <div className="space-y-6">
@@ -145,7 +176,7 @@ function ClientesPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-muted-foreground">
               <tr>
-                <th className="text-left p-3 font-medium">Código</th>
+                <th className="text-left p-3 font-medium">Códigos / Linhas</th>
                 <th className="text-left p-3 font-medium">Nome</th>
                 <th className="text-left p-3 font-medium">Tipo</th>
                 <th className="text-left p-3 font-medium">Cidade/UF</th>
@@ -158,9 +189,20 @@ function ClientesPage() {
             <tbody>
               {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
               {!isLoading && filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>}
-              {filtered.map((c) => (
-                <tr key={c.id} className="border-t hover:bg-muted/30">
-                  <td className="p-3 font-mono text-xs">{c.client_code || "-"}</td>
+              {filtered.map((c) => {
+                const cls = linesByClient[c.id] ?? [];
+                return (
+                <tr key={c.id} className="border-t hover:bg-muted/30 align-top">
+                  <td className="p-3">
+                    <div className="flex flex-wrap gap-1 max-w-xs">
+                      {cls.length === 0 && <span className="font-mono text-xs text-muted-foreground">{c.client_code || "-"}</span>}
+                      {cls.map((l) => (
+                        <Badge key={l.id} variant={LINE_VARIANT[l.line]} className="font-mono text-[10px]" title={LINE_LABEL[l.line]}>
+                          {l.line_code} · {LINE_LABEL[l.line]}
+                        </Badge>
+                      ))}
+                    </div>
+                  </td>
                   <td className="p-3 font-medium">{c.name}</td>
                   <td className="p-3">{TYPE_LABEL[c.type]}</td>
                   <td className="p-3">{[c.city, c.state].filter(Boolean).join(" / ") || "-"}</td>
@@ -169,17 +211,99 @@ function ClientesPage() {
                   <td className="p-3 text-right">R$ {Number(c.total_purchases ?? 0).toLocaleString("pt-BR")}</td>
                   {isStaff && (
                     <td className="p-3 text-right whitespace-nowrap">
+                      <Button size="sm" variant="ghost" title="Linhas de negócio" onClick={() => setLinesFor(c)}><Layers className="size-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="size-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir este cliente?")) del.mutate(c.id); }}><Trash2 className="size-4 text-destructive" /></Button>
                     </td>
                   )}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
       </Card>
+
+      <Dialog open={!!linesFor} onOpenChange={(o) => !o && setLinesFor(null)}>
+        {linesFor && <LinesDialog client={linesFor} lines={linesByClient[linesFor.id] ?? []} onClose={() => setLinesFor(null)} />}
+      </Dialog>
     </div>
+  );
+}
+
+function LinesDialog({ client, lines, onClose }: { client: Client; lines: ClientLine[]; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [newCode, setNewCode] = useState("");
+  const [newLine, setNewLine] = useState<keyof typeof LINE_LABEL>("nutricao_ruminantes");
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["client_lines"] });
+
+  const setLine = useMutation({
+    mutationFn: async ({ id, line }: { id: string; line: string }) => {
+      const { error } = await (supabase.from("client_lines" as any) as any).update({ line }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const addLine = useMutation({
+    mutationFn: async () => {
+      if (!newCode.trim()) throw new Error("Informe o código");
+      const { error } = await (supabase.from("client_lines" as any) as any).insert({
+        client_id: client.id, line: newLine, line_code: newCode.trim(), is_primary: false,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { refresh(); setNewCode(""); toast.success("Linha adicionada"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const removeLine = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase.from("client_lines" as any) as any).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { refresh(); toast.success("Removida"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <DialogContent className="max-w-xl">
+      <DialogHeader><DialogTitle>Linhas de negócio — {client.name}</DialogTitle></DialogHeader>
+      <div className="space-y-2">
+        {lines.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma linha cadastrada.</p>}
+        {lines.map((l) => (
+          <div key={l.id} className="flex items-center gap-2 border rounded-md p-2">
+            <span className="font-mono text-xs w-20">{l.line_code}</span>
+            <Select value={l.line} onValueChange={(v) => setLine.mutate({ id: l.id, line: v })}>
+              <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(LINE_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {l.is_primary && <Badge variant="outline">primário</Badge>}
+            <Button size="sm" variant="ghost" onClick={() => { if (confirm("Remover esta linha?")) removeLine.mutate(l.id); }}>
+              <Trash2 className="size-4 text-destructive" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      <div className="border-t pt-3 mt-2">
+        <Label className="text-xs">Adicionar nova linha</Label>
+        <div className="flex gap-2 mt-1.5">
+          <Input placeholder="Código" value={newCode} onChange={(e) => setNewCode(e.target.value)} className="w-32 font-mono" />
+          <Select value={newLine} onValueChange={(v: any) => setNewLine(v)}>
+            <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {Object.entries(LINE_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => addLine.mutate()} disabled={addLine.isPending}><Plus className="size-4" /></Button>
+        </div>
+      </div>
+      <DialogFooter><Button variant="outline" onClick={onClose}>Fechar</Button></DialogFooter>
+    </DialogContent>
   );
 }
 
