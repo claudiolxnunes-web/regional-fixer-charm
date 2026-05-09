@@ -118,6 +118,7 @@ export type Database = {
           group_code: string | null
           group_name: string | null
           id: string
+          import_source: string | null
           last_purchase_date: string | null
           lat: number | null
           lng: number | null
@@ -163,6 +164,7 @@ export type Database = {
           group_code?: string | null
           group_name?: string | null
           id?: string
+          import_source?: string | null
           last_purchase_date?: string | null
           lat?: number | null
           lng?: number | null
@@ -208,6 +210,7 @@ export type Database = {
           group_code?: string | null
           group_name?: string | null
           id?: string
+          import_source?: string | null
           last_purchase_date?: string | null
           lat?: number | null
           lng?: number | null
@@ -335,6 +338,7 @@ export type Database = {
           green_order: string | null
           grv: string | null
           id: string
+          import_source: string | null
           is_vef: string | null
           line: string | null
           load_id: string | null
@@ -377,6 +381,7 @@ export type Database = {
           green_order?: string | null
           grv?: string | null
           id?: string
+          import_source?: string | null
           is_vef?: string | null
           line?: string | null
           load_id?: string | null
@@ -419,6 +424,7 @@ export type Database = {
           green_order?: string | null
           grv?: string | null
           id?: string
+          import_source?: string | null
           is_vef?: string | null
           line?: string | null
           load_id?: string | null
@@ -726,6 +732,7 @@ export type Database = {
           grv: string | null
           icms_total: number | null
           id: string
+          import_source: string | null
           invoice_date: string | null
           invoice_number: string | null
           line: string | null
@@ -789,6 +796,7 @@ export type Database = {
           grv?: string | null
           icms_total?: number | null
           id?: string
+          import_source?: string | null
           invoice_date?: string | null
           invoice_number?: string | null
           line?: string | null
@@ -852,6 +860,7 @@ export type Database = {
           grv?: string | null
           icms_total?: number | null
           id?: string
+          import_source?: string | null
           invoice_date?: string | null
           invoice_number?: string | null
           line?: string | null
