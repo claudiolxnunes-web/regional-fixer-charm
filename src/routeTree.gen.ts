@@ -24,6 +24,7 @@ import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppClientesRouteImport } from './routes/_app/clientes'
 import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
+import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
 
 const LoginRoute = LoginRouteImport.update({
@@ -100,6 +101,11 @@ const AppAtividadesRoute = AppAtividadesRouteImport.update({
   path: '/atividades',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAlertasRoute = AppAlertasRouteImport.update({
   id: '/alertas',
   path: '/alertas',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/alertas': typeof AppAlertasRoute
+  '/analytics': typeof AppAnalyticsRoute
   '/atividades': typeof AppAtividadesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/alertas': typeof AppAlertasRoute
+  '/analytics': typeof AppAnalyticsRoute
   '/atividades': typeof AppAtividadesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/alertas': typeof AppAlertasRoute
+  '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/atividades': typeof AppAtividadesRoute
   '/_app/clientes': typeof AppClientesRoute
   '/_app/dashboard': typeof AppDashboardRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/alertas'
+    | '/analytics'
     | '/atividades'
     | '/clientes'
     | '/dashboard'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/alertas'
+    | '/analytics'
     | '/atividades'
     | '/clientes'
     | '/dashboard'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/_app/alertas'
+    | '/_app/analytics'
     | '/_app/atividades'
     | '/_app/clientes'
     | '/_app/dashboard'
@@ -327,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAtividadesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/alertas': {
       id: '/_app/alertas'
       path: '/alertas'
@@ -339,6 +358,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAlertasRoute: typeof AppAlertasRoute
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppAtividadesRoute: typeof AppAtividadesRoute
   AppClientesRoute: typeof AppClientesRoute
   AppDashboardRoute: typeof AppDashboardRoute
@@ -355,6 +375,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAlertasRoute: AppAlertasRoute,
+  AppAnalyticsRoute: AppAnalyticsRoute,
   AppAtividadesRoute: AppAtividadesRoute,
   AppClientesRoute: AppClientesRoute,
   AppDashboardRoute: AppDashboardRoute,
