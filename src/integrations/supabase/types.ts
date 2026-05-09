@@ -90,47 +90,6 @@ export type Database = {
           },
         ]
       }
-      client_lines: {
-        Row: {
-          client_id: string
-          created_at: string
-          id: string
-          is_primary: boolean
-          line: string
-          line_code: string
-          notes: string | null
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          id?: string
-          is_primary?: boolean
-          line: string
-          line_code: string
-          notes?: string | null
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          id?: string
-          is_primary?: boolean
-          line?: string
-          line_code?: string
-          notes?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_lines_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       clients: {
         Row: {
           abc_class: string | null
