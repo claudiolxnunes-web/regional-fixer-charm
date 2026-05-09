@@ -288,12 +288,99 @@ function ClientForm({ editing, onClose }: { editing: Client | null; onClose: () 
   );
 }
 
-function ClientSalesTab({ clientId: _clientId }: { clientId: string }) {
+function ClientSalesTab({ clientId }: { clientId: string }) {
+  const { data: sales = [], isLoading } = useQuery({
+    queryKey: ["client_sales", clientId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("sales")
+        .select("invoice_date, invoice_number, product_name, line, solution, qty_bags, revenue, mb_cb_total, ml_cb_total, commission_value, representative, branch")
+        .eq("client_id", clientId)
+        .order("invoice_date", { ascending: false, nullsFirst: false })
+        .limit(500);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  if (isLoading) return <p className="py-8 text-center text-sm text-muted-foreground">Carregando...</p>;
+  if (!sales.length) return <p className="py-8 text-center text-sm text-muted-foreground">Nenhuma venda registrada para este cliente.</p>;
+
+  const fmt = (v: any) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const totalRev = sales.reduce((a: number, s: any) => a + Number(s.revenue ?? 0), 0);
+  const totalMB = sales.reduce((a: number, s: any) => a + Number(s.mb_cb_total ?? 0), 0);
+  const totalML = sales.reduce((a: number, s: any) => a + Number(s.ml_cb_total ?? 0), 0);
+  const totalQty = sales.reduce((a: number, s: any) => a + Number(s.qty_bags ?? 0), 0);
+
+  // group by line
+  const byLine: Record<string, { rev: number; qty: number }> = {};
+  sales.forEach((s: any) => {
+    const k = s.line || "—";
+    byLine[k] ??= { rev: 0, qty: 0 };
+    byLine[k].rev += Number(s.revenue ?? 0);
+    byLine[k].qty += Number(s.qty_bags ?? 0);
+  });
+
   return (
-    <div className="py-12 text-center text-sm text-muted-foreground space-y-2">
-      <p className="font-medium text-foreground">Vendas ainda não importadas</p>
-      <p>Assim que o modelo de vendas for carregado, este painel mostrará o histórico do cliente
-      classificado por linha (Nutrição Ruminantes, Revenda Ruminantes, Aditivos), com totais por período.</p>
+    <div className="space-y-4">
+      <div className="grid grid-cols-4 gap-3">
+        <KpiCard label="Faturamento" value={`R$ ${fmt(totalRev)}`} />
+        <KpiCard label="MB CB" value={`R$ ${fmt(totalMB)}`} sub={totalRev ? `${((totalMB/totalRev)*100).toFixed(1)}%` : ""} />
+        <KpiCard label="ML CB" value={`R$ ${fmt(totalML)}`} sub={totalRev ? `${((totalML/totalRev)*100).toFixed(1)}%` : ""} />
+        <KpiCard label="Volume (sacos)" value={totalQty.toLocaleString("pt-BR")} sub={`${sales.length} NFs`} />
+      </div>
+
+      <div>
+        <p className="text-xs font-medium text-muted-foreground mb-2">Por linha</p>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(byLine).map(([line, v]) => (
+            <Badge key={line} variant="outline" className="text-xs">
+              {line}: R$ {fmt(v.rev)} ({v.qty.toLocaleString("pt-BR")} sc)
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-h-96 overflow-auto border rounded-md">
+        <table className="w-full text-xs">
+          <thead className="bg-muted/50 text-muted-foreground sticky top-0">
+            <tr>
+              <th className="text-left p-2 font-medium">Data</th>
+              <th className="text-left p-2 font-medium">NF</th>
+              <th className="text-left p-2 font-medium">Produto</th>
+              <th className="text-left p-2 font-medium">Linha</th>
+              <th className="text-right p-2 font-medium">Qtd</th>
+              <th className="text-right p-2 font-medium">Faturamento</th>
+              <th className="text-right p-2 font-medium">MB</th>
+              <th className="text-right p-2 font-medium">Comissão</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sales.map((s: any, i: number) => (
+              <tr key={i} className="border-t">
+                <td className="p-2 whitespace-nowrap">{s.invoice_date ? new Date(s.invoice_date).toLocaleDateString("pt-BR") : "-"}</td>
+                <td className="p-2 font-mono">{s.invoice_number}</td>
+                <td className="p-2">{s.product_name}</td>
+                <td className="p-2">{s.line || "-"}</td>
+                <td className="p-2 text-right">{Number(s.qty_bags ?? 0).toLocaleString("pt-BR")}</td>
+                <td className="p-2 text-right">{fmt(s.revenue)}</td>
+                <td className="p-2 text-right">{fmt(s.mb_cb_total)}</td>
+                <td className="p-2 text-right">{fmt(s.commission_value)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function KpiCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="rounded-md border p-3">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-lg font-semibold mt-1">{value}</div>
+      {sub && <div className="text-[11px] text-muted-foreground">{sub}</div>}
     </div>
   );
 }
