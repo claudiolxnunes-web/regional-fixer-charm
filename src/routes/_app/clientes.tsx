@@ -41,12 +41,28 @@ const TYPE_LABEL: Record<string, string> = {
   revenda_agropecuaria: "Revenda",
 };
 
+const LINE_LABEL: Record<string, string> = {
+  nutricao_ruminantes: "Nutrição Ruminantes",
+  revenda_ruminantes: "Revenda Ruminantes",
+  aditivos: "Aditivos",
+  indefinido: "Indefinido",
+};
+const LINE_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
+  nutricao_ruminantes: "default",
+  revenda_ruminantes: "secondary",
+  aditivos: "default",
+  indefinido: "outline",
+};
+
+type ClientLine = { id: string; client_id: string; line: keyof typeof LINE_LABEL; line_code: string; is_primary: boolean };
+
 function ClientesPage() {
   const qc = useQueryClient();
   const { isStaff } = useAuth();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
+  const [linesFor, setLinesFor] = useState<Client | null>(null);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["clients"],
@@ -57,6 +73,20 @@ function ClientesPage() {
     },
   });
 
+  const { data: lines = [] } = useQuery({
+    queryKey: ["client_lines"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("client_lines" as any).select("*");
+      if (error) throw error;
+      return data as ClientLine[];
+    },
+  });
+
+  const linesByClient = lines.reduce<Record<string, ClientLine[]>>((acc, l) => {
+    (acc[l.client_id] ||= []).push(l);
+    return acc;
+  }, {});
+
   const del = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("clients").delete().eq("id", id);
@@ -66,9 +96,10 @@ function ClientesPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const filtered = clients.filter((c) =>
-    [c.name, c.client_code, c.city, c.cnpj].some((v) => (v ?? "").toLowerCase().includes(q.toLowerCase()))
-  );
+  const filtered = clients.filter((c) => {
+    const codes = (linesByClient[c.id] ?? []).map((l) => l.line_code).join(" ");
+    return [c.name, c.client_code, c.city, c.cnpj, codes].some((v) => (v ?? "").toLowerCase().includes(q.toLowerCase()));
+  });
 
   return (
     <div className="space-y-6">
