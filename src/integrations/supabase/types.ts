@@ -97,6 +97,66 @@ export type Database = {
           },
         ]
       }
+      alerts: {
+        Row: {
+          client_code: string | null
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          message: string | null
+          metadata: Json | null
+          read_at: string | null
+          rep_user_id: string | null
+          representative_id: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          client_code?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          read_at?: string | null
+          rep_user_id?: string | null
+          representative_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          client_code?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          read_at?: string | null
+          rep_user_id?: string | null
+          representative_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           abc_class: string | null
@@ -1272,6 +1332,7 @@ export type Database = {
     Functions: {
       current_rep_code: { Args: never; Returns: string }
       current_rep_id: { Args: never; Returns: string }
+      generate_inactive_client_alerts: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
