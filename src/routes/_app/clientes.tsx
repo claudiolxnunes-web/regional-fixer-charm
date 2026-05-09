@@ -1,0 +1,227 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+
+export const Route = createFileRoute("/_app/clientes")({ component: ClientesPage });
+
+type Client = {
+  id: string;
+  client_code: string | null;
+  name: string;
+  type: "fazenda_ruminantes" | "fabrica_racao" | "revenda_agropecuaria";
+  cnpj: string | null;
+  city: string | null;
+  state: string | null;
+  phone: string | null;
+  email: string | null;
+  status: "active" | "inactive" | "prospect" | null;
+  abc_class: string | null;
+  total_purchases: number | null;
+};
+
+const TYPE_LABEL: Record<string, string> = {
+  fazenda_ruminantes: "Fazenda",
+  fabrica_racao: "Fábrica de Ração",
+  revenda_agropecuaria: "Revenda",
+};
+
+function ClientesPage() {
+  const qc = useQueryClient();
+  const { isStaff } = useAuth();
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Client | null>(null);
+
+  const { data: clients = [], isLoading } = useQuery({
+    queryKey: ["clients"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("clients").select("*").order("name");
+      if (error) throw error;
+      return data as Client[];
+    },
+  });
+
+  const del = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("clients").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["clients"] }); toast.success("Cliente removido"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const filtered = clients.filter((c) =>
+    [c.name, c.client_code, c.city, c.cnpj].some((v) => (v ?? "").toLowerCase().includes(q.toLowerCase()))
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Clientes</h1>
+          <p className="text-sm text-muted-foreground">{clients.length} cadastrados</p>
+        </div>
+        {isStaff && (
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setEditing(null)}><Plus className="size-4 mr-2" /> Novo cliente</Button>
+            </DialogTrigger>
+            <ClientForm key={editing?.id ?? "new"} editing={editing} onClose={() => setOpen(false)} />
+          </Dialog>
+        )}
+      </div>
+
+      <div className="relative max-w-sm">
+        <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="Buscar por nome, código, cidade..." value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+      </div>
+
+      <Card>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-muted-foreground">
+              <tr>
+                <th className="text-left p-3 font-medium">Código</th>
+                <th className="text-left p-3 font-medium">Nome</th>
+                <th className="text-left p-3 font-medium">Tipo</th>
+                <th className="text-left p-3 font-medium">Cidade/UF</th>
+                <th className="text-left p-3 font-medium">Status</th>
+                <th className="text-left p-3 font-medium">ABC</th>
+                <th className="text-right p-3 font-medium">Compras</th>
+                {isStaff && <th className="p-3"></th>}
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
+              {!isLoading && filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>}
+              {filtered.map((c) => (
+                <tr key={c.id} className="border-t hover:bg-muted/30">
+                  <td className="p-3 font-mono text-xs">{c.client_code || "-"}</td>
+                  <td className="p-3 font-medium">{c.name}</td>
+                  <td className="p-3">{TYPE_LABEL[c.type]}</td>
+                  <td className="p-3">{[c.city, c.state].filter(Boolean).join(" / ") || "-"}</td>
+                  <td className="p-3"><Badge variant={c.status === "active" ? "default" : "secondary"}>{c.status ?? "-"}</Badge></td>
+                  <td className="p-3">{c.abc_class && <Badge variant="outline">{c.abc_class}</Badge>}</td>
+                  <td className="p-3 text-right">R$ {Number(c.total_purchases ?? 0).toLocaleString("pt-BR")}</td>
+                  {isStaff && (
+                    <td className="p-3 text-right whitespace-nowrap">
+                      <Button size="sm" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="size-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir este cliente?")) del.mutate(c.id); }}><Trash2 className="size-4 text-destructive" /></Button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function ClientForm({ editing, onClose }: { editing: Client | null; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    client_code: editing?.client_code ?? "",
+    name: editing?.name ?? "",
+    type: editing?.type ?? "fazenda_ruminantes",
+    cnpj: editing?.cnpj ?? "",
+    email: editing?.email ?? "",
+    phone: editing?.phone ?? "",
+    city: editing?.city ?? "",
+    state: editing?.state ?? "",
+    status: editing?.status ?? "active",
+    abc_class: editing?.abc_class ?? "",
+    total_purchases: editing?.total_purchases ?? 0,
+  });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const payload = { ...form, abc_class: form.abc_class || null, total_purchases: Number(form.total_purchases) || 0 };
+      if (editing) {
+        const { error } = await supabase.from("clients").update(payload).eq("id", editing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("clients").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["clients"] }); toast.success("Salvo"); onClose(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <DialogContent className="max-w-2xl">
+      <DialogHeader><DialogTitle>{editing ? "Editar cliente" : "Novo cliente"}</DialogTitle></DialogHeader>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Código"><Input value={form.client_code} onChange={(e) => setForm({ ...form, client_code: e.target.value })} /></Field>
+        <Field label="CNPJ"><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} /></Field>
+        <Field label="Nome" full><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
+        <Field label="Tipo">
+          <Select value={form.type} onValueChange={(v: any) => setForm({ ...form, type: v })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fazenda_ruminantes">Fazenda de Ruminantes</SelectItem>
+              <SelectItem value="fabrica_racao">Fábrica de Ração</SelectItem>
+              <SelectItem value="revenda_agropecuaria">Revenda Agropecuária</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Status">
+          <Select value={form.status as string} onValueChange={(v: any) => setForm({ ...form, status: v })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Ativo</SelectItem>
+              <SelectItem value="inactive">Inativo</SelectItem>
+              <SelectItem value="prospect">Prospect</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="E-mail"><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+        <Field label="Telefone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+        <Field label="Cidade"><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></Field>
+        <Field label="UF"><Input maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })} /></Field>
+        <Field label="Classe ABC">
+          <Select value={form.abc_class || "none"} onValueChange={(v) => setForm({ ...form, abc_class: v === "none" ? "" : v })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">—</SelectItem>
+              <SelectItem value="A">A</SelectItem>
+              <SelectItem value="B">B</SelectItem>
+              <SelectItem value="C">C</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="Total de compras (R$)"><Input type="number" value={form.total_purchases} onChange={(e) => setForm({ ...form, total_purchases: Number(e.target.value) })} /></Field>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>Cancelar</Button>
+        <Button onClick={() => save.mutate()} disabled={save.isPending || !form.name}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+}
+
+function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+  return (
+    <div className={`space-y-1.5 ${full ? "col-span-2" : ""}`}>
+      <Label className="text-xs">{label}</Label>
+      {children}
+    </div>
+  );
+}
