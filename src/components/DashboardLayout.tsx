@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Users, Building2, Target, Briefcase, Activity,
   Map, BarChart3, Bell, Settings, Upload, Brain, LogOut, Sprout,
-  TrendingUp, LineChart, Smartphone, ClipboardList, Zap,
+  TrendingUp, LineChart, Smartphone, ClipboardList, Zap, ShoppingCart,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
