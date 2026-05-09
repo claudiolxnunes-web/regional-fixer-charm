@@ -156,7 +156,7 @@ function ClientesPage() {
                   <td className="p-3">{c.abc_class && <Badge variant="outline">{c.abc_class}</Badge>}</td>
                   <td className="p-3 text-right">R$ {Number(c.total_purchases ?? 0).toLocaleString("pt-BR")}</td>
                   {isStaff && (
-                    <td className="p-3 text-right whitespace-nowrap">
+                    <td className="p-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="size-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir este cliente?")) del.mutate(c.id); }}><Trash2 className="size-4 text-destructive" /></Button>
                     </td>
