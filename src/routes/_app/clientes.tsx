@@ -147,9 +147,9 @@ function ClientesPage() {
               {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
               {!isLoading && filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>}
               {filtered.map((c) => (
-                <tr key={c.id} className="border-t hover:bg-muted/30">
+                <tr key={c.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => { setEditing(c); setOpen(true); }}>
                   <td className="p-3 font-mono text-xs">{c.client_code || "-"}</td>
-                  <td className="p-3 font-medium">{c.name}</td>
+                  <td className="p-3 font-medium text-primary hover:underline">{c.name}</td>
                   <td className="p-3">{TYPE_LABEL[c.type]}</td>
                   <td className="p-3">{[c.city, c.state].filter(Boolean).join(" / ") || "-"}</td>
                   <td className="p-3"><Badge variant={c.status === "active" ? "default" : "secondary"}>{c.status ?? "-"}</Badge></td>
