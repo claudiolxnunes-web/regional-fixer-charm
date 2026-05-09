@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppVendasRouteImport } from './routes/_app/vendas'
 import { Route as AppRepresentantesRouteImport } from './routes/_app/representantes'
 import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
+import { Route as AppRegistroCampoRouteImport } from './routes/_app/registro-campo'
 import { Route as AppPreferenciasRouteImport } from './routes/_app/preferencias'
 import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
 import { Route as AppMetasRouteImport } from './routes/_app/metas'
@@ -22,7 +24,10 @@ import { Route as AppImportacaoRouteImport } from './routes/_app/importacao'
 import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppClientesRouteImport } from './routes/_app/clientes'
+import { Route as AppAutomacoesRouteImport } from './routes/_app/automacoes'
 import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
+import { Route as AppAppRepresentanteRouteImport } from './routes/_app/app-representante'
+import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
 
 const LoginRoute = LoginRouteImport.update({
@@ -39,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppVendasRoute = AppVendasRouteImport.update({
+  id: '/vendas',
+  path: '/vendas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRepresentantesRoute = AppRepresentantesRouteImport.update({
   id: '/representantes',
   path: '/representantes',
@@ -47,6 +57,11 @@ const AppRepresentantesRoute = AppRepresentantesRouteImport.update({
 const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRegistroCampoRoute = AppRegistroCampoRouteImport.update({
+  id: '/registro-campo',
+  path: '/registro-campo',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPreferenciasRoute = AppPreferenciasRouteImport.update({
@@ -89,9 +104,24 @@ const AppClientesRoute = AppClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAutomacoesRoute = AppAutomacoesRouteImport.update({
+  id: '/automacoes',
+  path: '/automacoes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAtividadesRoute = AppAtividadesRouteImport.update({
   id: '/atividades',
   path: '/atividades',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAppRepresentanteRoute = AppAppRepresentanteRouteImport.update({
+  id: '/app-representante',
+  path: '/app-representante',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAlertasRoute = AppAlertasRouteImport.update({
@@ -104,7 +134,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/alertas': typeof AppAlertasRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/app-representante': typeof AppAppRepresentanteRoute
   '/atividades': typeof AppAtividadesRoute
+  '/automacoes': typeof AppAutomacoesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
@@ -113,14 +146,19 @@ export interface FileRoutesByFullPath {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/preferencias': typeof AppPreferenciasRoute
+  '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
+  '/vendas': typeof AppVendasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/alertas': typeof AppAlertasRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/app-representante': typeof AppAppRepresentanteRoute
   '/atividades': typeof AppAtividadesRoute
+  '/automacoes': typeof AppAutomacoesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
@@ -129,8 +167,10 @@ export interface FileRoutesByTo {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/preferencias': typeof AppPreferenciasRoute
+  '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
+  '/vendas': typeof AppVendasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,7 +178,10 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/alertas': typeof AppAlertasRoute
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/app-representante': typeof AppAppRepresentanteRoute
   '/_app/atividades': typeof AppAtividadesRoute
+  '/_app/automacoes': typeof AppAutomacoesRoute
   '/_app/clientes': typeof AppClientesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/ia-insights': typeof AppIaInsightsRoute
@@ -147,8 +190,10 @@ export interface FileRoutesById {
   '/_app/metas': typeof AppMetasRoute
   '/_app/oportunidades': typeof AppOportunidadesRoute
   '/_app/preferencias': typeof AppPreferenciasRoute
+  '/_app/registro-campo': typeof AppRegistroCampoRoute
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRoute
+  '/_app/vendas': typeof AppVendasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -156,7 +201,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/alertas'
+    | '/analytics'
+    | '/app-representante'
     | '/atividades'
+    | '/automacoes'
     | '/clientes'
     | '/dashboard'
     | '/ia-insights'
@@ -165,14 +213,19 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/preferencias'
+    | '/registro-campo'
     | '/relatorios'
     | '/representantes'
+    | '/vendas'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/alertas'
+    | '/analytics'
+    | '/app-representante'
     | '/atividades'
+    | '/automacoes'
     | '/clientes'
     | '/dashboard'
     | '/ia-insights'
@@ -181,15 +234,20 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/preferencias'
+    | '/registro-campo'
     | '/relatorios'
     | '/representantes'
+    | '/vendas'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
     | '/_app/alertas'
+    | '/_app/analytics'
+    | '/_app/app-representante'
     | '/_app/atividades'
+    | '/_app/automacoes'
     | '/_app/clientes'
     | '/_app/dashboard'
     | '/_app/ia-insights'
@@ -198,8 +256,10 @@ export interface FileRouteTypes {
     | '/_app/metas'
     | '/_app/oportunidades'
     | '/_app/preferencias'
+    | '/_app/registro-campo'
     | '/_app/relatorios'
     | '/_app/representantes'
+    | '/_app/vendas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -231,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/vendas': {
+      id: '/_app/vendas'
+      path: '/vendas'
+      fullPath: '/vendas'
+      preLoaderRoute: typeof AppVendasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/representantes': {
       id: '/_app/representantes'
       path: '/representantes'
@@ -243,6 +310,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof AppRelatoriosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/registro-campo': {
+      id: '/_app/registro-campo'
+      path: '/registro-campo'
+      fullPath: '/registro-campo'
+      preLoaderRoute: typeof AppRegistroCampoRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/preferencias': {
@@ -301,11 +375,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/automacoes': {
+      id: '/_app/automacoes'
+      path: '/automacoes'
+      fullPath: '/automacoes'
+      preLoaderRoute: typeof AppAutomacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/atividades': {
       id: '/_app/atividades'
       path: '/atividades'
       fullPath: '/atividades'
       preLoaderRoute: typeof AppAtividadesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/app-representante': {
+      id: '/_app/app-representante'
+      path: '/app-representante'
+      fullPath: '/app-representante'
+      preLoaderRoute: typeof AppAppRepresentanteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/alertas': {
@@ -320,7 +415,10 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAlertasRoute: typeof AppAlertasRoute
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppAppRepresentanteRoute: typeof AppAppRepresentanteRoute
   AppAtividadesRoute: typeof AppAtividadesRoute
+  AppAutomacoesRoute: typeof AppAutomacoesRoute
   AppClientesRoute: typeof AppClientesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppIaInsightsRoute: typeof AppIaInsightsRoute
@@ -329,13 +427,18 @@ interface AppRouteChildren {
   AppMetasRoute: typeof AppMetasRoute
   AppOportunidadesRoute: typeof AppOportunidadesRoute
   AppPreferenciasRoute: typeof AppPreferenciasRoute
+  AppRegistroCampoRoute: typeof AppRegistroCampoRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRepresentantesRoute: typeof AppRepresentantesRoute
+  AppVendasRoute: typeof AppVendasRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAlertasRoute: AppAlertasRoute,
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppAppRepresentanteRoute: AppAppRepresentanteRoute,
   AppAtividadesRoute: AppAtividadesRoute,
+  AppAutomacoesRoute: AppAutomacoesRoute,
   AppClientesRoute: AppClientesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppIaInsightsRoute: AppIaInsightsRoute,
@@ -344,8 +447,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppMetasRoute: AppMetasRoute,
   AppOportunidadesRoute: AppOportunidadesRoute,
   AppPreferenciasRoute: AppPreferenciasRoute,
+  AppRegistroCampoRoute: AppRegistroCampoRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppRepresentantesRoute: AppRepresentantesRoute,
+  AppVendasRoute: AppVendasRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
