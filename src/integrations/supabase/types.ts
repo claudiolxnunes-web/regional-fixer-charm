@@ -253,6 +253,51 @@ export type Database = {
           },
         ]
       }
+      daily_reports: {
+        Row: {
+          calls_count: number
+          created_at: string
+          id: string
+          observations: string | null
+          orders_count: number
+          proposals_count: number
+          rep_user_id: string
+          report_date: string
+          representative_id: string | null
+          submitted_at: string | null
+          updated_at: string
+          visits_count: number
+        }
+        Insert: {
+          calls_count?: number
+          created_at?: string
+          id?: string
+          observations?: string | null
+          orders_count?: number
+          proposals_count?: number
+          rep_user_id?: string
+          report_date?: string
+          representative_id?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          visits_count?: number
+        }
+        Update: {
+          calls_count?: number
+          created_at?: string
+          id?: string
+          observations?: string | null
+          orders_count?: number
+          proposals_count?: number
+          rep_user_id?: string
+          report_date?: string
+          representative_id?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          visits_count?: number
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string
@@ -597,6 +642,60 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      quotes: {
+        Row: {
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          id: string
+          items: Json
+          manager_response: string | null
+          notes: string | null
+          payment_terms: string | null
+          rep_user_id: string
+          representative_id: string | null
+          responded_at: string | null
+          status: string
+          total: number | null
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          items?: Json
+          manager_response?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          rep_user_id?: string
+          representative_id?: string | null
+          responded_at?: string | null
+          status?: string
+          total?: number | null
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          items?: Json
+          manager_response?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          rep_user_id?: string
+          representative_id?: string | null
+          responded_at?: string | null
+          status?: string
+          total?: number | null
+          updated_at?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -989,8 +1088,124 @@ export type Database = {
           },
         ]
       }
+      sales_rep_view: {
+        Row: {
+          bonus: number | null
+          branch: string | null
+          branch_code: string | null
+          category: string | null
+          city: string | null
+          client_code: string | null
+          client_id: string | null
+          client_name: string | null
+          currency: string | null
+          id: string | null
+          invoice_date: string | null
+          invoice_number: string | null
+          line: string | null
+          month_year: string | null
+          order_date: string | null
+          order_number: string | null
+          price_per_bag: number | null
+          price_per_kg: number | null
+          product_code: string | null
+          product_group: string | null
+          product_group_code: string | null
+          product_name: string | null
+          qty_bags: number | null
+          region: string | null
+          rep_code: string | null
+          representative: string | null
+          representative_id: string | null
+          revenue: number | null
+          segmentation: string | null
+          solution: string | null
+          state: string | null
+          subsolution: string | null
+          volume_sales: number | null
+          volume_sales_bonus: number | null
+          year: number | null
+        }
+        Insert: {
+          bonus?: number | null
+          branch?: string | null
+          branch_code?: string | null
+          category?: string | null
+          city?: string | null
+          client_code?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          currency?: string | null
+          id?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line?: string | null
+          month_year?: string | null
+          order_date?: string | null
+          order_number?: string | null
+          price_per_bag?: number | null
+          price_per_kg?: number | null
+          product_code?: string | null
+          product_group?: string | null
+          product_group_code?: string | null
+          product_name?: string | null
+          qty_bags?: number | null
+          region?: string | null
+          rep_code?: string | null
+          representative?: string | null
+          representative_id?: string | null
+          revenue?: number | null
+          segmentation?: string | null
+          solution?: string | null
+          state?: string | null
+          subsolution?: string | null
+          volume_sales?: number | null
+          volume_sales_bonus?: number | null
+          year?: number | null
+        }
+        Update: {
+          bonus?: number | null
+          branch?: string | null
+          branch_code?: string | null
+          category?: string | null
+          city?: string | null
+          client_code?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          currency?: string | null
+          id?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line?: string | null
+          month_year?: string | null
+          order_date?: string | null
+          order_number?: string | null
+          price_per_bag?: number | null
+          price_per_kg?: number | null
+          product_code?: string | null
+          product_group?: string | null
+          product_group_code?: string | null
+          product_name?: string | null
+          qty_bags?: number | null
+          region?: string | null
+          rep_code?: string | null
+          representative?: string | null
+          representative_id?: string | null
+          revenue?: number | null
+          segmentation?: string | null
+          solution?: string | null
+          state?: string | null
+          subsolution?: string | null
+          volume_sales?: number | null
+          volume_sales_bonus?: number | null
+          year?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      current_rep_code: { Args: never; Returns: string }
+      current_rep_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1001,7 +1216,7 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "manager" | "rep" | "user"
+      app_role: "admin" | "manager" | "rep" | "user" | "representative"
       client_status: "active" | "inactive" | "prospect"
       client_type:
         | "fazenda_ruminantes"
@@ -1141,7 +1356,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "manager", "rep", "user"],
+      app_role: ["admin", "manager", "rep", "user", "representative"],
       client_status: ["active", "inactive", "prospect"],
       client_type: [
         "fazenda_ruminantes",
