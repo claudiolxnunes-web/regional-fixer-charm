@@ -130,10 +130,10 @@ export function ImportDialog({
     if (!autoRows?.length) return;
     setBusy(true);
     try {
-      const q = matchBy
-        ? supabase.from(table).upsert(autoRows, { onConflict: matchBy, ignoreDuplicates: true })
-        : supabase.from(table).insert(autoRows);
-      const { error } = await q;
+      const tbl: any = supabase.from(table as any);
+      const { error } = await (matchBy
+        ? tbl.upsert(autoRows, { onConflict: matchBy, ignoreDuplicates: true })
+        : tbl.insert(autoRows));
       if (error) throw error;
       toast.success(`${autoRows.length} registro(s) criado(s)`);
       qc.invalidateQueries({ queryKey: [invalidateKey] });
