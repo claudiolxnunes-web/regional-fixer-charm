@@ -75,6 +75,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activities_opportunity_id_fkey"
             columns: ["opportunity_id"]
             isOneToOne: false
@@ -361,6 +368,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "opportunities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "opportunities_region_id_fkey"
             columns: ["region_id"]
             isOneToOne: false
@@ -578,7 +592,165 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      clients_view: {
+        Row: {
+          abc_class: string | null
+          address: string | null
+          animal_count: number | null
+          animal_types: string | null
+          business_potential: number | null
+          category: string | null
+          city: string | null
+          client_code: string | null
+          cnpj: string | null
+          consumed_products: string | null
+          contact_name: string | null
+          covered_municipalities: number | null
+          created_at: string | null
+          days_since_last_purchase: number | null
+          effective_status: string | null
+          email: string | null
+          farming_system: string | null
+          final_clients_count: number | null
+          group_code: string | null
+          group_name: string | null
+          id: string | null
+          last_purchase_date: string | null
+          lat: number | null
+          lng: number | null
+          monthly_sales_volume: number | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          product_lines: string | null
+          product_mix: string | null
+          production_capacity: number | null
+          production_type: string | null
+          property_area: number | null
+          purchase_potential: number | null
+          ration_types: string | null
+          raw_material_volume: number | null
+          region_id: string | null
+          representative_id: string | null
+          segment: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["client_status"] | null
+          total_purchases: number | null
+          type: Database["public"]["Enums"]["client_type"] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          abc_class?: string | null
+          address?: string | null
+          animal_count?: number | null
+          animal_types?: string | null
+          business_potential?: number | null
+          category?: string | null
+          city?: string | null
+          client_code?: string | null
+          cnpj?: string | null
+          consumed_products?: string | null
+          contact_name?: string | null
+          covered_municipalities?: number | null
+          created_at?: string | null
+          days_since_last_purchase?: never
+          effective_status?: never
+          email?: string | null
+          farming_system?: string | null
+          final_clients_count?: number | null
+          group_code?: string | null
+          group_name?: string | null
+          id?: string | null
+          last_purchase_date?: string | null
+          lat?: number | null
+          lng?: number | null
+          monthly_sales_volume?: number | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          product_lines?: string | null
+          product_mix?: string | null
+          production_capacity?: number | null
+          production_type?: string | null
+          property_area?: number | null
+          purchase_potential?: number | null
+          ration_types?: string | null
+          raw_material_volume?: number | null
+          region_id?: string | null
+          representative_id?: string | null
+          segment?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["client_status"] | null
+          total_purchases?: number | null
+          type?: Database["public"]["Enums"]["client_type"] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          abc_class?: string | null
+          address?: string | null
+          animal_count?: number | null
+          animal_types?: string | null
+          business_potential?: number | null
+          category?: string | null
+          city?: string | null
+          client_code?: string | null
+          cnpj?: string | null
+          consumed_products?: string | null
+          contact_name?: string | null
+          covered_municipalities?: number | null
+          created_at?: string | null
+          days_since_last_purchase?: never
+          effective_status?: never
+          email?: string | null
+          farming_system?: string | null
+          final_clients_count?: number | null
+          group_code?: string | null
+          group_name?: string | null
+          id?: string | null
+          last_purchase_date?: string | null
+          lat?: number | null
+          lng?: number | null
+          monthly_sales_volume?: number | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          product_lines?: string | null
+          product_mix?: string | null
+          production_capacity?: number | null
+          production_type?: string | null
+          property_area?: number | null
+          purchase_potential?: number | null
+          ration_types?: string | null
+          raw_material_volume?: number | null
+          region_id?: string | null
+          representative_id?: string | null
+          segment?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["client_status"] | null
+          total_purchases?: number | null
+          type?: Database["public"]["Enums"]["client_type"] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_representative_id_fkey"
+            columns: ["representative_id"]
+            isOneToOne: false
+            referencedRelation: "representatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {

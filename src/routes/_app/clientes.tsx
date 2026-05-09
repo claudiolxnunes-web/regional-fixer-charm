@@ -32,8 +32,17 @@ type Client = {
   phone: string | null;
   email: string | null;
   status: "active" | "inactive" | "prospect" | null;
+  effective_status?: "active" | "inactive" | "prospect" | null;
+  days_since_last_purchase?: number | null;
+  last_purchase_date?: string | null;
   abc_class: string | null;
   total_purchases: number | null;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  active: "Ativo",
+  inactive: "Inativo (>6m)",
+  prospect: "Prospect",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -52,7 +61,7 @@ function ClientesPage() {
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("clients").select("*").order("name");
+      const { data, error } = await (supabase as any).from("clients_view").select("*").order("name");
       if (error) throw error;
       return data as Client[];
     },
@@ -152,7 +161,7 @@ function ClientesPage() {
                   <td className="p-3 font-medium text-primary hover:underline">{c.name}</td>
                   <td className="p-3">{TYPE_LABEL[c.type]}</td>
                   <td className="p-3">{[c.city, c.state].filter(Boolean).join(" / ") || "-"}</td>
-                  <td className="p-3"><Badge variant={c.status === "active" ? "default" : "secondary"}>{c.status ?? "-"}</Badge></td>
+                  <td className="p-3">{(() => { const s = c.effective_status ?? c.status ?? "-"; const variant = s === "active" ? "default" : s === "prospect" ? "outline" : "secondary"; return <Badge variant={variant as any}>{STATUS_LABEL[s] ?? s}</Badge>; })()}</td>
                   <td className="p-3">{c.abc_class && <Badge variant="outline">{c.abc_class}</Badge>}</td>
                   <td className="p-3 text-right">R$ {Number(c.total_purchases ?? 0).toLocaleString("pt-BR")}</td>
                   {isStaff && (
