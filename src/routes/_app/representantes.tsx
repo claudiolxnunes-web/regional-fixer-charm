@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { ImportDialog } from "@/components/ImportDialog";
 
 export const Route = createFileRoute("/_app/representantes")({ component: RepsPage });
 
@@ -19,12 +20,15 @@ type Rep = {
   id: string;
   rep_code: string | null;
   name: string;
+  company: string | null;
+  company_cnpj: string | null;
   email: string | null;
   phone: string | null;
   status: "active" | "inactive";
   total_sales: number | null;
   total_clients: number | null;
   home_state: string | null;
+  home_city: string | null;
 };
 
 function RepsPage() {
@@ -53,18 +57,56 @@ function RepsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Representantes</h1>
           <p className="text-sm text-muted-foreground">{reps.length} cadastrados</p>
         </div>
         {isStaff && (
-          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setEditing(null)}><Plus className="size-4 mr-2" /> Novo</Button>
-            </DialogTrigger>
-            <RepForm key={editing?.id ?? "new"} editing={editing} onClose={() => setOpen(false)} />
-          </Dialog>
+          <div className="flex gap-2">
+            <ImportDialog
+              table="representatives"
+              invalidateKey="reps"
+              title="Importar representantes"
+              matchBy="rep_code"
+              templateSample={{
+                codigo: "REP001",
+                nome: "João Silva",
+                empresa: "Acme Representações",
+                cnpj: "00.000.000/0000-00",
+                cidade: "São Paulo",
+                estado: "SP",
+                regiao: "Sudeste",
+                email: "rep@email.com",
+                telefone: "(11) 99999-0000",
+              }}
+              columns={[
+                { header: "codigo", field: "rep_code", required: true },
+                { header: "nome", field: "name", required: true },
+                { header: "empresa", field: "company" },
+                { header: "cnpj", field: "company_cnpj" },
+                { header: "cidade", field: "home_city" },
+                { header: "estado", field: "home_state", transform: (v) => String(v ?? "").toUpperCase().slice(0, 2) || null },
+                { header: "regiao", field: "territory" },
+                { header: "email", field: "email" },
+                { header: "telefone", field: "phone" },
+              ]}
+              autoDetect={async () => {
+                // Find rep IDs referenced by clients but missing in representatives
+                const { data: refs } = await supabase.from("clients").select("representative_id").not("representative_id", "is", null);
+                const { data: existing } = await supabase.from("representatives").select("id");
+                const existingIds = new Set((existing ?? []).map((r) => r.id));
+                const missing = Array.from(new Set((refs ?? []).map((r) => r.representative_id))).filter((id) => id && !existingIds.has(id as string));
+                return missing.map((id) => ({ id, name: "Representante sem cadastro", rep_code: `AUTO-${String(id).slice(0, 6)}`, status: "active" }));
+              }}
+            />
+            <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setEditing(null)}><Plus className="size-4 mr-2" /> Novo</Button>
+              </DialogTrigger>
+              <RepForm key={editing?.id ?? "new"} editing={editing} onClose={() => setOpen(false)} />
+            </Dialog>
+          </div>
         )}
       </div>
 
@@ -74,7 +116,8 @@ function RepsPage() {
             <thead className="bg-muted/50 text-muted-foreground">
               <tr>
                 <th className="text-left p-3">Código</th><th className="text-left p-3">Nome</th>
-                <th className="text-left p-3">E-mail</th><th className="text-left p-3">UF</th>
+                <th className="text-left p-3">Empresa</th>
+                <th className="text-left p-3">Cidade/UF</th>
                 <th className="text-left p-3">Status</th><th className="text-right p-3">Vendas</th>
                 <th className="text-right p-3">Clientes</th>{isStaff && <th></th>}
               </tr>
@@ -86,8 +129,8 @@ function RepsPage() {
                 <tr key={r.id} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono text-xs">{r.rep_code || "-"}</td>
                   <td className="p-3 font-medium">{r.name}</td>
-                  <td className="p-3">{r.email || "-"}</td>
-                  <td className="p-3">{r.home_state || "-"}</td>
+                  <td className="p-3">{r.company || "-"}</td>
+                  <td className="p-3">{[r.home_city, r.home_state].filter(Boolean).join(" / ") || "-"}</td>
                   <td className="p-3"><Badge variant={r.status === "active" ? "default" : "secondary"}>{r.status}</Badge></td>
                   <td className="p-3 text-right">R$ {Number(r.total_sales ?? 0).toLocaleString("pt-BR")}</td>
                   <td className="p-3 text-right">{r.total_clients ?? 0}</td>
@@ -112,8 +155,11 @@ function RepForm({ editing, onClose }: { editing: Rep | null; onClose: () => voi
   const [form, setForm] = useState({
     rep_code: editing?.rep_code ?? "",
     name: editing?.name ?? "",
+    company: editing?.company ?? "",
+    company_cnpj: editing?.company_cnpj ?? "",
     email: editing?.email ?? "",
     phone: editing?.phone ?? "",
+    home_city: editing?.home_city ?? "",
     home_state: editing?.home_state ?? "",
     status: editing?.status ?? "active",
   });
@@ -133,12 +179,15 @@ function RepForm({ editing, onClose }: { editing: Rep | null; onClose: () => voi
   });
 
   return (
-    <DialogContent>
+    <DialogContent className="max-w-2xl">
       <DialogHeader><DialogTitle>{editing ? "Editar" : "Novo"} representante</DialogTitle></DialogHeader>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5"><Label className="text-xs">Código</Label><Input value={form.rep_code} onChange={(e) => setForm({ ...form, rep_code: e.target.value })} /></div>
+        <div className="space-y-1.5"><Label className="text-xs">Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+        <div className="space-y-1.5"><Label className="text-xs">Empresa de representação</Label><Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} /></div>
+        <div className="space-y-1.5"><Label className="text-xs">CNPJ da empresa</Label><Input value={form.company_cnpj} onChange={(e) => setForm({ ...form, company_cnpj: e.target.value })} /></div>
+        <div className="space-y-1.5"><Label className="text-xs">Cidade sede</Label><Input value={form.home_city} onChange={(e) => setForm({ ...form, home_city: e.target.value })} /></div>
         <div className="space-y-1.5"><Label className="text-xs">UF sede</Label><Input maxLength={2} value={form.home_state} onChange={(e) => setForm({ ...form, home_state: e.target.value.toUpperCase() })} /></div>
-        <div className="col-span-2 space-y-1.5"><Label className="text-xs">Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
         <div className="space-y-1.5"><Label className="text-xs">E-mail</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
         <div className="space-y-1.5"><Label className="text-xs">Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
         <div className="space-y-1.5">
