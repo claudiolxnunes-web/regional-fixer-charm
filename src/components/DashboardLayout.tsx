@@ -21,6 +21,7 @@ const groups = [
       { to: "/representantes", label: "Representantes", icon: Users },
       { to: "/clientes", label: "Clientes", icon: Building2 },
       { to: "/vendas", label: "Vendas", icon: TrendingUp },
+      { to: "/pedidos", label: "Carteira de Pedidos", icon: ShoppingCart },
       { to: "/oportunidades", label: "Oportunidades", icon: Briefcase },
       { to: "/metas", label: "Metas", icon: Target },
       { to: "/atividades", label: "Atividades", icon: Activity },
