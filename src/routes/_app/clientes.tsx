@@ -16,6 +16,7 @@ import {
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { ImportDialog } from "@/components/ImportDialog";
 
 export const Route = createFileRoute("/_app/clientes")({ component: ClientesPage });
 
@@ -77,12 +78,60 @@ function ClientesPage() {
           <p className="text-sm text-muted-foreground">{clients.length} cadastrados</p>
         </div>
         {isStaff && (
-          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setEditing(null)}><Plus className="size-4 mr-2" /> Novo cliente</Button>
-            </DialogTrigger>
-            <ClientForm key={editing?.id ?? "new"} editing={editing} onClose={() => setOpen(false)} />
-          </Dialog>
+          <div className="flex gap-2">
+            <ImportDialog
+              table="clients"
+              invalidateKey="clients"
+              title="Importar clientes"
+              matchBy="client_code"
+              templateSample={{
+                codigo: "CLI001",
+                nome: "Fazenda Boa Vista",
+                cnpj: "00.000.000/0000-00",
+                tipo: "fazenda_ruminantes",
+                cidade: "Uberaba",
+                estado: "MG",
+                codigo_representante: "REP001",
+                segmento: "Bovino de corte",
+                email: "contato@email.com",
+                telefone: "(34) 99999-0000",
+              }}
+              columns={[
+                { header: "codigo", field: "client_code", required: true },
+                { header: "nome", field: "name", required: true },
+                { header: "cnpj", field: "cnpj" },
+                { header: "tipo", field: "type", transform: (v) => {
+                  const s = String(v ?? "").toLowerCase();
+                  if (s.includes("fabrica") || s.includes("racao")) return "fabrica_racao";
+                  if (s.includes("revenda") || s.includes("agropec")) return "revenda_agropecuaria";
+                  return "fazenda_ruminantes";
+                } },
+                { header: "cidade", field: "city" },
+                { header: "estado", field: "state", transform: (v) => String(v ?? "").toUpperCase().slice(0, 2) || null },
+                { header: "segmento", field: "segment" },
+                { header: "email", field: "email" },
+                { header: "telefone", field: "phone" },
+              ]}
+              autoDetect={async () => {
+                // Find client IDs referenced in opportunities/activities but missing
+                const [{ data: opps }, { data: acts }, { data: existing }] = await Promise.all([
+                  supabase.from("opportunities").select("client_id").not("client_id", "is", null),
+                  supabase.from("activities").select("client_id").not("client_id", "is", null),
+                  supabase.from("clients").select("id"),
+                ]);
+                const existingIds = new Set((existing ?? []).map((c) => c.id));
+                const refs = [...(opps ?? []), ...(acts ?? [])].map((r) => r.client_id).filter(Boolean) as string[];
+                const missing = Array.from(new Set(refs)).filter((id) => !existingIds.has(id));
+                return missing.map((id) => ({ id, name: "Cliente sem cadastro", client_code: `AUTO-${id.slice(0, 6)}`, type: "fazenda_ruminantes", status: "prospect" }));
+              }}
+            />
+            <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setEditing(null)}><Plus className="size-4 mr-2" /> Novo cliente</Button>
+              </DialogTrigger>
+              <ClientForm key={editing?.id ?? "new"} editing={editing} onClose={() => setOpen(false)} />
+            </Dialog>
+          </div>
         )}
       </div>
 
