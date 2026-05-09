@@ -1,0 +1,2 @@
+ALTER TABLE public.clients DROP CONSTRAINT IF EXISTS clients_abc_class_check;
+ALTER TABLE public.clients ADD CONSTRAINT clients_abc_class_check CHECK (abc_class IS NULL OR abc_class IN ('A','B','C','D'));
