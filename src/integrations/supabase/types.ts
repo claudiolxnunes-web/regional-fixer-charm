@@ -97,6 +97,7 @@ export type Database = {
           animal_count: number | null
           animal_types: string | null
           business_potential: number | null
+          category: string | null
           city: string | null
           client_code: string | null
           cnpj: string | null
@@ -107,6 +108,8 @@ export type Database = {
           email: string | null
           farming_system: string | null
           final_clients_count: number | null
+          group_code: string | null
+          group_name: string | null
           id: string
           last_purchase_date: string | null
           lat: number | null
@@ -139,6 +142,7 @@ export type Database = {
           animal_count?: number | null
           animal_types?: string | null
           business_potential?: number | null
+          category?: string | null
           city?: string | null
           client_code?: string | null
           cnpj?: string | null
@@ -149,6 +153,8 @@ export type Database = {
           email?: string | null
           farming_system?: string | null
           final_clients_count?: number | null
+          group_code?: string | null
+          group_name?: string | null
           id?: string
           last_purchase_date?: string | null
           lat?: number | null
@@ -181,6 +187,7 @@ export type Database = {
           animal_count?: number | null
           animal_types?: string | null
           business_potential?: number | null
+          category?: string | null
           city?: string | null
           client_code?: string | null
           cnpj?: string | null
@@ -191,6 +198,8 @@ export type Database = {
           email?: string | null
           farming_system?: string | null
           final_clients_count?: number | null
+          group_code?: string | null
+          group_name?: string | null
           id?: string
           last_purchase_date?: string | null
           lat?: number | null
@@ -367,6 +376,57 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          active: boolean | null
+          base_price: number | null
+          created_at: string
+          group_code: string | null
+          id: string
+          line: string | null
+          name: string
+          notes: string | null
+          product_code: string | null
+          product_group: string | null
+          solution: string | null
+          subsolution: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          base_price?: number | null
+          created_at?: string
+          group_code?: string | null
+          id?: string
+          line?: string | null
+          name: string
+          notes?: string | null
+          product_code?: string | null
+          product_group?: string | null
+          solution?: string | null
+          subsolution?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          base_price?: number | null
+          created_at?: string
+          group_code?: string | null
+          id?: string
+          line?: string | null
+          name?: string
+          notes?: string | null
+          product_code?: string | null
+          product_group?: string | null
+          solution?: string | null
+          subsolution?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -418,6 +478,7 @@ export type Database = {
           company_cnpj: string | null
           created_at: string
           email: string | null
+          filial: string | null
           hire_date: string | null
           home_city: string | null
           home_state: string | null
@@ -441,6 +502,7 @@ export type Database = {
           company_cnpj?: string | null
           created_at?: string
           email?: string | null
+          filial?: string | null
           hire_date?: string | null
           home_city?: string | null
           home_state?: string | null
@@ -464,6 +526,7 @@ export type Database = {
           company_cnpj?: string | null
           created_at?: string
           email?: string | null
+          filial?: string | null
           hire_date?: string | null
           home_city?: string | null
           home_state?: string | null
