@@ -1,4 +1,4 @@
-) # Project Memory
+# Project Memory
 
 ## Core
 Plataforma comercial agro: gestão de área, clientes, representantes e metas.
