@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ImportDialog } from "@/components/ImportDialog";
-import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle } from "lucide-react";
+import { GoalsImportDialog } from "@/components/GoalsImportDialog";
+import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -277,6 +278,13 @@ function ImportacaoPage() {
               ]}
             />
           }
+        />
+
+        <ImportCard
+          icon={<Target className="size-5" />}
+          title="Metas (FAT x VOL)"
+          description="Metas anuais por representante, mês, linha, solução e subsolução. Substitui o ano ao reimportar."
+          action={<GoalsImportDialog />}
         />
 
         <Card className="p-5 border-dashed flex flex-col gap-3">
