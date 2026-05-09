@@ -14,9 +14,11 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRepresentantesRouteImport } from './routes/_app/representantes'
 import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
+import { Route as AppPreferenciasRouteImport } from './routes/_app/preferencias'
 import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
 import { Route as AppMetasRouteImport } from './routes/_app/metas'
 import { Route as AppMapaRouteImport } from './routes/_app/mapa'
+import { Route as AppImportacaoRouteImport } from './routes/_app/importacao'
 import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppClientesRouteImport } from './routes/_app/clientes'
@@ -47,6 +49,11 @@ const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPreferenciasRoute = AppPreferenciasRouteImport.update({
+  id: '/preferencias',
+  path: '/preferencias',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOportunidadesRoute = AppOportunidadesRouteImport.update({
   id: '/oportunidades',
   path: '/oportunidades',
@@ -60,6 +67,11 @@ const AppMetasRoute = AppMetasRouteImport.update({
 const AppMapaRoute = AppMapaRouteImport.update({
   id: '/mapa',
   path: '/mapa',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppImportacaoRoute = AppImportacaoRouteImport.update({
+  id: '/importacao',
+  path: '/importacao',
   getParentRoute: () => AppRoute,
 } as any)
 const AppIaInsightsRoute = AppIaInsightsRouteImport.update({
@@ -96,9 +108,11 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
+  '/importacao': typeof AppImportacaoRoute
   '/mapa': typeof AppMapaRoute
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
+  '/preferencias': typeof AppPreferenciasRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
 }
@@ -110,9 +124,11 @@ export interface FileRoutesByTo {
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
+  '/importacao': typeof AppImportacaoRoute
   '/mapa': typeof AppMapaRoute
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
+  '/preferencias': typeof AppPreferenciasRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
 }
@@ -126,9 +142,11 @@ export interface FileRoutesById {
   '/_app/clientes': typeof AppClientesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/ia-insights': typeof AppIaInsightsRoute
+  '/_app/importacao': typeof AppImportacaoRoute
   '/_app/mapa': typeof AppMapaRoute
   '/_app/metas': typeof AppMetasRoute
   '/_app/oportunidades': typeof AppOportunidadesRoute
+  '/_app/preferencias': typeof AppPreferenciasRoute
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRoute
 }
@@ -142,9 +160,11 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/dashboard'
     | '/ia-insights'
+    | '/importacao'
     | '/mapa'
     | '/metas'
     | '/oportunidades'
+    | '/preferencias'
     | '/relatorios'
     | '/representantes'
   fileRoutesByTo: FileRoutesByTo
@@ -156,9 +176,11 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/dashboard'
     | '/ia-insights'
+    | '/importacao'
     | '/mapa'
     | '/metas'
     | '/oportunidades'
+    | '/preferencias'
     | '/relatorios'
     | '/representantes'
   id:
@@ -171,9 +193,11 @@ export interface FileRouteTypes {
     | '/_app/clientes'
     | '/_app/dashboard'
     | '/_app/ia-insights'
+    | '/_app/importacao'
     | '/_app/mapa'
     | '/_app/metas'
     | '/_app/oportunidades'
+    | '/_app/preferencias'
     | '/_app/relatorios'
     | '/_app/representantes'
   fileRoutesById: FileRoutesById
@@ -221,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRelatoriosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/preferencias': {
+      id: '/_app/preferencias'
+      path: '/preferencias'
+      fullPath: '/preferencias'
+      preLoaderRoute: typeof AppPreferenciasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/oportunidades': {
       id: '/_app/oportunidades'
       path: '/oportunidades'
@@ -240,6 +271,13 @@ declare module '@tanstack/react-router' {
       path: '/mapa'
       fullPath: '/mapa'
       preLoaderRoute: typeof AppMapaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/importacao': {
+      id: '/_app/importacao'
+      path: '/importacao'
+      fullPath: '/importacao'
+      preLoaderRoute: typeof AppImportacaoRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/ia-insights': {
@@ -286,9 +324,11 @@ interface AppRouteChildren {
   AppClientesRoute: typeof AppClientesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppIaInsightsRoute: typeof AppIaInsightsRoute
+  AppImportacaoRoute: typeof AppImportacaoRoute
   AppMapaRoute: typeof AppMapaRoute
   AppMetasRoute: typeof AppMetasRoute
   AppOportunidadesRoute: typeof AppOportunidadesRoute
+  AppPreferenciasRoute: typeof AppPreferenciasRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRepresentantesRoute: typeof AppRepresentantesRoute
 }
@@ -299,9 +339,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppClientesRoute: AppClientesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppIaInsightsRoute: AppIaInsightsRoute,
+  AppImportacaoRoute: AppImportacaoRoute,
   AppMapaRoute: AppMapaRoute,
   AppMetasRoute: AppMetasRoute,
   AppOportunidadesRoute: AppOportunidadesRoute,
+  AppPreferenciasRoute: AppPreferenciasRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppRepresentantesRoute: AppRepresentantesRoute,
 }
