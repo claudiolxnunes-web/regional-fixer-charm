@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut: async () => { await supabase.auth.signOut(); },
     hasRole: (r) => roles.includes(r),
     isStaff: roles.includes("admin") || roles.includes("manager"),
+    isRepresentative: roles.includes("representative") || roles.includes("rep"),
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
