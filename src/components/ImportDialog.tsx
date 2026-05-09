@@ -95,10 +95,10 @@ export function ImportDialog({
     if (!parsed.length) return;
     setBusy(true);
     try {
-      const q = matchBy
-        ? supabase.from(table).upsert(parsed, { onConflict: matchBy, ignoreDuplicates: false })
-        : supabase.from(table).insert(parsed);
-      const { error } = await q;
+      const tbl: any = supabase.from(table as any);
+      const { error } = await (matchBy
+        ? tbl.upsert(parsed, { onConflict: matchBy, ignoreDuplicates: false })
+        : tbl.insert(parsed));
       if (error) throw error;
       toast.success(`${parsed.length} registro(s) importado(s)`);
       qc.invalidateQueries({ queryKey: [invalidateKey] });
