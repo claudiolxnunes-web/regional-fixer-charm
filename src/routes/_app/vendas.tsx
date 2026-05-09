@@ -13,13 +13,18 @@ export const Route = createFileRoute("/_app/vendas")({ component: VendasPage });
 const fmt = (v: any) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function VendasPage() {
+  const { isStaff } = useAuth();
   const [q, setQ] = useState("");
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["sales_all"],
+    queryKey: ["sales_all", isStaff],
     queryFn: async () => {
+      const table = isStaff ? "sales" : "sales_rep_view";
+      const cols = isStaff
+        ? "invoice_date, invoice_number, client_code, client_name, product_name, line, solution, subsolution, qty_bags, revenue, mb_cb_total, mb_cb_pct, ml_cb_total, commission_value, representative, branch, region, state, month_year"
+        : "invoice_date, invoice_number, client_code, client_name, product_name, line, solution, subsolution, qty_bags, revenue, representative, branch, region, state, month_year";
       const { data, error } = await (supabase as any)
-        .from("sales")
-        .select("invoice_date, invoice_number, client_code, client_name, product_name, line, solution, subsolution, qty_bags, revenue, mb_cb_total, mb_cb_pct, ml_cb_total, commission_value, representative, branch, region, state, month_year")
+        .from(table)
+        .select(cols)
         .order("invoice_date", { ascending: false, nullsFirst: false })
         .limit(2000);
       if (error) throw error;
