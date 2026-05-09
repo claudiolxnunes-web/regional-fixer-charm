@@ -12,6 +12,7 @@ interface AuthCtx {
   signOut: () => Promise<void>;
   hasRole: (r: Role) => boolean;
   isStaff: boolean;
+  isRepresentative: boolean;
 }
 
 const Ctx = createContext<AuthCtx | undefined>(undefined);
