@@ -13,6 +13,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
@@ -146,16 +147,16 @@ function ClientesPage() {
               {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
               {!isLoading && filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>}
               {filtered.map((c) => (
-                <tr key={c.id} className="border-t hover:bg-muted/30">
+                <tr key={c.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => { setEditing(c); setOpen(true); }}>
                   <td className="p-3 font-mono text-xs">{c.client_code || "-"}</td>
-                  <td className="p-3 font-medium">{c.name}</td>
+                  <td className="p-3 font-medium text-primary hover:underline">{c.name}</td>
                   <td className="p-3">{TYPE_LABEL[c.type]}</td>
                   <td className="p-3">{[c.city, c.state].filter(Boolean).join(" / ") || "-"}</td>
                   <td className="p-3"><Badge variant={c.status === "active" ? "default" : "secondary"}>{c.status ?? "-"}</Badge></td>
                   <td className="p-3">{c.abc_class && <Badge variant="outline">{c.abc_class}</Badge>}</td>
                   <td className="p-3 text-right">R$ {Number(c.total_purchases ?? 0).toLocaleString("pt-BR")}</td>
                   {isStaff && (
-                    <td className="p-3 text-right whitespace-nowrap">
+                    <td className="p-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="size-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir este cliente?")) del.mutate(c.id); }}><Trash2 className="size-4 text-destructive" /></Button>
                     </td>
@@ -202,55 +203,133 @@ function ClientForm({ editing, onClose }: { editing: Client | null; onClose: () 
   });
 
   return (
-    <DialogContent className="max-w-2xl">
-      <DialogHeader><DialogTitle>{editing ? "Editar cliente" : "Novo cliente"}</DialogTitle></DialogHeader>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Código"><Input value={form.client_code} onChange={(e) => setForm({ ...form, client_code: e.target.value })} /></Field>
-        <Field label="CNPJ"><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} /></Field>
-        <Field label="Nome" full><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
-        <Field label="Tipo">
-          <Select value={form.type} onValueChange={(v: any) => setForm({ ...form, type: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="fazenda_ruminantes">Fazenda de Ruminantes</SelectItem>
-              <SelectItem value="fabrica_racao">Fábrica de Ração</SelectItem>
-              <SelectItem value="revenda_agropecuaria">Revenda Agropecuária</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Status">
-          <Select value={form.status as string} onValueChange={(v: any) => setForm({ ...form, status: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Ativo</SelectItem>
-              <SelectItem value="inactive">Inativo</SelectItem>
-              <SelectItem value="prospect">Prospect</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="E-mail"><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-        <Field label="Telefone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
-        <Field label="Cidade"><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></Field>
-        <Field label="UF"><Input maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })} /></Field>
-        <Field label="Classe ABC">
-          <Select value={form.abc_class || "none"} onValueChange={(v) => setForm({ ...form, abc_class: v === "none" ? "" : v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">—</SelectItem>
-              <SelectItem value="A">A</SelectItem>
-              <SelectItem value="B">B</SelectItem>
-              <SelectItem value="C">C</SelectItem>
-              <SelectItem value="D">D</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Total de compras (R$)"><Input type="number" value={form.total_purchases} onChange={(e) => setForm({ ...form, total_purchases: Number(e.target.value) })} /></Field>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={onClose}>Cancelar</Button>
-        <Button onClick={() => save.mutate()} disabled={save.isPending || !form.name}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
-      </DialogFooter>
+    <DialogContent className="max-w-3xl">
+      <DialogHeader>
+        <DialogTitle>
+          {editing ? editing.name : "Novo cliente"}
+          {editing?.client_code && <span className="ml-2 font-mono text-xs text-muted-foreground">#{editing.client_code}</span>}
+        </DialogTitle>
+      </DialogHeader>
+
+      <Tabs defaultValue="dados">
+        <TabsList>
+          <TabsTrigger value="dados">Dados</TabsTrigger>
+          <TabsTrigger value="vendas" disabled={!editing}>Vendas</TabsTrigger>
+          <TabsTrigger value="atividades" disabled={!editing}>Atividades</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dados" className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Código"><Input value={form.client_code} onChange={(e) => setForm({ ...form, client_code: e.target.value })} /></Field>
+            <Field label="CNPJ"><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} /></Field>
+            <Field label="Nome" full><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
+            <Field label="Tipo">
+              <Select value={form.type} onValueChange={(v: any) => setForm({ ...form, type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fazenda_ruminantes">Fazenda de Ruminantes</SelectItem>
+                  <SelectItem value="fabrica_racao">Fábrica de Ração</SelectItem>
+                  <SelectItem value="revenda_agropecuaria">Revenda Agropecuária</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Status">
+              <Select value={form.status as string} onValueChange={(v: any) => setForm({ ...form, status: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Ativo</SelectItem>
+                  <SelectItem value="inactive">Inativo</SelectItem>
+                  <SelectItem value="prospect">Prospect</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="E-mail"><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+            <Field label="Telefone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+            <Field label="Cidade"><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></Field>
+            <Field label="UF"><Input maxLength={2} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })} /></Field>
+            <Field label="Classe ABC">
+              <Select value={form.abc_class || "none"} onValueChange={(v) => setForm({ ...form, abc_class: v === "none" ? "" : v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">—</SelectItem>
+                  <SelectItem value="A">A</SelectItem>
+                  <SelectItem value="B">B</SelectItem>
+                  <SelectItem value="C">C</SelectItem>
+                  <SelectItem value="D">D</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Total de compras (R$)"><Input type="number" value={form.total_purchases} onChange={(e) => setForm({ ...form, total_purchases: Number(e.target.value) })} /></Field>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose}>Cancelar</Button>
+            <Button onClick={() => save.mutate()} disabled={save.isPending || !form.name}>{save.isPending ? "Salvando..." : "Salvar"}</Button>
+          </DialogFooter>
+        </TabsContent>
+
+        <TabsContent value="vendas">
+          {editing && <ClientSalesTab clientId={editing.id} />}
+        </TabsContent>
+
+        <TabsContent value="atividades">
+          {editing && <ClientActivitiesTab clientId={editing.id} />}
+        </TabsContent>
+      </Tabs>
     </DialogContent>
+  );
+}
+
+function ClientSalesTab({ clientId: _clientId }: { clientId: string }) {
+  return (
+    <div className="py-12 text-center text-sm text-muted-foreground space-y-2">
+      <p className="font-medium text-foreground">Vendas ainda não importadas</p>
+      <p>Assim que o modelo de vendas for carregado, este painel mostrará o histórico do cliente
+      classificado por linha (Nutrição Ruminantes, Revenda Ruminantes, Aditivos), com totais por período.</p>
+    </div>
+  );
+}
+
+function ClientActivitiesTab({ clientId }: { clientId: string }) {
+  const { data: activities = [], isLoading } = useQuery({
+    queryKey: ["client_activities", clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("activities")
+        .select("id, title, type, status, scheduled_at, completed_at, outcome")
+        .eq("client_id", clientId)
+        .order("scheduled_at", { ascending: false, nullsFirst: false })
+        .limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (isLoading) return <p className="py-8 text-center text-sm text-muted-foreground">Carregando...</p>;
+  if (!activities.length) return <p className="py-8 text-center text-sm text-muted-foreground">Nenhuma atividade registrada para este cliente.</p>;
+
+  return (
+    <div className="max-h-96 overflow-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-muted/50 text-muted-foreground sticky top-0">
+          <tr>
+            <th className="text-left p-2 font-medium">Data</th>
+            <th className="text-left p-2 font-medium">Título</th>
+            <th className="text-left p-2 font-medium">Tipo</th>
+            <th className="text-left p-2 font-medium">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {activities.map((a: any) => (
+            <tr key={a.id} className="border-t">
+              <td className="p-2 whitespace-nowrap text-xs">{a.scheduled_at ? new Date(a.scheduled_at).toLocaleDateString("pt-BR") : "-"}</td>
+              <td className="p-2">{a.title}</td>
+              <td className="p-2 text-xs">{a.type}</td>
+              <td className="p-2"><Badge variant="outline" className="text-xs">{a.status ?? "-"}</Badge></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
