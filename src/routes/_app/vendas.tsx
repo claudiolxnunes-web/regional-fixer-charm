@@ -73,10 +73,10 @@ function VendasPage() {
         <p className="text-sm text-muted-foreground">{rows.length.toLocaleString("pt-BR")} notas no período</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className={`grid grid-cols-2 ${isStaff ? "md:grid-cols-5" : "md:grid-cols-3"} gap-3`}>
         <Kpi label="Faturamento" value={`R$ ${fmt(k.totalRev)}`} />
-        <Kpi label="MB CB" value={`R$ ${fmt(k.totalMB)}`} sub={k.totalRev ? `${((k.totalMB / k.totalRev) * 100).toFixed(1)}%` : ""} />
-        <Kpi label="ML CB" value={`R$ ${fmt(k.totalML)}`} sub={k.totalRev ? `${((k.totalML / k.totalRev) * 100).toFixed(1)}%` : ""} />
+        {isStaff && <Kpi label="MB CB" value={`R$ ${fmt(k.totalMB)}`} sub={k.totalRev ? `${((k.totalMB / k.totalRev) * 100).toFixed(1)}%` : ""} />}
+        {isStaff && <Kpi label="ML CB" value={`R$ ${fmt(k.totalML)}`} sub={k.totalRev ? `${((k.totalML / k.totalRev) * 100).toFixed(1)}%` : ""} />}
         <Kpi label="Volume (sacos)" value={k.totalQty.toLocaleString("pt-BR")} />
         <Kpi label="Clientes" value={k.clients.toString()} />
       </div>
@@ -104,14 +104,14 @@ function VendasPage() {
                 <th className="text-left p-2 font-medium">Linha</th>
                 <th className="text-right p-2 font-medium">Qtd</th>
                 <th className="text-right p-2 font-medium">Faturamento</th>
-                <th className="text-right p-2 font-medium">MB %</th>
-                <th className="text-right p-2 font-medium">MB</th>
+                {isStaff && <th className="text-right p-2 font-medium">MB %</th>}
+                {isStaff && <th className="text-right p-2 font-medium">MB</th>}
                 <th className="text-left p-2 font-medium">RC</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={10} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
-              {!isLoading && !filtered.length && <tr><td colSpan={10} className="p-8 text-center text-muted-foreground">Nenhuma venda encontrada</td></tr>}
+              {isLoading && <tr><td colSpan={isStaff ? 10 : 8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
+              {!isLoading && !filtered.length && <tr><td colSpan={isStaff ? 10 : 8} className="p-8 text-center text-muted-foreground">Nenhuma venda encontrada</td></tr>}
               {filtered.slice(0, 500).map((r: any, i: number) => (
                 <tr key={i} className="border-t hover:bg-muted/30">
                   <td className="p-2 whitespace-nowrap">{r.invoice_date ? new Date(r.invoice_date).toLocaleDateString("pt-BR") : "-"}</td>
@@ -121,8 +121,8 @@ function VendasPage() {
                   <td className="p-2"><Badge variant="outline" className="text-[10px]">{r.line || "-"}</Badge></td>
                   <td className="p-2 text-right">{Number(r.qty_bags ?? 0).toLocaleString("pt-BR")}</td>
                   <td className="p-2 text-right">{fmt(r.revenue)}</td>
-                  <td className="p-2 text-right">{r.mb_cb_pct != null ? (Number(r.mb_cb_pct) * 100).toFixed(1) + "%" : "-"}</td>
-                  <td className="p-2 text-right">{fmt(r.mb_cb_total)}</td>
+                  {isStaff && <td className="p-2 text-right">{r.mb_cb_pct != null ? (Number(r.mb_cb_pct) * 100).toFixed(1) + "%" : "-"}</td>}
+                  {isStaff && <td className="p-2 text-right">{fmt(r.mb_cb_total)}</td>}
                   <td className="p-2 text-[11px]">{r.representative}</td>
                 </tr>
               ))}
