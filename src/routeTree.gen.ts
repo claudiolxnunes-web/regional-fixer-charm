@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppVendasRouteImport } from './routes/_app/vendas'
 import { Route as AppRepresentantesRouteImport } from './routes/_app/representantes'
 import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
+import { Route as AppRegistroCampoRouteImport } from './routes/_app/registro-campo'
 import { Route as AppPreferenciasRouteImport } from './routes/_app/preferencias'
 import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
 import { Route as AppMetasRouteImport } from './routes/_app/metas'
@@ -55,6 +56,11 @@ const AppRepresentantesRoute = AppRepresentantesRouteImport.update({
 const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRegistroCampoRoute = AppRegistroCampoRouteImport.update({
+  id: '/registro-campo',
+  path: '/registro-campo',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPreferenciasRoute = AppPreferenciasRouteImport.update({
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/preferencias': typeof AppPreferenciasRoute
+  '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/preferencias': typeof AppPreferenciasRoute
+  '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_app/metas': typeof AppMetasRoute
   '/_app/oportunidades': typeof AppOportunidadesRoute
   '/_app/preferencias': typeof AppPreferenciasRoute
+  '/_app/registro-campo': typeof AppRegistroCampoRoute
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRoute
   '/_app/vendas': typeof AppVendasRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/preferencias'
+    | '/registro-campo'
     | '/relatorios'
     | '/representantes'
     | '/vendas'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/preferencias'
+    | '/registro-campo'
     | '/relatorios'
     | '/representantes'
     | '/vendas'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/_app/metas'
     | '/_app/oportunidades'
     | '/_app/preferencias'
+    | '/_app/registro-campo'
     | '/_app/relatorios'
     | '/_app/representantes'
     | '/_app/vendas'
@@ -286,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof AppRelatoriosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/registro-campo': {
+      id: '/_app/registro-campo'
+      path: '/registro-campo'
+      fullPath: '/registro-campo'
+      preLoaderRoute: typeof AppRegistroCampoRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/preferencias': {
@@ -388,6 +407,7 @@ interface AppRouteChildren {
   AppMetasRoute: typeof AppMetasRoute
   AppOportunidadesRoute: typeof AppOportunidadesRoute
   AppPreferenciasRoute: typeof AppPreferenciasRoute
+  AppRegistroCampoRoute: typeof AppRegistroCampoRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRepresentantesRoute: typeof AppRepresentantesRoute
   AppVendasRoute: typeof AppVendasRoute
@@ -406,6 +426,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMetasRoute: AppMetasRoute,
   AppOportunidadesRoute: AppOportunidadesRoute,
   AppPreferenciasRoute: AppPreferenciasRoute,
+  AppRegistroCampoRoute: AppRegistroCampoRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppRepresentantesRoute: AppRepresentantesRoute,
   AppVendasRoute: AppVendasRoute,
