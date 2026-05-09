@@ -31,6 +31,7 @@ import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
 import { Route as AppAppRepresentanteRouteImport } from './routes/_app/app-representante'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
+import { Route as ApiPublicHooksRunAlertsRouteImport } from './routes/api/public/hooks/run-alerts'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -141,6 +142,11 @@ const AppAlertasRoute = AppAlertasRouteImport.update({
   path: '/alertas',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicHooksRunAlertsRoute = ApiPublicHooksRunAlertsRouteImport.update({
+  id: '/api/public/hooks/run-alerts',
+  path: '/api/public/hooks/run-alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
+  '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
+  '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRoute
   '/_app/vendas': typeof AppVendasRoute
+  '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/representantes'
     | '/vendas'
+    | '/api/public/hooks/run-alerts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/representantes'
     | '/vendas'
+    | '/api/public/hooks/run-alerts'
   id:
     | '__root__'
     | '/'
@@ -284,12 +295,14 @@ export interface FileRouteTypes {
     | '/_app/relatorios'
     | '/_app/representantes'
     | '/_app/vendas'
+    | '/api/public/hooks/run-alerts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiPublicHooksRunAlertsRoute: typeof ApiPublicHooksRunAlertsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -448,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/hooks/run-alerts': {
+      id: '/api/public/hooks/run-alerts'
+      path: '/api/public/hooks/run-alerts'
+      fullPath: '/api/public/hooks/run-alerts'
+      preLoaderRoute: typeof ApiPublicHooksRunAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -501,6 +521,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiPublicHooksRunAlertsRoute: ApiPublicHooksRunAlertsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
