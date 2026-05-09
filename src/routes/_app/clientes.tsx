@@ -32,8 +32,17 @@ type Client = {
   phone: string | null;
   email: string | null;
   status: "active" | "inactive" | "prospect" | null;
+  effective_status?: "active" | "inactive" | "prospect" | null;
+  days_since_last_purchase?: number | null;
+  last_purchase_date?: string | null;
   abc_class: string | null;
   total_purchases: number | null;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  active: "Ativo",
+  inactive: "Inativo (>6m)",
+  prospect: "Prospect",
 };
 
 const TYPE_LABEL: Record<string, string> = {
