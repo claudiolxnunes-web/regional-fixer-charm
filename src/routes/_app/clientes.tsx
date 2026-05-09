@@ -78,7 +78,7 @@ function ClientesPage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("client_lines" as any).select("*");
       if (error) throw error;
-      return data as ClientLine[];
+      return (data as unknown) as ClientLine[];
     },
   });
 
