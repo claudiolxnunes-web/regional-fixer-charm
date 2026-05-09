@@ -414,9 +414,12 @@ export type Database = {
       }
       representatives: {
         Row: {
+          company: string | null
+          company_cnpj: string | null
           created_at: string
           email: string | null
           hire_date: string | null
+          home_city: string | null
           home_state: string | null
           id: string
           name: string
@@ -434,9 +437,12 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          company?: string | null
+          company_cnpj?: string | null
           created_at?: string
           email?: string | null
           hire_date?: string | null
+          home_city?: string | null
           home_state?: string | null
           id?: string
           name: string
@@ -454,9 +460,12 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          company?: string | null
+          company_cnpj?: string | null
           created_at?: string
           email?: string | null
           hire_date?: string | null
+          home_city?: string | null
           home_state?: string | null
           id?: string
           name?: string
