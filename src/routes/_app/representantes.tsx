@@ -1,0 +1,161 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+
+export const Route = createFileRoute("/_app/representantes")({ component: RepsPage });
+
+type Rep = {
+  id: string;
+  rep_code: string | null;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  status: "active" | "inactive";
+  total_sales: number | null;
+  total_clients: number | null;
+  home_state: string | null;
+};
+
+function RepsPage() {
+  const qc = useQueryClient();
+  const { isStaff } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Rep | null>(null);
+
+  const { data: reps = [], isLoading } = useQuery({
+    queryKey: ["reps"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("representatives").select("*").order("name");
+      if (error) throw error;
+      return data as Rep[];
+    },
+  });
+
+  const del = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("representatives").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["reps"] }); toast.success("Removido"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Representantes</h1>
+          <p className="text-sm text-muted-foreground">{reps.length} cadastrados</p>
+        </div>
+        {isStaff && (
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setEditing(null)}><Plus className="size-4 mr-2" /> Novo</Button>
+            </DialogTrigger>
+            <RepForm key={editing?.id ?? "new"} editing={editing} onClose={() => setOpen(false)} />
+          </Dialog>
+        )}
+      </div>
+
+      <Card>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-muted-foreground">
+              <tr>
+                <th className="text-left p-3">Código</th><th className="text-left p-3">Nome</th>
+                <th className="text-left p-3">E-mail</th><th className="text-left p-3">UF</th>
+                <th className="text-left p-3">Status</th><th className="text-right p-3">Vendas</th>
+                <th className="text-right p-3">Clientes</th>{isStaff && <th></th>}
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
+              {!isLoading && reps.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum representante cadastrado</td></tr>}
+              {reps.map((r) => (
+                <tr key={r.id} className="border-t hover:bg-muted/30">
+                  <td className="p-3 font-mono text-xs">{r.rep_code || "-"}</td>
+                  <td className="p-3 font-medium">{r.name}</td>
+                  <td className="p-3">{r.email || "-"}</td>
+                  <td className="p-3">{r.home_state || "-"}</td>
+                  <td className="p-3"><Badge variant={r.status === "active" ? "default" : "secondary"}>{r.status}</Badge></td>
+                  <td className="p-3 text-right">R$ {Number(r.total_sales ?? 0).toLocaleString("pt-BR")}</td>
+                  <td className="p-3 text-right">{r.total_clients ?? 0}</td>
+                  {isStaff && (
+                    <td className="p-3 text-right whitespace-nowrap">
+                      <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil className="size-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir?")) del.mutate(r.id); }}><Trash2 className="size-4 text-destructive" /></Button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function RepForm({ editing, onClose }: { editing: Rep | null; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    rep_code: editing?.rep_code ?? "",
+    name: editing?.name ?? "",
+    email: editing?.email ?? "",
+    phone: editing?.phone ?? "",
+    home_state: editing?.home_state ?? "",
+    status: editing?.status ?? "active",
+  });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (editing) {
+        const { error } = await supabase.from("representatives").update(form).eq("id", editing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("representatives").insert(form);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["reps"] }); toast.success("Salvo"); onClose(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <DialogContent>
+      <DialogHeader><DialogTitle>{editing ? "Editar" : "Novo"} representante</DialogTitle></DialogHeader>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5"><Label className="text-xs">Código</Label><Input value={form.rep_code} onChange={(e) => setForm({ ...form, rep_code: e.target.value })} /></div>
+        <div className="space-y-1.5"><Label className="text-xs">UF sede</Label><Input maxLength={2} value={form.home_state} onChange={(e) => setForm({ ...form, home_state: e.target.value.toUpperCase() })} /></div>
+        <div className="col-span-2 space-y-1.5"><Label className="text-xs">Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+        <div className="space-y-1.5"><Label className="text-xs">E-mail</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+        <div className="space-y-1.5"><Label className="text-xs">Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Status</Label>
+          <Select value={form.status} onValueChange={(v: any) => setForm({ ...form, status: v })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Ativo</SelectItem>
+              <SelectItem value="inactive">Inativo</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>Cancelar</Button>
+        <Button onClick={() => save.mutate()} disabled={save.isPending || !form.name}>Salvar</Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+}
