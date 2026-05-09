@@ -310,6 +310,135 @@ export type Database = {
           },
         ]
       }
+      open_orders: {
+        Row: {
+          billing_real: string | null
+          block_type: string | null
+          branch_code: string | null
+          category: string | null
+          client_code: string | null
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          ddd: string | null
+          delivery_real: string | null
+          delivery_requested: string | null
+          director: string | null
+          driver: string | null
+          driver_phone: string | null
+          erc: string | null
+          erc_code: string | null
+          financial_block_reason: string | null
+          forecast_billing_real: string | null
+          forecast_billing_requested: string | null
+          gev: string | null
+          green_order: string | null
+          grv: string | null
+          id: string
+          is_vef: string | null
+          line: string | null
+          load_id: string | null
+          oc: string | null
+          order_inclusion_date: string | null
+          order_number: string | null
+          order_value: number | null
+          order_volume: number | null
+          pre_load: string | null
+          prescription_block_reason: string | null
+          product_code: string | null
+          product_name: string | null
+          representative_id: string | null
+          segment: string | null
+          snapshot_at: string
+          status_tracking: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_real?: string | null
+          block_type?: string | null
+          branch_code?: string | null
+          category?: string | null
+          client_code?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          ddd?: string | null
+          delivery_real?: string | null
+          delivery_requested?: string | null
+          director?: string | null
+          driver?: string | null
+          driver_phone?: string | null
+          erc?: string | null
+          erc_code?: string | null
+          financial_block_reason?: string | null
+          forecast_billing_real?: string | null
+          forecast_billing_requested?: string | null
+          gev?: string | null
+          green_order?: string | null
+          grv?: string | null
+          id?: string
+          is_vef?: string | null
+          line?: string | null
+          load_id?: string | null
+          oc?: string | null
+          order_inclusion_date?: string | null
+          order_number?: string | null
+          order_value?: number | null
+          order_volume?: number | null
+          pre_load?: string | null
+          prescription_block_reason?: string | null
+          product_code?: string | null
+          product_name?: string | null
+          representative_id?: string | null
+          segment?: string | null
+          snapshot_at?: string
+          status_tracking?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_real?: string | null
+          block_type?: string | null
+          branch_code?: string | null
+          category?: string | null
+          client_code?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          ddd?: string | null
+          delivery_real?: string | null
+          delivery_requested?: string | null
+          director?: string | null
+          driver?: string | null
+          driver_phone?: string | null
+          erc?: string | null
+          erc_code?: string | null
+          financial_block_reason?: string | null
+          forecast_billing_real?: string | null
+          forecast_billing_requested?: string | null
+          gev?: string | null
+          green_order?: string | null
+          grv?: string | null
+          id?: string
+          is_vef?: string | null
+          line?: string | null
+          load_id?: string | null
+          oc?: string | null
+          order_inclusion_date?: string | null
+          order_number?: string | null
+          order_value?: number | null
+          order_volume?: number | null
+          pre_load?: string | null
+          prescription_block_reason?: string | null
+          product_code?: string | null
+          product_name?: string | null
+          representative_id?: string | null
+          segment?: string | null
+          snapshot_at?: string
+          status_tracking?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           client_id: string | null
@@ -569,6 +698,198 @@ export type Database = {
           },
         ]
       }
+      sales: {
+        Row: {
+          bonus: number | null
+          branch: string | null
+          branch_code: string | null
+          category: string | null
+          cfop: string | null
+          city: string | null
+          client_code: string | null
+          client_group: string | null
+          client_id: string | null
+          client_name: string | null
+          cofins_total: number | null
+          commercial_expense: number | null
+          commission_pct: number | null
+          commission_value: number | null
+          cost_total: number | null
+          created_at: string
+          currency: string | null
+          customized: string | null
+          discount_pct: number | null
+          fl_vef: string | null
+          freight: number | null
+          gnv: string | null
+          group_code: string | null
+          grv: string | null
+          icms_total: number | null
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          line: string | null
+          mb_cb_pct: number | null
+          mb_cb_total: number | null
+          ml_cb_pct: number | null
+          ml_cb_total: number | null
+          month_year: string | null
+          operation_type: string | null
+          order_date: string | null
+          order_number: string | null
+          pis_total: number | null
+          pmr: number | null
+          price_per_bag: number | null
+          price_per_kg: number | null
+          product_code: string | null
+          product_group: string | null
+          product_group_code: string | null
+          product_name: string | null
+          qty_bags: number | null
+          region: string | null
+          rep_code: string | null
+          representative: string | null
+          representative_id: string | null
+          revenue: number | null
+          revenue_no_charges: number | null
+          segmentation: string | null
+          solution: string | null
+          state: string | null
+          subsolution: string | null
+          updated_at: string
+          volume_converted: number | null
+          volume_sales: number | null
+          volume_sales_bonus: number | null
+          year: number | null
+        }
+        Insert: {
+          bonus?: number | null
+          branch?: string | null
+          branch_code?: string | null
+          category?: string | null
+          cfop?: string | null
+          city?: string | null
+          client_code?: string | null
+          client_group?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          cofins_total?: number | null
+          commercial_expense?: number | null
+          commission_pct?: number | null
+          commission_value?: number | null
+          cost_total?: number | null
+          created_at?: string
+          currency?: string | null
+          customized?: string | null
+          discount_pct?: number | null
+          fl_vef?: string | null
+          freight?: number | null
+          gnv?: string | null
+          group_code?: string | null
+          grv?: string | null
+          icms_total?: number | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line?: string | null
+          mb_cb_pct?: number | null
+          mb_cb_total?: number | null
+          ml_cb_pct?: number | null
+          ml_cb_total?: number | null
+          month_year?: string | null
+          operation_type?: string | null
+          order_date?: string | null
+          order_number?: string | null
+          pis_total?: number | null
+          pmr?: number | null
+          price_per_bag?: number | null
+          price_per_kg?: number | null
+          product_code?: string | null
+          product_group?: string | null
+          product_group_code?: string | null
+          product_name?: string | null
+          qty_bags?: number | null
+          region?: string | null
+          rep_code?: string | null
+          representative?: string | null
+          representative_id?: string | null
+          revenue?: number | null
+          revenue_no_charges?: number | null
+          segmentation?: string | null
+          solution?: string | null
+          state?: string | null
+          subsolution?: string | null
+          updated_at?: string
+          volume_converted?: number | null
+          volume_sales?: number | null
+          volume_sales_bonus?: number | null
+          year?: number | null
+        }
+        Update: {
+          bonus?: number | null
+          branch?: string | null
+          branch_code?: string | null
+          category?: string | null
+          cfop?: string | null
+          city?: string | null
+          client_code?: string | null
+          client_group?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          cofins_total?: number | null
+          commercial_expense?: number | null
+          commission_pct?: number | null
+          commission_value?: number | null
+          cost_total?: number | null
+          created_at?: string
+          currency?: string | null
+          customized?: string | null
+          discount_pct?: number | null
+          fl_vef?: string | null
+          freight?: number | null
+          gnv?: string | null
+          group_code?: string | null
+          grv?: string | null
+          icms_total?: number | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line?: string | null
+          mb_cb_pct?: number | null
+          mb_cb_total?: number | null
+          ml_cb_pct?: number | null
+          ml_cb_total?: number | null
+          month_year?: string | null
+          operation_type?: string | null
+          order_date?: string | null
+          order_number?: string | null
+          pis_total?: number | null
+          pmr?: number | null
+          price_per_bag?: number | null
+          price_per_kg?: number | null
+          product_code?: string | null
+          product_group?: string | null
+          product_group_code?: string | null
+          product_name?: string | null
+          qty_bags?: number | null
+          region?: string | null
+          rep_code?: string | null
+          representative?: string | null
+          representative_id?: string | null
+          revenue?: number | null
+          revenue_no_charges?: number | null
+          segmentation?: string | null
+          solution?: string | null
+          state?: string | null
+          subsolution?: string | null
+          updated_at?: string
+          volume_converted?: number | null
+          volume_sales?: number | null
+          volume_sales_bonus?: number | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -603,6 +924,8 @@ export type Database = {
           city: string | null
           client_code: string | null
           cnpj: string | null
+          computed_last_purchase_date: string | null
+          computed_total_purchases: number | null
           consumed_products: string | null
           contact_name: string | null
           covered_municipalities: number | null
@@ -639,100 +962,6 @@ export type Database = {
           type: Database["public"]["Enums"]["client_type"] | null
           updated_at: string | null
           website: string | null
-        }
-        Insert: {
-          abc_class?: string | null
-          address?: string | null
-          animal_count?: number | null
-          animal_types?: string | null
-          business_potential?: number | null
-          category?: string | null
-          city?: string | null
-          client_code?: string | null
-          cnpj?: string | null
-          consumed_products?: string | null
-          contact_name?: string | null
-          covered_municipalities?: number | null
-          created_at?: string | null
-          days_since_last_purchase?: never
-          effective_status?: never
-          email?: string | null
-          farming_system?: string | null
-          final_clients_count?: number | null
-          group_code?: string | null
-          group_name?: string | null
-          id?: string | null
-          last_purchase_date?: string | null
-          lat?: number | null
-          lng?: number | null
-          monthly_sales_volume?: number | null
-          name?: string | null
-          notes?: string | null
-          phone?: string | null
-          product_lines?: string | null
-          product_mix?: string | null
-          production_capacity?: number | null
-          production_type?: string | null
-          property_area?: number | null
-          purchase_potential?: number | null
-          ration_types?: string | null
-          raw_material_volume?: number | null
-          region_id?: string | null
-          representative_id?: string | null
-          segment?: string | null
-          state?: string | null
-          status?: Database["public"]["Enums"]["client_status"] | null
-          total_purchases?: number | null
-          type?: Database["public"]["Enums"]["client_type"] | null
-          updated_at?: string | null
-          website?: string | null
-        }
-        Update: {
-          abc_class?: string | null
-          address?: string | null
-          animal_count?: number | null
-          animal_types?: string | null
-          business_potential?: number | null
-          category?: string | null
-          city?: string | null
-          client_code?: string | null
-          cnpj?: string | null
-          consumed_products?: string | null
-          contact_name?: string | null
-          covered_municipalities?: number | null
-          created_at?: string | null
-          days_since_last_purchase?: never
-          effective_status?: never
-          email?: string | null
-          farming_system?: string | null
-          final_clients_count?: number | null
-          group_code?: string | null
-          group_name?: string | null
-          id?: string | null
-          last_purchase_date?: string | null
-          lat?: number | null
-          lng?: number | null
-          monthly_sales_volume?: number | null
-          name?: string | null
-          notes?: string | null
-          phone?: string | null
-          product_lines?: string | null
-          product_mix?: string | null
-          production_capacity?: number | null
-          production_type?: string | null
-          property_area?: number | null
-          purchase_potential?: number | null
-          ration_types?: string | null
-          raw_material_volume?: number | null
-          region_id?: string | null
-          representative_id?: string | null
-          segment?: string | null
-          state?: string | null
-          status?: Database["public"]["Enums"]["client_status"] | null
-          total_purchases?: number | null
-          type?: Database["public"]["Enums"]["client_type"] | null
-          updated_at?: string | null
-          website?: string | null
         }
         Relationships: [
           {

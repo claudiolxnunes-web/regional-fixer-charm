@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Users, Building2, Target, Briefcase, Activity,
   Map, BarChart3, Bell, Settings, Upload, Brain, LogOut, Sprout,
-  TrendingUp, LineChart, Smartphone, ClipboardList, Zap,
+  TrendingUp, LineChart, Smartphone, ClipboardList, Zap, ShoppingCart,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -21,6 +21,7 @@ const groups = [
       { to: "/representantes", label: "Representantes", icon: Users },
       { to: "/clientes", label: "Clientes", icon: Building2 },
       { to: "/vendas", label: "Vendas", icon: TrendingUp },
+      { to: "/pedidos", label: "Carteira de Pedidos", icon: ShoppingCart },
       { to: "/oportunidades", label: "Oportunidades", icon: Briefcase },
       { to: "/metas", label: "Metas", icon: Target },
       { to: "/atividades", label: "Atividades", icon: Activity },
