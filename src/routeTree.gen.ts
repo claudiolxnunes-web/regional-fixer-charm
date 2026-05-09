@@ -13,8 +13,15 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRepresentantesRouteImport } from './routes/_app/representantes'
+import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
+import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
+import { Route as AppMetasRouteImport } from './routes/_app/metas'
+import { Route as AppMapaRouteImport } from './routes/_app/mapa'
+import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppClientesRouteImport } from './routes/_app/clientes'
+import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
+import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -35,6 +42,31 @@ const AppRepresentantesRoute = AppRepresentantesRouteImport.update({
   path: '/representantes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOportunidadesRoute = AppOportunidadesRouteImport.update({
+  id: '/oportunidades',
+  path: '/oportunidades',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMetasRoute = AppMetasRouteImport.update({
+  id: '/metas',
+  path: '/metas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMapaRoute = AppMapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIaInsightsRoute = AppIaInsightsRouteImport.update({
+  id: '/ia-insights',
+  path: '/ia-insights',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -45,19 +77,43 @@ const AppClientesRoute = AppClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAtividadesRoute = AppAtividadesRouteImport.update({
+  id: '/atividades',
+  path: '/atividades',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAlertasRoute = AppAlertasRouteImport.update({
+  id: '/alertas',
+  path: '/alertas',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/alertas': typeof AppAlertasRoute
+  '/atividades': typeof AppAtividadesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
+  '/ia-insights': typeof AppIaInsightsRoute
+  '/mapa': typeof AppMapaRoute
+  '/metas': typeof AppMetasRoute
+  '/oportunidades': typeof AppOportunidadesRoute
+  '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/alertas': typeof AppAlertasRoute
+  '/atividades': typeof AppAtividadesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
+  '/ia-insights': typeof AppIaInsightsRoute
+  '/mapa': typeof AppMapaRoute
+  '/metas': typeof AppMetasRoute
+  '/oportunidades': typeof AppOportunidadesRoute
+  '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
 }
 export interface FileRoutesById {
@@ -65,22 +121,60 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/alertas': typeof AppAlertasRoute
+  '/_app/atividades': typeof AppAtividadesRoute
   '/_app/clientes': typeof AppClientesRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/ia-insights': typeof AppIaInsightsRoute
+  '/_app/mapa': typeof AppMapaRoute
+  '/_app/metas': typeof AppMetasRoute
+  '/_app/oportunidades': typeof AppOportunidadesRoute
+  '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/clientes' | '/dashboard' | '/representantes'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/alertas'
+    | '/atividades'
+    | '/clientes'
+    | '/dashboard'
+    | '/ia-insights'
+    | '/mapa'
+    | '/metas'
+    | '/oportunidades'
+    | '/relatorios'
+    | '/representantes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/clientes' | '/dashboard' | '/representantes'
+  to:
+    | '/'
+    | '/login'
+    | '/alertas'
+    | '/atividades'
+    | '/clientes'
+    | '/dashboard'
+    | '/ia-insights'
+    | '/mapa'
+    | '/metas'
+    | '/oportunidades'
+    | '/relatorios'
+    | '/representantes'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
+    | '/_app/alertas'
+    | '/_app/atividades'
     | '/_app/clientes'
     | '/_app/dashboard'
+    | '/_app/ia-insights'
+    | '/_app/mapa'
+    | '/_app/metas'
+    | '/_app/oportunidades'
+    | '/_app/relatorios'
     | '/_app/representantes'
   fileRoutesById: FileRoutesById
 }
@@ -120,6 +214,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRepresentantesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/relatorios': {
+      id: '/_app/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AppRelatoriosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/oportunidades': {
+      id: '/_app/oportunidades'
+      path: '/oportunidades'
+      fullPath: '/oportunidades'
+      preLoaderRoute: typeof AppOportunidadesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/metas': {
+      id: '/_app/metas'
+      path: '/metas'
+      fullPath: '/metas'
+      preLoaderRoute: typeof AppMetasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mapa': {
+      id: '/_app/mapa'
+      path: '/mapa'
+      fullPath: '/mapa'
+      preLoaderRoute: typeof AppMapaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ia-insights': {
+      id: '/_app/ia-insights'
+      path: '/ia-insights'
+      fullPath: '/ia-insights'
+      preLoaderRoute: typeof AppIaInsightsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -134,18 +263,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/atividades': {
+      id: '/_app/atividades'
+      path: '/atividades'
+      fullPath: '/atividades'
+      preLoaderRoute: typeof AppAtividadesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/alertas': {
+      id: '/_app/alertas'
+      path: '/alertas'
+      fullPath: '/alertas'
+      preLoaderRoute: typeof AppAlertasRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAlertasRoute: typeof AppAlertasRoute
+  AppAtividadesRoute: typeof AppAtividadesRoute
   AppClientesRoute: typeof AppClientesRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppIaInsightsRoute: typeof AppIaInsightsRoute
+  AppMapaRoute: typeof AppMapaRoute
+  AppMetasRoute: typeof AppMetasRoute
+  AppOportunidadesRoute: typeof AppOportunidadesRoute
+  AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRepresentantesRoute: typeof AppRepresentantesRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAlertasRoute: AppAlertasRoute,
+  AppAtividadesRoute: AppAtividadesRoute,
   AppClientesRoute: AppClientesRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppIaInsightsRoute: AppIaInsightsRoute,
+  AppMapaRoute: AppMapaRoute,
+  AppMetasRoute: AppMetasRoute,
+  AppOportunidadesRoute: AppOportunidadesRoute,
+  AppRelatoriosRoute: AppRelatoriosRoute,
   AppRepresentantesRoute: AppRepresentantesRoute,
 }
 
@@ -159,3 +316,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
