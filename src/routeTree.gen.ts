@@ -24,6 +24,7 @@ import { Route as AppImportacaoRouteImport } from './routes/_app/importacao'
 import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppClientesRouteImport } from './routes/_app/clientes'
+import { Route as AppAutomacoesRouteImport } from './routes/_app/automacoes'
 import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
 import { Route as AppAppRepresentanteRouteImport } from './routes/_app/app-representante'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
@@ -103,6 +104,11 @@ const AppClientesRoute = AppClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAutomacoesRoute = AppAutomacoesRouteImport.update({
+  id: '/automacoes',
+  path: '/automacoes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAtividadesRoute = AppAtividadesRouteImport.update({
   id: '/atividades',
   path: '/atividades',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
   '/atividades': typeof AppAtividadesRoute
+  '/automacoes': typeof AppAutomacoesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
   '/atividades': typeof AppAtividadesRoute
+  '/automacoes': typeof AppAutomacoesRoute
   '/clientes': typeof AppClientesRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/app-representante': typeof AppAppRepresentanteRoute
   '/_app/atividades': typeof AppAtividadesRoute
+  '/_app/automacoes': typeof AppAutomacoesRoute
   '/_app/clientes': typeof AppClientesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/ia-insights': typeof AppIaInsightsRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/app-representante'
     | '/atividades'
+    | '/automacoes'
     | '/clientes'
     | '/dashboard'
     | '/ia-insights'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/app-representante'
     | '/atividades'
+    | '/automacoes'
     | '/clientes'
     | '/dashboard'
     | '/ia-insights'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/_app/analytics'
     | '/_app/app-representante'
     | '/_app/atividades'
+    | '/_app/automacoes'
     | '/_app/clientes'
     | '/_app/dashboard'
     | '/_app/ia-insights'
@@ -363,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/automacoes': {
+      id: '/_app/automacoes'
+      path: '/automacoes'
+      fullPath: '/automacoes'
+      preLoaderRoute: typeof AppAutomacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/atividades': {
       id: '/_app/atividades'
       path: '/atividades'
@@ -399,6 +418,7 @@ interface AppRouteChildren {
   AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppAppRepresentanteRoute: typeof AppAppRepresentanteRoute
   AppAtividadesRoute: typeof AppAtividadesRoute
+  AppAutomacoesRoute: typeof AppAutomacoesRoute
   AppClientesRoute: typeof AppClientesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppIaInsightsRoute: typeof AppIaInsightsRoute
@@ -418,6 +438,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAnalyticsRoute: AppAnalyticsRoute,
   AppAppRepresentanteRoute: AppAppRepresentanteRoute,
   AppAtividadesRoute: AppAtividadesRoute,
+  AppAutomacoesRoute: AppAutomacoesRoute,
   AppClientesRoute: AppClientesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppIaInsightsRoute: AppIaInsightsRoute,
