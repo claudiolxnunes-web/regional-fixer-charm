@@ -298,6 +298,72 @@ export type Database = {
         }
         Relationships: []
       }
+      goal_targets: {
+        Row: {
+          created_at: string
+          id: string
+          import_source: string | null
+          line: string | null
+          line_code: string | null
+          month: number
+          pct: number | null
+          representative_code: string | null
+          representative_id: string | null
+          representative_name: string | null
+          revenue_target: number | null
+          solution: string | null
+          solution_code: string | null
+          subsolution: string | null
+          subsolution_code: string | null
+          total_year: number | null
+          updated_at: string
+          volume_target: number | null
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          import_source?: string | null
+          line?: string | null
+          line_code?: string | null
+          month: number
+          pct?: number | null
+          representative_code?: string | null
+          representative_id?: string | null
+          representative_name?: string | null
+          revenue_target?: number | null
+          solution?: string | null
+          solution_code?: string | null
+          subsolution?: string | null
+          subsolution_code?: string | null
+          total_year?: number | null
+          updated_at?: string
+          volume_target?: number | null
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          import_source?: string | null
+          line?: string | null
+          line_code?: string | null
+          month?: number
+          pct?: number | null
+          representative_code?: string | null
+          representative_id?: string | null
+          representative_name?: string | null
+          revenue_target?: number | null
+          solution?: string | null
+          solution_code?: string | null
+          subsolution?: string | null
+          subsolution_code?: string | null
+          total_year?: number | null
+          updated_at?: string
+          volume_target?: number | null
+          year?: number
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string

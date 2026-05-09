@@ -13,6 +13,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { ImportDialog } from "@/components/ImportDialog";
+import { RepBreakdownDialog } from "@/components/RepBreakdownDialog";
 
 export const Route = createFileRoute("/_app/representantes")({ component: RepsPage });
 
@@ -119,7 +120,7 @@ function RepsPage() {
                 <th className="text-left p-3">Empresa</th>
                 <th className="text-left p-3">Cidade/UF</th>
                 <th className="text-left p-3">Status</th><th className="text-right p-3">Vendas</th>
-                <th className="text-right p-3">Clientes</th>{isStaff && <th></th>}
+                <th className="text-right p-3">Clientes</th><th></th>
               </tr>
             </thead>
             <tbody>
@@ -134,12 +135,15 @@ function RepsPage() {
                   <td className="p-3"><Badge variant={r.status === "active" ? "default" : "secondary"}>{r.status}</Badge></td>
                   <td className="p-3 text-right">R$ {Number(r.total_sales ?? 0).toLocaleString("pt-BR")}</td>
                   <td className="p-3 text-right">{r.total_clients ?? 0}</td>
-                  {isStaff && (
-                    <td className="p-3 text-right whitespace-nowrap">
-                      <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil className="size-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir?")) del.mutate(r.id); }}><Trash2 className="size-4 text-destructive" /></Button>
-                    </td>
-                  )}
+                  <td className="p-3 text-right whitespace-nowrap">
+                    <RepBreakdownDialog repCode={r.rep_code} repName={r.name} showMargins={isStaff} />
+                    {isStaff && (
+                      <>
+                        <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil className="size-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir?")) del.mutate(r.id); }}><Trash2 className="size-4 text-destructive" /></Button>
+                      </>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
