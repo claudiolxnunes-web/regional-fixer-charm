@@ -117,10 +117,11 @@ function AlertasPage() {
               disabled={regen.isPending}
               onClick={() => regen.mutate()}
             >
-            <RefreshCw className={`size-4 mr-1 ${regen.isPending ? "animate-spin" : ""}`} />
-            Recalcular agora
-          </Button>
-        )}
+              <RefreshCw className={`size-4 mr-1 ${regen.isPending ? "animate-spin" : ""}`} />
+              Recalcular agora
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
