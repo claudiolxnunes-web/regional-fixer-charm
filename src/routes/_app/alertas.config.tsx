@@ -105,9 +105,12 @@ function AlertConfigPage() {
             Ajuste os limites e severidades de cada regra. {!isStaff && "(Apenas leitura — só gestores podem editar.)"}
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/alertas"><ArrowLeft className="size-4 mr-1" /> Voltar para alertas</Link>
-        </Button>
+        <div className="flex gap-2">
+          {isStaff && <TestNowButton onDone={() => qc.invalidateQueries({ queryKey: ["alerts_list"] })} />}
+          <Button asChild variant="outline" size="sm">
+            <Link to="/alertas"><ArrowLeft className="size-4 mr-1" /> Voltar para alertas</Link>
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
