@@ -1332,7 +1332,12 @@ export type Database = {
     Functions: {
       current_rep_code: { Args: never; Returns: string }
       current_rep_id: { Args: never; Returns: string }
+      generate_all_alerts: { Args: never; Returns: Json }
+      generate_consumption_drop_alerts: { Args: never; Returns: number }
+      generate_goal_at_risk_alerts: { Args: never; Returns: number }
       generate_inactive_client_alerts: { Args: never; Returns: number }
+      generate_low_stock_alerts: { Args: never; Returns: number }
+      generate_quote_expiring_alerts: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
