@@ -31,6 +31,7 @@ import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
 import { Route as AppAppRepresentanteRouteImport } from './routes/_app/app-representante'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
+import { Route as AppAlertasConfigRouteImport } from './routes/_app/alertas.config'
 import { Route as ApiPublicHooksRunAlertsRouteImport } from './routes/api/public/hooks/run-alerts'
 
 const LoginRoute = LoginRouteImport.update({
@@ -142,6 +143,11 @@ const AppAlertasRoute = AppAlertasRouteImport.update({
   path: '/alertas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAlertasConfigRoute = AppAlertasConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AppAlertasRoute,
+} as any)
 const ApiPublicHooksRunAlertsRoute = ApiPublicHooksRunAlertsRouteImport.update({
   id: '/api/public/hooks/run-alerts',
   path: '/api/public/hooks/run-alerts',
@@ -151,7 +157,7 @@ const ApiPublicHooksRunAlertsRoute = ApiPublicHooksRunAlertsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/alertas': typeof AppAlertasRoute
+  '/alertas': typeof AppAlertasRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
   '/atividades': typeof AppAtividadesRoute
@@ -170,12 +176,13 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
+  '/alertas/config': typeof AppAlertasConfigRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/alertas': typeof AppAlertasRoute
+  '/alertas': typeof AppAlertasRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
   '/atividades': typeof AppAtividadesRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
+  '/alertas/config': typeof AppAlertasConfigRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
 }
 export interface FileRoutesById {
@@ -201,7 +209,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/_app/alertas': typeof AppAlertasRoute
+  '/_app/alertas': typeof AppAlertasRouteWithChildren
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/app-representante': typeof AppAppRepresentanteRoute
   '/_app/atividades': typeof AppAtividadesRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRoute
   '/_app/vendas': typeof AppVendasRoute
+  '/_app/alertas/config': typeof AppAlertasConfigRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
 }
 export interface FileRouteTypes {
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/representantes'
     | '/vendas'
+    | '/alertas/config'
     | '/api/public/hooks/run-alerts'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/representantes'
     | '/vendas'
+    | '/alertas/config'
     | '/api/public/hooks/run-alerts'
   id:
     | '__root__'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/_app/relatorios'
     | '/_app/representantes'
     | '/_app/vendas'
+    | '/_app/alertas/config'
     | '/api/public/hooks/run-alerts'
   fileRoutesById: FileRoutesById
 }
@@ -461,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/alertas/config': {
+      id: '/_app/alertas/config'
+      path: '/config'
+      fullPath: '/alertas/config'
+      preLoaderRoute: typeof AppAlertasConfigRouteImport
+      parentRoute: typeof AppAlertasRoute
+    }
     '/api/public/hooks/run-alerts': {
       id: '/api/public/hooks/run-alerts'
       path: '/api/public/hooks/run-alerts'
@@ -471,8 +490,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppAlertasRouteChildren {
+  AppAlertasConfigRoute: typeof AppAlertasConfigRoute
+}
+
+const AppAlertasRouteChildren: AppAlertasRouteChildren = {
+  AppAlertasConfigRoute: AppAlertasConfigRoute,
+}
+
+const AppAlertasRouteWithChildren = AppAlertasRoute._addFileChildren(
+  AppAlertasRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppAlertasRoute: typeof AppAlertasRoute
+  AppAlertasRoute: typeof AppAlertasRouteWithChildren
   AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppAppRepresentanteRoute: typeof AppAppRepresentanteRoute
   AppAtividadesRoute: typeof AppAtividadesRoute
@@ -494,7 +525,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAlertasRoute: AppAlertasRoute,
+  AppAlertasRoute: AppAlertasRouteWithChildren,
   AppAnalyticsRoute: AppAnalyticsRoute,
   AppAppRepresentanteRoute: AppAppRepresentanteRoute,
   AppAtividadesRoute: AppAtividadesRoute,
@@ -526,3 +557,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
