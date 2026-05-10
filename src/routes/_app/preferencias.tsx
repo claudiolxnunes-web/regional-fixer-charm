@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { createPortalSession } from "@/utils/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 export const Route = createFileRoute("/_app/preferencias")({ component: Preferencias });
 
@@ -14,6 +17,9 @@ function Preferencias() {
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [team, setTeam] = useState<{ plan: string; subscription_status: string; current_period_end: string | null } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -23,8 +29,31 @@ function Preferencias() {
       const { data } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).maybeSingle();
       setFullName(data?.full_name ?? "");
       setAvatarUrl(data?.avatar_url ?? "");
+      const { data: tm } = await supabase
+        .from("team_members")
+        .select("role, teams!inner(plan, subscription_status, current_period_end)")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (tm) {
+        setIsAdmin(tm.role === "admin");
+        setTeam((tm as any).teams);
+      }
     })();
   }, []);
+
+  async function openPortal() {
+    setPortalLoading(true);
+    try {
+      const url = await createPortalSession({
+        data: { returnUrl: `${window.location.origin}/preferencias`, environment: getStripeEnvironment() },
+      });
+      if (url) window.open(url, "_blank");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao abrir portal");
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   async function save() {
     setLoading(true);
@@ -60,6 +89,29 @@ function Preferencias() {
           </div>
         </CardContent>
       </Card>
+
+      {isAdmin && team && (
+        <Card>
+          <CardHeader><CardTitle>Assinatura</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground">Plano atual:</span>
+              <Badge variant="secondary" className="capitalize">{team.plan}</Badge>
+              <Badge variant={team.subscription_status === "active" ? "default" : "destructive"}>
+                {team.subscription_status}
+              </Badge>
+            </div>
+            {team.current_period_end && (
+              <p className="text-sm text-muted-foreground">
+                Renovação / expira em: {new Date(team.current_period_end).toLocaleDateString("pt-BR")}
+              </p>
+            )}
+            <Button onClick={openPortal} disabled={portalLoading} variant="outline">
+              {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
