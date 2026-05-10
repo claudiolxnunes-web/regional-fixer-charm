@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings2, Save, RotateCcw, ArrowLeft } from "lucide-react";
+import { Settings2, Save, RotateCcw, ArrowLeft, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/alertas/config")({ component: AlertConfigPage });
@@ -105,9 +105,12 @@ function AlertConfigPage() {
             Ajuste os limites e severidades de cada regra. {!isStaff && "(Apenas leitura — só gestores podem editar.)"}
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/alertas"><ArrowLeft className="size-4 mr-1" /> Voltar para alertas</Link>
-        </Button>
+        <div className="flex gap-2">
+          {isStaff && <TestNowButton onDone={() => qc.invalidateQueries({ queryKey: ["alerts_list"] })} />}
+          <Button asChild variant="outline" size="sm">
+            <Link to="/alertas"><ArrowLeft className="size-4 mr-1" /> Voltar para alertas</Link>
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -126,6 +129,34 @@ function AlertConfigPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function TestNowButton({ onDone }: { onDone: () => void }) {
+  const [last, setLast] = useState<any>(null);
+  const run = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/public/hooks/run-alerts", { method: "POST" });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    onSuccess: (d: any) => {
+      const c = d.counts || {};
+      setLast(c);
+      const total = c.total ?? 0;
+      toast.success(
+        `Teste concluído: ${total} novo(s) — inativos: ${c.inactive_client ?? 0}, queda: ${c.consumption_drop ?? 0}, estoque: ${c.low_stock ?? 0}, meta: ${c.goal_at_risk ?? 0}, propostas: ${c.quote_expiring ?? 0}`,
+        { duration: 8000 }
+      );
+      onDone();
+    },
+    onError: (e: any) => toast.error(e.message || "Erro no teste"),
+  });
+  return (
+    <Button size="sm" variant="default" disabled={run.isPending} onClick={() => run.mutate()} title="Executa as regras agora com os thresholds salvos">
+      <FlaskConical className={`size-4 mr-1 ${run.isPending ? "animate-pulse" : ""}`} />
+      {run.isPending ? "Testando..." : last ? `Testar de novo (último: ${last.total ?? 0})` : "Testar agora"}
+    </Button>
   );
 }
 
