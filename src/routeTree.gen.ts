@@ -9,9 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AppVendasRouteImport } from './routes/_app/vendas'
 import { Route as AppRepresentantesRouteImport } from './routes/_app/representantes'
 import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
@@ -32,8 +34,14 @@ import { Route as AppAppRepresentanteRouteImport } from './routes/_app/app-repre
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
 import { Route as AppAlertasConfigRouteImport } from './routes/_app/alertas.config'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksRunAlertsRouteImport } from './routes/api/public/hooks/run-alerts'
 
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -46,6 +54,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/checkout/return',
+  path: '/checkout/return',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppVendasRoute = AppVendasRouteImport.update({
@@ -148,6 +161,12 @@ const AppAlertasConfigRoute = AppAlertasConfigRouteImport.update({
   path: '/config',
   getParentRoute: () => AppAlertasRoute,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRunAlertsRoute = ApiPublicHooksRunAlertsRouteImport.update({
   id: '/api/public/hooks/run-alerts',
   path: '/api/public/hooks/run-alerts',
@@ -157,6 +176,7 @@ const ApiPublicHooksRunAlertsRoute = ApiPublicHooksRunAlertsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/planos': typeof PlanosRoute
   '/alertas': typeof AppAlertasRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
@@ -176,12 +196,15 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/planos': typeof PlanosRoute
   '/alertas': typeof AppAlertasRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
@@ -201,14 +224,17 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRoute
   '/vendas': typeof AppVendasRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/planos': typeof PlanosRoute
   '/_app/alertas': typeof AppAlertasRouteWithChildren
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/app-representante': typeof AppAppRepresentanteRoute
@@ -228,14 +254,17 @@ export interface FileRoutesById {
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRoute
   '/_app/vendas': typeof AppVendasRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/_app/alertas/config': typeof AppAlertasConfigRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
+    | '/planos'
     | '/alertas'
     | '/analytics'
     | '/app-representante'
@@ -255,12 +284,15 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/representantes'
     | '/vendas'
+    | '/checkout/return'
     | '/alertas/config'
     | '/api/public/hooks/run-alerts'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/planos'
     | '/alertas'
     | '/analytics'
     | '/app-representante'
@@ -280,13 +312,16 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/representantes'
     | '/vendas'
+    | '/checkout/return'
     | '/alertas/config'
     | '/api/public/hooks/run-alerts'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
+    | '/planos'
     | '/_app/alertas'
     | '/_app/analytics'
     | '/_app/app-representante'
@@ -306,19 +341,31 @@ export interface FileRouteTypes {
     | '/_app/relatorios'
     | '/_app/representantes'
     | '/_app/vendas'
+    | '/checkout/return'
     | '/_app/alertas/config'
     | '/api/public/hooks/run-alerts'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PlanosRoute: typeof PlanosRoute
+  CheckoutReturnRoute: typeof CheckoutReturnRoute
   ApiPublicHooksRunAlertsRoute: typeof ApiPublicHooksRunAlertsRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -338,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/checkout/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/vendas': {
@@ -480,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertasConfigRouteImport
       parentRoute: typeof AppAlertasRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/run-alerts': {
       id: '/api/public/hooks/run-alerts'
       path: '/api/public/hooks/run-alerts'
@@ -552,18 +613,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  PlanosRoute: PlanosRoute,
+  CheckoutReturnRoute: CheckoutReturnRoute,
   ApiPublicHooksRunAlertsRoute: ApiPublicHooksRunAlertsRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
