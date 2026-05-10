@@ -14,12 +14,12 @@ export const Route = createFileRoute("/api/public/hooks/run-alerts")({
           auth: { autoRefreshToken: false, persistSession: false },
         });
 
-        const { data, error } = await supabase.rpc("generate_inactive_client_alerts");
+        const { data, error } = await supabase.rpc("generate_all_alerts");
         if (error) {
           return new Response(JSON.stringify({ error: error.message }), { status: 500 });
         }
         return new Response(
-          JSON.stringify({ ok: true, inactive_alerts_created: data ?? 0, ts: new Date().toISOString() }),
+          JSON.stringify({ ok: true, counts: data, ts: new Date().toISOString() }),
           { headers: { "Content-Type": "application/json" } }
         );
       },
