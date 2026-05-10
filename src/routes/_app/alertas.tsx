@@ -106,13 +106,17 @@ function AlertasPage() {
             Inatividade, queda de consumo, estoque baixo, meta em risco e propostas vencendo. Recorrência mensal.
           </p>
         </div>
-        {isStaff && (
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={regen.isPending}
-            onClick={() => regen.mutate()}
-          >
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/alertas/config"><Settings2 className="size-4 mr-1" /> Configurar regras</Link>
+          </Button>
+          {isStaff && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={regen.isPending}
+              onClick={() => regen.mutate()}
+            >
             <RefreshCw className={`size-4 mr-1 ${regen.isPending ? "animate-spin" : ""}`} />
             Recalcular agora
           </Button>
