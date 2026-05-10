@@ -97,6 +97,27 @@ export type Database = {
           },
         ]
       }
+      alert_settings: {
+        Row: {
+          config: Json
+          rule_type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          rule_type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          rule_type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       alerts: {
         Row: {
           client_code: string | null
@@ -1330,6 +1351,10 @@ export type Database = {
       }
     }
     Functions: {
+      alert_setting: {
+        Args: { _default: number; _key: string; _rule: string }
+        Returns: number
+      }
       current_rep_code: { Args: never; Returns: string }
       current_rep_id: { Args: never; Returns: string }
       generate_all_alerts: { Args: never; Returns: Json }

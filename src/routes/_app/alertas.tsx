@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, CheckCircle2, Eye, RefreshCw, AlertTriangle, Clock } from "lucide-react";
+import { Bell, CheckCircle2, Eye, RefreshCw, AlertTriangle, Clock, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 
@@ -106,17 +106,22 @@ function AlertasPage() {
             Inatividade, queda de consumo, estoque baixo, meta em risco e propostas vencendo. Recorrência mensal.
           </p>
         </div>
-        {isStaff && (
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={regen.isPending}
-            onClick={() => regen.mutate()}
-          >
-            <RefreshCw className={`size-4 mr-1 ${regen.isPending ? "animate-spin" : ""}`} />
-            Recalcular agora
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/alertas/config"><Settings2 className="size-4 mr-1" /> Configurar regras</Link>
           </Button>
-        )}
+          {isStaff && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={regen.isPending}
+              onClick={() => regen.mutate()}
+            >
+              <RefreshCw className={`size-4 mr-1 ${regen.isPending ? "animate-spin" : ""}`} />
+              Recalcular agora
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">

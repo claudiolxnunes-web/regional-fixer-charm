@@ -43,6 +43,7 @@ const groups = [
       { to: "/app-representante", label: "App Representante", icon: Smartphone },
       { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
       { to: "/alertas", label: "Alertas", icon: Bell },
+      { to: "/alertas/config", label: "Config. Alertas", icon: Settings },
       { to: "/preferencias", label: "Preferências", icon: Settings },
       { to: "/importacao", label: "Importar Dados", icon: Upload },
       { to: "/automacoes", label: "Automações", icon: Zap },
