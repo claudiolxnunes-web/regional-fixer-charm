@@ -103,7 +103,7 @@ function AlertasPage() {
             <Bell className="size-6" /> Alertas Comerciais
           </h1>
           <p className="text-sm text-muted-foreground">
-            Cliente inativo (3+ meses), recorrente mensal. Mais regras em breve.
+            Inatividade, queda de consumo, estoque baixo, meta em risco e propostas vencendo. Recorrência mensal.
           </p>
         </div>
         {isStaff && (
