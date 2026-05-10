@@ -69,18 +69,19 @@ export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { returnUrl: string; environment: StripeEnv }) => data)
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: team } = await supabase
-      .from("teams")
-      .select("stripe_customer_id")
-      .order("created_at", { ascending: false })
-      .limit(1)
+    const { supabase, userId } = context;
+    const { data: tm } = await supabase
+      .from("team_members")
+      .select("teams!inner(stripe_customer_id)")
+      .eq("user_id", userId)
+      .eq("role", "admin")
       .maybeSingle();
-    if (!team?.stripe_customer_id) throw new Error("Nenhuma assinatura encontrada");
+    const customerId = (tm as any)?.teams?.stripe_customer_id;
+    if (!customerId) throw new Error("Nenhuma assinatura encontrada");
 
     const stripe = createStripeClient(data.environment);
     const portal = await stripe.billingPortal.sessions.create({
-      customer: team.stripe_customer_id as string,
+      customer: customerId as string,
       return_url: data.returnUrl,
     });
     return portal.url;
