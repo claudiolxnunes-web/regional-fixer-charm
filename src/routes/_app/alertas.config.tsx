@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings2, Save, RotateCcw, ArrowLeft } from "lucide-react";
+import { Settings2, Save, RotateCcw, ArrowLeft, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/alertas/config")({ component: AlertConfigPage });
