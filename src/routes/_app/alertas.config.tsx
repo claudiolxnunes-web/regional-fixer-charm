@@ -132,31 +132,108 @@ function AlertConfigPage() {
   );
 }
 
+const TYPE_LABEL: Record<string, string> = {
+  inactive_client: "Cliente inativo",
+  consumption_drop: "Queda de consumo",
+  low_stock: "Estoque baixo",
+  goal_at_risk: "Meta em risco",
+  quote_expiring: "Proposta vencendo",
+};
+const SEV_CLS: Record<string, string> = {
+  high: "bg-destructive text-destructive-foreground",
+  medium: "bg-secondary text-secondary-foreground",
+  low: "bg-muted text-muted-foreground",
+};
+
 function TestNowButton({ onDone }: { onDone: () => void }) {
   const [last, setLast] = useState<any>(null);
+  const [rows, setRows] = useState<any[] | null>(null);
   const run = useMutation({
     mutationFn: async () => {
+      const startedAt = new Date().toISOString();
       const res = await fetch("/api/public/hooks/run-alerts", { method: "POST" });
       if (!res.ok) throw new Error(await res.text());
-      return res.json();
+      const json = await res.json();
+      const { data: newRows, error } = await supabase
+        .from("alerts")
+        .select("id, type, severity, client_name, client_code, message, created_at, representative_id")
+        .gte("created_at", startedAt)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      const repIds = Array.from(new Set((newRows ?? []).map((r: any) => r.representative_id).filter(Boolean)));
+      let repMap: Record<string, string> = {};
+      if (repIds.length) {
+        const { data: reps } = await supabase.from("representatives").select("id, name, rep_code").in("id", repIds);
+        (reps ?? []).forEach((r: any) => { repMap[r.id] = r.name || r.rep_code || "—"; });
+      }
+      return { counts: json.counts, rows: (newRows ?? []).map((r: any) => ({ ...r, rep_name: r.representative_id ? repMap[r.representative_id] : "—" })) };
     },
     onSuccess: (d: any) => {
-      const c = d.counts || {};
-      setLast(c);
-      const total = c.total ?? 0;
-      toast.success(
-        `Teste concluído: ${total} novo(s) — inativos: ${c.inactive_client ?? 0}, queda: ${c.consumption_drop ?? 0}, estoque: ${c.low_stock ?? 0}, meta: ${c.goal_at_risk ?? 0}, propostas: ${c.quote_expiring ?? 0}`,
-        { duration: 8000 }
-      );
+      setLast(d.counts);
+      setRows(d.rows);
+      const total = d.counts?.total ?? 0;
+      toast.success(`Teste concluído: ${total} novo(s) alerta(s)`);
       onDone();
     },
     onError: (e: any) => toast.error(e.message || "Erro no teste"),
   });
   return (
-    <Button size="sm" variant="default" disabled={run.isPending} onClick={() => run.mutate()} title="Executa as regras agora com os thresholds salvos">
-      <FlaskConical className={`size-4 mr-1 ${run.isPending ? "animate-pulse" : ""}`} />
-      {run.isPending ? "Testando..." : last ? `Testar de novo (último: ${last.total ?? 0})` : "Testar agora"}
-    </Button>
+    <>
+      <Button size="sm" variant="default" disabled={run.isPending} onClick={() => run.mutate()} title="Executa as regras agora com os thresholds salvos">
+        <FlaskConical className={`size-4 mr-1 ${run.isPending ? "animate-pulse" : ""}`} />
+        {run.isPending ? "Testando..." : last ? `Testar de novo (último: ${last.total ?? 0})` : "Testar agora"}
+      </Button>
+      {rows !== null && (
+        <TestResultPanel counts={last} rows={rows} onClear={() => { setRows(null); setLast(null); }} />
+      )}
+    </>
+  );
+}
+
+function TestResultPanel({ counts, rows, onClear }: { counts: any; rows: any[]; onClear: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm overflow-auto p-4" onClick={onClear}>
+      <Card className="max-w-5xl mx-auto p-5 mt-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between mb-3 gap-3">
+          <div>
+            <h3 className="font-semibold">Resultado do teste — {counts?.total ?? 0} novo(s) alerta(s)</h3>
+            <p className="text-xs text-muted-foreground">
+              Inativos: {counts?.inactive_client ?? 0} · Queda: {counts?.consumption_drop ?? 0} · Estoque: {counts?.low_stock ?? 0} · Meta: {counts?.goal_at_risk ?? 0} · Propostas: {counts?.quote_expiring ?? 0}
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={onClear}>Fechar</Button>
+        </div>
+        <div className="overflow-x-auto border rounded-md">
+          <table className="w-full text-xs">
+            <thead className="bg-muted/50 text-muted-foreground">
+              <tr>
+                <th className="text-left p-2 font-medium">Regra</th>
+                <th className="text-left p-2 font-medium">Severidade</th>
+                <th className="text-left p-2 font-medium">Cliente</th>
+                <th className="text-left p-2 font-medium">Representante</th>
+                <th className="text-left p-2 font-medium">Mensagem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!rows.length && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Nenhum alerta novo. Os thresholds atuais não dispararam nada (ou já existiam alertas neste mês — dedupe).</td></tr>}
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t">
+                  <td className="p-2 whitespace-nowrap">{TYPE_LABEL[r.type] || r.type}</td>
+                  <td className="p-2"><span className={`px-2 py-0.5 rounded text-[10px] uppercase ${SEV_CLS[r.severity] || ""}`}>{r.severity}</span></td>
+                  <td className="p-2">{r.client_name || r.client_code || "—"}</td>
+                  <td className="p-2">{r.rep_name || "—"}</td>
+                  <td className="p-2 max-w-md">{r.message}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Dica: a função tem dedupe mensal por cliente/representante/proposta. Se nada apareceu, pode ser que os alertas deste mês já tenham sido gerados antes — abra <Link to="/alertas" className="underline">/alertas</Link> e filtre por "Todos".
+        </p>
+      </Card>
+    </div>
   );
 }
 
