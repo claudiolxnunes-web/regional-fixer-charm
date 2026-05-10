@@ -24,7 +24,7 @@ function RegistroCampo() {
   async function save() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return toast.error("Não autenticado");
-    const { error } = await supabase.from("daily_reports").upsert({
+    const { error } = await supabase.from("daily_reports").insert({
       rep_user_id: user.id,
       report_date: form.report_date,
       visits_count: Number(form.visits_count || 0),
@@ -33,7 +33,7 @@ function RegistroCampo() {
       orders_count: Number(form.orders_count || 0),
       observations: form.observations || null,
       submitted_at: new Date().toISOString(),
-    }, { onConflict: "rep_user_id,report_date" } as any);
+    });
     if (error) return toast.error(error.message);
     toast.success("Registro salvo");
     qc.invalidateQueries({ queryKey: ["daily-reports"] });
