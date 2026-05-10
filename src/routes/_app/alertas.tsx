@@ -82,7 +82,14 @@ function AlertasPage() {
       return res.json();
     },
     onSuccess: (d: any) => {
-      toast.success(`${d.inactive_alerts_created ?? 0} novo(s) alerta(s)`);
+      const c = d.counts || {};
+      const total = c.total ?? 0;
+      toast.success(
+        `${total} novo(s) alerta(s)` +
+          (total > 0
+            ? ` — inativos: ${c.inactive_client ?? 0}, queda: ${c.consumption_drop ?? 0}, estoque: ${c.low_stock ?? 0}, meta: ${c.goal_at_risk ?? 0}, propostas: ${c.quote_expiring ?? 0}`
+            : "")
+      );
       qc.invalidateQueries({ queryKey: ["alerts_list"] });
     },
     onError: (e: any) => toast.error(e.message),
