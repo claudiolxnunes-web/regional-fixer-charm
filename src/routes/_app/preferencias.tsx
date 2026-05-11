@@ -16,6 +16,7 @@ function Preferencias() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [team, setTeam] = useState<{ plan: string; subscription_status: string; current_period_end: string | null } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -26,9 +27,10 @@ function Preferencias() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setEmail(user.email ?? "");
-      const { data } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("full_name, avatar_url, phone").eq("id", user.id).maybeSingle();
       setFullName(data?.full_name ?? "");
       setAvatarUrl(data?.avatar_url ?? "");
+      setPhone((data as any)?.phone ?? "");
       const { data: tm } = await supabase
         .from("team_members")
         .select("role, teams!inner(plan, subscription_status, current_period_end)")
@@ -59,7 +61,7 @@ function Preferencias() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { error } = await supabase.from("profiles").update({ full_name: fullName, avatar_url: avatarUrl }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ full_name: fullName, avatar_url: avatarUrl, phone } as any).eq("id", user.id);
     setLoading(false);
     if (error) toast.error(error.message); else toast.success("Preferências salvas");
   }
@@ -82,6 +84,13 @@ function Preferencias() {
         <CardContent className="space-y-4">
           <div><Label>E-mail</Label><Input value={email} disabled /></div>
           <div><Label>Nome completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} /></div>
+          <div>
+            <Label>WhatsApp (com DDD)</Label>
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+55 61 99675-7585" />
+            <p className="text-xs text-muted-foreground mt-1">
+              Receberá alertas de alta severidade. <strong>Sandbox Twilio:</strong> envie <code>join &lt;código&gt;</code> para <code>+1 415 523 8886</code> no WhatsApp uma vez para autorizar.
+            </p>
+          </div>
           <div><Label>URL do avatar</Label><Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." /></div>
           <div className="flex gap-2">
             <Button onClick={save} disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button>
