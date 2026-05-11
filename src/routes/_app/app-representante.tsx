@@ -27,17 +27,30 @@ const fmtDate = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", mon
 function RepAppPage() {
   const { user, isRepresentative, isStaff, signOut } = useAuth();
 
-  const { data: rep } = useQuery({
-    queryKey: ["my_rep", user?.id],
+  const { data: rep, isLoading } = useQuery({
+    queryKey: ["my_rep", user?.id, isStaff],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      // 1) Tenta o RC vinculado ao usuário
+      const { data: mine, error } = await supabase
         .from("representatives")
         .select("id, rep_code, name, territory, home_state, home_city")
         .eq("user_id", user!.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (mine) return { ...mine, _preview: false } as any;
+
+      // 2) Fallback para gestor/superadmin: usa o 1º representante da equipe (modo preview)
+      if (isStaff) {
+        const { data: any1 } = await supabase
+          .from("representatives")
+          .select("id, rep_code, name, territory, home_state, home_city")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (any1) return { ...any1, _preview: true } as any;
+      }
+      return null;
     },
   });
 
@@ -50,11 +63,15 @@ function RepAppPage() {
     );
   }
 
+  if (isLoading) {
+    return <div className="max-w-md mx-auto py-12 text-center text-sm text-muted-foreground">Carregando...</div>;
+  }
+
   if (!rep) {
     return (
       <div className="max-w-md mx-auto py-12 text-center space-y-3">
-        <p className="text-muted-foreground">Nenhum cadastro de representante vinculado ao seu usuário.</p>
-        {isStaff && <p className="text-xs text-muted-foreground">Como gestor, você pode visualizar e testar o app, mas precisa vincular um RC ao seu usuário em /representantes para ver dados reais.</p>}
+        <p className="text-muted-foreground">Nenhum representante cadastrado ainda.</p>
+        {isStaff && <p className="text-xs text-muted-foreground">Cadastre um representante em /representantes para visualizar o app.</p>}
       </div>
     );
   }
@@ -132,6 +149,11 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
 
   return (
     <div className="max-w-md mx-auto -mx-8 -my-6 md:mx-auto md:my-0 md:max-w-lg">
+      {rep._preview && (
+        <div className="bg-amber-100 text-amber-900 text-[11px] px-3 py-1.5 text-center border-b border-amber-200">
+          Modo visualização — você está vendo o app como o representante <strong>{rep.name}</strong>.
+        </div>
+      )}
       {/* Header */}
       <div className="bg-emerald-700 text-emerald-50 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow">
         <div className="size-9 rounded-full bg-emerald-800/60 grid place-items-center text-emerald-100 font-semibold">
