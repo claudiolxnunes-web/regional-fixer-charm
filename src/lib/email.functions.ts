@@ -71,7 +71,7 @@ export const notifyQuoteCreated = createServerFn({ method: "POST" })
         <li><strong>Validade:</strong> ${q.valid_until ?? "—"}</li>
        </ul>
        ${q.notes ? `<p style="color:#374151"><em>${q.notes}</em></p>` : ""}
-       <p><a href="${process.env.APP_URL ?? "https://regional-fixer-charm.lovable.app"}/propostas" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Abrir propostas</a></p>`,
+       <p><a href="${process.env.APP_URL ?? "https://www.bpfconsult.com.br"}/propostas" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Abrir propostas</a></p>`,
     );
 
     await sendResendEmail({
@@ -108,7 +108,7 @@ export const sendInviteWithTeam = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    const base = process.env.APP_URL ?? "https://regional-fixer-charm.lovable.app";
+    const base = process.env.APP_URL ?? "https://www.bpfconsult.com.br";
     const link = `${base}/login?invite=${inv.token}`;
     const html = wrap(
       "Você foi convidado para o AgroGestão CRM",
