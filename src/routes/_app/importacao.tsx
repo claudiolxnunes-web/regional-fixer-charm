@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ImportDialog } from "@/components/ImportDialog";
 import { GoalsImportDialog } from "@/components/GoalsImportDialog";
-import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target } from "lucide-react";
+import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -35,13 +35,33 @@ const num = (v: any) => (v == null || v === "" ? null : Number(String(v).replace
 const txt = (v: any) => (v == null ? null : String(v).trim() || null);
 
 function ImportacaoPage() {
+  const qc = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await qc.invalidateQueries();
+      await qc.refetchQueries({ type: "active" });
+      toast.success("Informações atualizadas em todas as abas");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao atualizar");
+    } finally {
+      setRefreshing(false);
+    }
+  };
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Importações</h1>
-        <p className="text-sm text-muted-foreground">
-          Importe planilhas Excel ou arquivos diversos para alimentar a base de dados.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Importações</h1>
+          <p className="text-sm text-muted-foreground">
+            Importe planilhas Excel ou arquivos diversos para alimentar a base de dados.
+          </p>
+        </div>
+        <Button onClick={handleRefresh} disabled={refreshing} variant="outline">
+          <RefreshCw className={`size-4 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+          Atualizar todas as abas
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
