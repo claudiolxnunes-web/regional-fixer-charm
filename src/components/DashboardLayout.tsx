@@ -70,8 +70,8 @@ function SidebarContent({
   return (
     <div className="h-full flex flex-col bg-sidebar text-sidebar-foreground">
       <div className="px-5 py-4 flex items-center gap-2.5 border-b border-sidebar-border">
-        <div className="size-9 rounded-lg bg-sidebar-primary grid place-items-center shrink-0">
-          <Sprout className="size-5 text-sidebar-primary-foreground" />
+        <div className="size-10 rounded-lg bg-white grid place-items-center shrink-0 overflow-hidden">
+          <img src={logo} alt="AgroGestão CRM" className="size-9 object-contain" />
         </div>
         <div className="min-w-0">
           <div className="font-semibold leading-none truncate">AgroGestão</div>
@@ -170,8 +170,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               />
             </SheetContent>
           </Sheet>
-          <div className="size-8 rounded-lg bg-sidebar-primary grid place-items-center shrink-0">
-            <Sprout className="size-4 text-sidebar-primary-foreground" />
+          <div className="size-8 rounded-lg bg-white grid place-items-center shrink-0 overflow-hidden">
+            <img src={logo} alt="AgroGestão CRM" className="size-7 object-contain" />
           </div>
           <div className="font-semibold text-sm truncate">AgroGestão</div>
         </header>
