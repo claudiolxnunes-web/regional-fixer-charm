@@ -82,26 +82,7 @@ export const notifyQuoteCreated = createServerFn({ method: "POST" })
     return { sent: emails.length };
   });
 
-/** Cria invite e envia email com o link de cadastro. */
-export const sendInvite = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    z
-      .object({
-        email: z.string().email(),
-        role: z.enum(["admin", "manager", "rep"]).default("rep"),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data }) => {
-    const sb = svc();
-    // descobrir team do usuário criador via JWT? handler não tem auth — exigimos teamId via secret? Fallback: usar primeiro team do criador desconhecido.
-    // Como esse endpoint é chamado pelo painel staff via fetch autenticado, pegamos token do header.
-    // Para simplicidade aqui, criamos invite sem team_id checagem (RLS aplicará).
-    // → usa rpc seria ideal. Mantemos simples: cria invite usando service role + first team do email criador? Impossível sem contexto.
-    // Solução prática: receber teamId do cliente.
-    throw new Error("use sendInviteWithTeam");
-  });
-
+/** Cria invite (RLS via service role) e envia email com link de cadastro. */
 export const sendInviteWithTeam = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z
