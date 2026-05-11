@@ -27,9 +27,10 @@ function Preferencias() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setEmail(user.email ?? "");
-      const { data } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("full_name, avatar_url, phone").eq("id", user.id).maybeSingle();
       setFullName(data?.full_name ?? "");
       setAvatarUrl(data?.avatar_url ?? "");
+      setPhone((data as any)?.phone ?? "");
       const { data: tm } = await supabase
         .from("team_members")
         .select("role, teams!inner(plan, subscription_status, current_period_end)")
