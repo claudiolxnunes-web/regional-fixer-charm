@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sprout } from "lucide-react";
 import { toast } from "sonner";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
 
@@ -55,8 +55,8 @@ function LoginPage() {
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-primary/10 via-background to-accent/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto size-12 rounded-xl bg-primary grid place-items-center mb-3">
-            <Sprout className="size-6 text-primary-foreground" />
+          <div className="mx-auto size-20 rounded-xl bg-white grid place-items-center mb-3 overflow-hidden border">
+            <img src={logo} alt="AgroGestão CRM" className="size-19 object-contain" />
           </div>
           <CardTitle className="text-2xl">AgroGestão CRM</CardTitle>
           <CardDescription>{mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}</CardDescription>
