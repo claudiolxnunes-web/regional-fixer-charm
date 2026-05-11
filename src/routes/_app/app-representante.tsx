@@ -149,6 +149,11 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
 
   return (
     <div className="max-w-md mx-auto -mx-8 -my-6 md:mx-auto md:my-0 md:max-w-lg">
+      {rep._preview && (
+        <div className="bg-amber-100 text-amber-900 text-[11px] px-3 py-1.5 text-center border-b border-amber-200">
+          Modo visualização — você está vendo o app como o representante <strong>{rep.name}</strong>.
+        </div>
+      )}
       {/* Header */}
       <div className="bg-emerald-700 text-emerald-50 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow">
         <div className="size-9 rounded-full bg-emerald-800/60 grid place-items-center text-emerald-100 font-semibold">
