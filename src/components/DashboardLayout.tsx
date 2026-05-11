@@ -10,6 +10,7 @@ import {
   Menu,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import logo from "@/assets/logo.png";
 
 const groups = [
   {
