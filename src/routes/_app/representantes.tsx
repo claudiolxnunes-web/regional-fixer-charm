@@ -64,6 +64,9 @@ function RepsPage() {
           <p className="text-sm text-muted-foreground">{reps.length} cadastrados</p>
         </div>
         {isStaff && (
+          <InviteButton />
+        )}
+        {isStaff && (
           <div className="flex gap-2">
             <ImportDialog
               table="representatives"
