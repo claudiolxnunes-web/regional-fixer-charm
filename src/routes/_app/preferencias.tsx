@@ -16,6 +16,7 @@ function Preferencias() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [team, setTeam] = useState<{ plan: string; subscription_status: string; current_period_end: string | null } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
