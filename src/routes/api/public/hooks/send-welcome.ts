@@ -17,7 +17,7 @@ export const Route = createFileRoute("/api/public/hooks/send-welcome")({
             `<p>Olá${name ? `, <strong>${name}</strong>` : ""}!</p>
              <p>Sua conta foi criada com sucesso. Confirme seu email para começar a usar o sistema.</p>
              <p>Aqui você vai gerenciar clientes, propostas, vendas e receber alertas comerciais automáticos.</p>
-             <p><a href="https://regional-fixer-charm.lovable.app/login" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Acessar o sistema</a></p>`,
+             <p><a href="https://www.bpfconsult.com.br/login" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Acessar o sistema</a></p>`,
           );
           await sendResendEmail({ to: email, subject: "Bem-vindo ao AgroGestão CRM", html });
           return new Response(JSON.stringify({ ok: true }), {

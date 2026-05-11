@@ -2,7 +2,9 @@
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 export const FROM_ADDRESS =
-  process.env.EMAIL_FROM ?? "AgroGestão CRM <onboarding@resend.dev>";
+  process.env.EMAIL_FROM ?? "BPF Consult <contato@bpfconsult.com.br>";
+
+export const APP_URL = process.env.APP_URL ?? "https://www.bpfconsult.com.br";
 
 export interface SendEmailInput {
   to: string | string[];

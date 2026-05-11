@@ -78,7 +78,7 @@ export const Route = createFileRoute("/api/public/hooks/daily-digest")({
                  ? `<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f9fafb"><th style="text-align:left;padding:6px 8px">Sev.</th><th style="text-align:left;padding:6px 8px">Alerta</th><th style="text-align:left;padding:6px 8px">Cliente</th></tr></thead><tbody>${rows}</tbody></table>`
                  : ""
              }
-             <p style="margin-top:16px"><a href="https://regional-fixer-charm.lovable.app/alertas" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Ver alertas</a></p>`,
+             <p style="margin-top:16px"><a href="https://www.bpfconsult.com.br/alertas" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Ver alertas</a></p>`,
           );
 
           try {
