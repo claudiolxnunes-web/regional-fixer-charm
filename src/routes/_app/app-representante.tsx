@@ -410,7 +410,7 @@ function ProposalForm({ rep, onClose }: { rep: any; onClose: () => void }) {
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await (supabase as any).from("quotes").insert({
+      const { data: inserted, error } = await (supabase as any).from("quotes").insert({
         representative_id: rep.id,
         client_name: client,
         items: products ? [{ description: products }] : [],
@@ -419,8 +419,17 @@ function ProposalForm({ rep, onClose }: { rep: any; onClose: () => void }) {
         valid_until: validUntil || null,
         notes: notes || null,
         status: "pending",
-      });
+      }).select("id").single();
       if (error) throw error;
+      // Notifica gestores (best-effort)
+      if (inserted?.id) {
+        try {
+          const { notifyQuoteCreated } = await import("@/lib/email.functions");
+          await notifyQuoteCreated({ data: { quoteId: inserted.id } });
+        } catch (e) {
+          console.warn("notifyQuoteCreated failed", e);
+        }
+      }
     },
     onSuccess: () => {
       toast.success("Proposta enviada para aprovação do gestor");
