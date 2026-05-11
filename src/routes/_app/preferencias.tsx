@@ -84,6 +84,13 @@ function Preferencias() {
         <CardContent className="space-y-4">
           <div><Label>E-mail</Label><Input value={email} disabled /></div>
           <div><Label>Nome completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} /></div>
+          <div>
+            <Label>WhatsApp (com DDD)</Label>
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+55 61 99675-7585" />
+            <p className="text-xs text-muted-foreground mt-1">
+              Receberá alertas de alta severidade. <strong>Sandbox Twilio:</strong> envie <code>join &lt;código&gt;</code> para <code>+1 415 523 8886</code> no WhatsApp uma vez para autorizar.
+            </p>
+          </div>
           <div><Label>URL do avatar</Label><Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." /></div>
           <div className="flex gap-2">
             <Button onClick={save} disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button>
