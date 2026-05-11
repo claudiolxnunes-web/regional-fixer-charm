@@ -61,7 +61,7 @@ function Preferencias() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { error } = await supabase.from("profiles").update({ full_name: fullName, avatar_url: avatarUrl }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ full_name: fullName, avatar_url: avatarUrl, phone } as any).eq("id", user.id);
     setLoading(false);
     if (error) toast.error(error.message); else toast.success("Preferências salvas");
   }
