@@ -35,7 +35,9 @@ import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
 import { Route as AppAlertasConfigRouteImport } from './routes/_app/alertas.config'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksSendWelcomeRouteImport } from './routes/api/public/hooks/send-welcome'
 import { Route as ApiPublicHooksRunAlertsRouteImport } from './routes/api/public/hooks/run-alerts'
+import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
 
 const PlanosRoute = PlanosRouteImport.update({
   id: '/planos',
@@ -167,11 +169,23 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSendWelcomeRoute =
+  ApiPublicHooksSendWelcomeRouteImport.update({
+    id: '/api/public/hooks/send-welcome',
+    path: '/api/public/hooks/send-welcome',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRunAlertsRoute = ApiPublicHooksRunAlertsRouteImport.update({
   id: '/api/public/hooks/run-alerts',
   path: '/api/public/hooks/run-alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksDailyDigestRoute =
+  ApiPublicHooksDailyDigestRouteImport.update({
+    id: '/api/public/hooks/daily-digest',
+    path: '/api/public/hooks/daily-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -198,7 +212,9 @@ export interface FileRoutesByFullPath {
   '/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
+  '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
+  '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -226,7 +242,9 @@ export interface FileRoutesByTo {
   '/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
+  '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
+  '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -256,7 +274,9 @@ export interface FileRoutesById {
   '/_app/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/_app/alertas/config': typeof AppAlertasConfigRoute
+  '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
+  '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -286,7 +306,9 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/checkout/return'
     | '/alertas/config'
+    | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
+    | '/api/public/hooks/send-welcome'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -314,7 +336,9 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/checkout/return'
     | '/alertas/config'
+    | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
+    | '/api/public/hooks/send-welcome'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -343,7 +367,9 @@ export interface FileRouteTypes {
     | '/_app/vendas'
     | '/checkout/return'
     | '/_app/alertas/config'
+    | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
+    | '/api/public/hooks/send-welcome'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -353,7 +379,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PlanosRoute: typeof PlanosRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
+  ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
   ApiPublicHooksRunAlertsRoute: typeof ApiPublicHooksRunAlertsRoute
+  ApiPublicHooksSendWelcomeRoute: typeof ApiPublicHooksSendWelcomeRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -541,11 +569,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/send-welcome': {
+      id: '/api/public/hooks/send-welcome'
+      path: '/api/public/hooks/send-welcome'
+      fullPath: '/api/public/hooks/send-welcome'
+      preLoaderRoute: typeof ApiPublicHooksSendWelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/run-alerts': {
       id: '/api/public/hooks/run-alerts'
       path: '/api/public/hooks/run-alerts'
       fullPath: '/api/public/hooks/run-alerts'
       preLoaderRoute: typeof ApiPublicHooksRunAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/daily-digest': {
+      id: '/api/public/hooks/daily-digest'
+      path: '/api/public/hooks/daily-digest'
+      fullPath: '/api/public/hooks/daily-digest'
+      preLoaderRoute: typeof ApiPublicHooksDailyDigestRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -615,7 +657,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PlanosRoute: PlanosRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
+  ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
   ApiPublicHooksRunAlertsRoute: ApiPublicHooksRunAlertsRoute,
+  ApiPublicHooksSendWelcomeRoute: ApiPublicHooksSendWelcomeRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

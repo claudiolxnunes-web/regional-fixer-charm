@@ -64,6 +64,9 @@ function RepsPage() {
           <p className="text-sm text-muted-foreground">{reps.length} cadastrados</p>
         </div>
         {isStaff && (
+          <InviteButton />
+        )}
+        {isStaff && (
           <div className="flex gap-2">
             <ImportDialog
               table="representatives"
@@ -210,5 +213,64 @@ function RepForm({ editing, onClose }: { editing: Rep | null; onClose: () => voi
         <Button onClick={() => save.mutate()} disabled={save.isPending || !form.name}>Salvar</Button>
       </DialogFooter>
     </DialogContent>
+  );
+}
+
+function InviteButton() {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"admin" | "manager" | "rep">("rep");
+  const [loading, setLoading] = useState(false);
+
+  async function send() {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { data: tm } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!tm?.team_id) throw new Error("Sem time associado");
+      const { sendInviteWithTeam } = await import("@/lib/email.functions");
+      await sendInviteWithTeam({ data: { email, role, teamId: tm.team_id, createdBy: user.id } });
+      toast.success("Convite enviado!");
+      setOpen(false);
+      setEmail("");
+    } catch (e: any) {
+      toast.error(e.message ?? "Falha");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline"><Plus className="size-4 mr-2" /> Convidar por email</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Convidar membro</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div>
+            <Label>Função</Label>
+            <Select value={role} onValueChange={(v) => setRole(v as any)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="rep">Representante</SelectItem>
+                <SelectItem value="manager">Gestor</SelectItem>
+                <SelectItem value="admin">Administrador</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button onClick={send} disabled={loading || !email}>Enviar convite</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

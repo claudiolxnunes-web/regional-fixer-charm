@@ -35,6 +35,12 @@ function LoginPage() {
           },
         });
         if (error) throw error;
+        // Email de boas-vindas (best-effort, não bloqueia signup)
+        fetch("/api/public/hooks/send-welcome", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, name }),
+        }).catch(() => {});
         toast.success("Conta criada! Verifique seu e-mail para confirmar.");
         setMode("signin");
       }
