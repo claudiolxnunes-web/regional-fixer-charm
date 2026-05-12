@@ -17,6 +17,12 @@ function planFromPriceId(priceId?: string): string {
   return 'mensal';
 }
 
+function monthsForOneTimePlan(plan: string): number {
+  if (plan === 'anual') return 12;
+  if (plan === 'semestral') return 6;
+  return 1;
+}
+
 async function logEvent(eventId: string, eventType: string, teamId: string | null, payload: any) {
   await getSupabase().from('subscriptions_log').insert({
     stripe_event_id: eventId, event_type: eventType, team_id: teamId, payload,
@@ -61,10 +67,10 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     updated_at: new Date().toISOString(),
   };
 
-  // For one-time payment (semestral), set period end manually = +6 months
+  // For one-time payment (semestral/anual), set period end manually
   if (session.mode === 'payment') {
     const end = new Date();
-    end.setMonth(end.getMonth() + 6);
+    end.setMonth(end.getMonth() + monthsForOneTimePlan(plan));
     update.current_period_end = end.toISOString();
   } else if (session.subscription) {
     update.stripe_subscription_id = session.subscription;
