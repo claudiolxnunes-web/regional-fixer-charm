@@ -296,7 +296,27 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
 
   if (!activity) return null;
 
-  async function save() {
+  function missingSpin() {
+    const labels: Record<string, string> = {
+      situation: "S (Situação)",
+      problem: "P (Problema)",
+      implication: "I (Implicação)",
+      need_payoff: "N (Necessidade)",
+    };
+    return Object.entries(labels)
+      .filter(([k]) => !(form as any)[k]?.trim())
+      .map(([, v]) => v);
+  }
+
+  async function save(opts: { force?: boolean } = {}) {
+    const missing = missingSpin();
+    if (missing.length && !opts.force) {
+      toast.warning(`Faltam: ${missing.join(", ")}`, {
+        description: "Você pode salvar mesmo assim ou completar antes.",
+        action: { label: "Salvar assim mesmo", onClick: () => save({ force: true }) },
+      });
+      return;
+    }
     const payload = {
       ...form,
       activity_id: activity.id,
@@ -315,6 +335,34 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
     toast.success("Anotações SPIN salvas");
     onSaved();
     onClose();
+  }
+
+  function exportRoteiro() {
+    const missing = missingSpin();
+    if (missing.length) {
+      toast.error(`Não é possível exportar: faltam ${missing.join(", ")}`);
+      return;
+    }
+    const text = [
+      `Roteiro SPIN — ${activity.clients?.name ?? activity.title}`,
+      `Data: ${activity.scheduled_at ? new Date(activity.scheduled_at).toLocaleString("pt-BR") : "-"}`,
+      "",
+      `S — Situação:\n${form.situation}`,
+      "",
+      `P — Problema:\n${form.problem}`,
+      "",
+      `I — Implicação:\n${form.implication}`,
+      "",
+      `N — Necessidade:\n${form.need_payoff}`,
+    ].join("\n");
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `spin-${(activity.clients?.name ?? "visita").toString().toLowerCase().replace(/\s+/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Roteiro exportado");
   }
 
   async function markCompleted() {
@@ -397,9 +445,10 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button onClick={save}>Salvar</Button>
+          <Button variant="outline" onClick={exportRoteiro}>Exportar roteiro</Button>
+          <Button onClick={() => save()}>Salvar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
