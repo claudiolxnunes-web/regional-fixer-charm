@@ -20,6 +20,7 @@ import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
 import { Route as AppRegistroCampoRouteImport } from './routes/_app/registro-campo'
 import { Route as AppPropostasRouteImport } from './routes/_app/propostas'
 import { Route as AppPreferenciasRouteImport } from './routes/_app/preferencias'
+import { Route as AppPlanejamentoRouteImport } from './routes/_app/planejamento'
 import { Route as AppPedidosRouteImport } from './routes/_app/pedidos'
 import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
 import { Route as AppMetasRouteImport } from './routes/_app/metas'
@@ -91,6 +92,11 @@ const AppPropostasRoute = AppPropostasRouteImport.update({
 const AppPreferenciasRoute = AppPreferenciasRouteImport.update({
   id: '/preferencias',
   path: '/preferencias',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlanejamentoRoute = AppPlanejamentoRouteImport.update({
+  id: '/planejamento',
+  path: '/planejamento',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPedidosRoute = AppPedidosRouteImport.update({
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/pedidos': typeof AppPedidosRoute
+  '/planejamento': typeof AppPlanejamentoRoute
   '/preferencias': typeof AppPreferenciasRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/pedidos': typeof AppPedidosRoute
+  '/planejamento': typeof AppPlanejamentoRoute
   '/preferencias': typeof AppPreferenciasRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/_app/metas': typeof AppMetasRoute
   '/_app/oportunidades': typeof AppOportunidadesRoute
   '/_app/pedidos': typeof AppPedidosRoute
+  '/_app/planejamento': typeof AppPlanejamentoRoute
   '/_app/preferencias': typeof AppPreferenciasRoute
   '/_app/propostas': typeof AppPropostasRoute
   '/_app/registro-campo': typeof AppRegistroCampoRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/pedidos'
+    | '/planejamento'
     | '/preferencias'
     | '/propostas'
     | '/registro-campo'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/pedidos'
+    | '/planejamento'
     | '/preferencias'
     | '/propostas'
     | '/registro-campo'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/_app/metas'
     | '/_app/oportunidades'
     | '/_app/pedidos'
+    | '/_app/planejamento'
     | '/_app/preferencias'
     | '/_app/propostas'
     | '/_app/registro-campo'
@@ -462,6 +474,13 @@ declare module '@tanstack/react-router' {
       path: '/preferencias'
       fullPath: '/preferencias'
       preLoaderRoute: typeof AppPreferenciasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/planejamento': {
+      id: '/_app/planejamento'
+      path: '/planejamento'
+      fullPath: '/planejamento'
+      preLoaderRoute: typeof AppPlanejamentoRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/pedidos': {
@@ -619,6 +638,7 @@ interface AppRouteChildren {
   AppMetasRoute: typeof AppMetasRoute
   AppOportunidadesRoute: typeof AppOportunidadesRoute
   AppPedidosRoute: typeof AppPedidosRoute
+  AppPlanejamentoRoute: typeof AppPlanejamentoRoute
   AppPreferenciasRoute: typeof AppPreferenciasRoute
   AppPropostasRoute: typeof AppPropostasRoute
   AppRegistroCampoRoute: typeof AppRegistroCampoRoute
@@ -641,6 +661,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMetasRoute: AppMetasRoute,
   AppOportunidadesRoute: AppOportunidadesRoute,
   AppPedidosRoute: AppPedidosRoute,
+  AppPlanejamentoRoute: AppPlanejamentoRoute,
   AppPreferenciasRoute: AppPreferenciasRoute,
   AppPropostasRoute: AppPropostasRoute,
   AppRegistroCampoRoute: AppRegistroCampoRoute,
