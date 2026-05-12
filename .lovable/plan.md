@@ -1,115 +1,86 @@
-# Plano: SaaS Multi-Tenant com Licença e Convites
+# Plano — Finalização das abas pendentes + Planejamento SMART/SPIN
 
-## Modelo de negócio aprovado
-- **Superadmin** (você): vê tudo, gerencia gestores
-- **Gestor** (admin): paga licença Stripe, convida até 20 representantes, vê só a própria equipe
-- **Representante** (user): entra por convite, vê só os próprios dados
+Stripe fica fora do escopo (será feito pelo programador externo). Foco: completar as abas que faltam e adicionar dois módulos novos de planejamento.
 
-**Preços:**
-- Mensal R$ 297,00 (recorrente)
-- Semestral R$ 1.514,70 à vista (15% off)
-- Anual R$ 2.673,00 à vista (25% off)
+## Fase A — Auditoria e correção das abas existentes
 
----
+### 1. Relatórios (`/relatorios`)
+- Verificar geração e exibição (vendas mensais, ranking de representantes, ranking de clientes, mix de produtos).
+- Adicionar exportação CSV/PDF por relatório.
+- Filtros: período, representante, linha, região.
 
-## Etapas de implementação
+### 2. Alertas (`/alertas` + `/alertas/config`)
+- Conferir se `generate_all_alerts()` está sendo executado (cron mensal já configurado).
+- Botão "Gerar agora" no painel para teste manual.
+- Garantir badge de alertas não lidos no menu.
+- Validar canais: painel ✓ / e-mail (Resend) / WhatsApp (Twilio).
 
-### Etapa 1 — Banco de dados (multi-tenancy)
-Adicionar a noção de "equipe/time" a tudo.
+### 3. Mapa de calor (`/mapa`)
+- Substituir lista por **mapa real** (Leaflet + OpenStreetMap, sem API key).
+- Camada de heatmap por densidade de clientes e por receita (toggle).
+- Marcadores agrupados (cluster) com popup: cliente, cidade, classe ABC, receita.
+- Filtros: UF, representante, classe ABC.
 
-**Novas tabelas:**
-- `teams` — uma por gestor (`owner_id`, `name`, `seat_limit=20`, `subscription_status`, `current_period_end`, `stripe_customer_id`, `stripe_subscription_id`, `plan` = mensal/semestral/anual)
-- `team_members` — vincula `user_id` ↔ `team_id` ↔ `role` (admin/rep)
-- `invites` — convites pendentes (`token`, `team_id`, `email` opcional, `role`, `expires_at`, `used_at`, `created_by`)
-- `subscriptions_log` — histórico de pagamentos/eventos Stripe
+### 4. Analytics avançado (`/analytics`)
+- Conferir KPIs e gráficos. Adicionar:
+  - Receita YoY / MoM, ticket médio, frequência de compra.
+  - Funil de oportunidades, taxa de conversão por etapa.
+  - Mix de produto (linha/solução), curva ABC de clientes.
+  - Cohort de retenção (clientes que voltaram a comprar).
 
-**Coluna `team_id` em:** representatives, clients, sales, opportunities, quotes, activities, alerts, daily_reports, goals, goal_targets, open_orders, products, regions
+### 5. IA Insights (`/ia-insights`)
+- Já gera 5 insights via Lovable AI. Adicionar:
+  - Histórico (salvar últimas execuções na tabela `ia_insights`).
+  - Análises específicas: churn risk por cliente, próximo melhor produto, resumo executivo mensal.
+  - Botão "Enviar por e-mail" para o gestor.
 
-**Novo enum de role:** `superadmin`, `admin`, `rep` (mantém compat com atual)
+### 6. Atividades (`/atividades`)
+- Conferir CRUD (criar, editar, concluir, cancelar).
+- Calendário semanal/mensal (toggle).
+- Filtros: representante, cliente, status, tipo (visita, ligação, e-mail, reunião).
+- Vínculo com oportunidades e clientes.
 
-**RLS reescrito:** todas as tabelas filtram por `team_id = current_user_team_id()` (função SECURITY DEFINER). Superadmin bypassa. Representante adiciona filtro extra (`representative_id = current_rep_id()`) onde aplicável.
+## Fase B — Planejamento estratégico (NOVO)
 
-### Etapa 2 — Stripe (checkout + webhook)
-- Habilitar Stripe built-in
-- Criar 3 produtos no Stripe via `batch_create_product`:
-  - "Plano Mensal" — R$ 297/mês recorrente
-  - "Plano Semestral" — R$ 1.514,70 a cada 6 meses
-  - "Plano Anual" — R$ 2.673,00 a cada 12 meses
-- Tela `/planos` (pública, fora do `_app`): cards com 3 planos + botão "Assinar"
-- Server function `create-checkout-session` cria sessão Stripe e devolve URL
-- Webhook `/api/public/stripe/webhook`: ao receber `checkout.session.completed` ou `customer.subscription.updated`, cria/atualiza `teams` e dá role `admin` ao usuário pagante
+### 7. Planejamento SMART do Gestor — `/planejamento` (apenas admin/manager)
+Página para definir e acompanhar metas estratégicas pelo método SMART (Específico, Mensurável, Atingível, Relevante, Temporal).
 
-### Etapa 3 — Onboarding do gestor pós-pagamento
-- Após Stripe redirecionar para `/checkout/success`, criar a equipe (se webhook ainda não rodou) e direcionar para `/equipe`
-- Tela `/equipe` (só admin): mostra plano ativo, status, próxima cobrança, botão "Gerenciar assinatura" (Stripe Customer Portal), e a área de convites
+**Funcionalidades:**
+- Criar plano semanal e/ou mensal.
+- Cada plano tem N objetivos SMART, com:
+  - Título, descrição, métrica (KPI), valor-alvo, valor atual, prazo, responsável (rep ou time).
+  - Status: planejado, em andamento, concluído, atrasado.
+  - Ações associadas (lista de tarefas/checkpoints).
+- Dashboard de acompanhamento: % de conclusão, progresso por objetivo.
+- Vínculo automático com `goal_targets` (metas de receita) quando aplicável.
 
-### Etapa 4 — Sistema de convites (link + QR + email)
-**UI em `/equipe`:**
-- Contador "5 de 20 representantes usados"
-- Botão "Convidar representante" → modal com 3 abas:
-  - **Link**: gera URL `https://app/convite/{token}`, botão "copiar"
-  - **QR Code**: renderiza QR do mesmo link (lib `qrcode.react`)
-  - **Email**: campo de email + envia automaticamente (requer dom. email configurado)
-- Lista de convites pendentes com status (enviado/usado/expirado) e botão "revogar"
+**Tabelas novas:**
+- `strategic_plans` (id, team_id, title, period_type='weekly'|'monthly', start_date, end_date, status, owner_id)
+- `strategic_objectives` (id, plan_id, title, description, metric, target_value, current_value, due_date, assigned_rep_id, status, smart_data jsonb)
+- `strategic_actions` (id, objective_id, title, done, done_at)
 
-**Página pública `/convite/$token`:**
-- Valida token via server function (não exposto antes do login)
-- Form de cadastro (nome, email, senha) → cria conta Supabase, vincula em `team_members` com role `rep`, marca convite como usado, redireciona para `/dashboard`
-- Bloqueia se já bateu o limite de 20
+### 8. Planejamento SPIN do Representante — `/planejamento-visitas` (representante)
+Roteirizador de visitas usando método SPIN (Situation, Problem, Implication, Need-payoff).
 
-**Email de convite:**
-- Requer setup do domínio de email (vou abrir o diálogo)
-- Template "convite-equipe" com nome do gestor + botão "Aceitar convite"
+**Funcionalidades:**
+- Listar visitas planejadas da semana (puxa de `activities` tipo=visit).
+- Para cada visita, checklist SPIN preenchido pelo rep:
+  - **Situação**: contexto atual do cliente (o que ele compra hoje, volume).
+  - **Problema**: dor identificada (preço alto, atraso, qualidade, falta de produto).
+  - **Implicação**: consequência da dor (perda de margem, churn, etc).
+  - **Necessidade de solução**: benefício da nossa proposta (produto X resolve Y).
+- Pós-visita: outcome estruturado, próximos passos, oportunidade gerada.
+- Roteiro otimizado por proximidade geográfica (ordenar visitas do dia por lat/lng).
 
-### Etapa 5 — Travas de acesso
-- Layout `_app` checa: `auth.uid` precisa ter `team_membership` ativo OU ser superadmin
-- Se admin sem assinatura ativa → redirecionar para `/planos`
-- Se rep sem time → tela "Aguardando convite"
-- Página `/superadmin` (só você): lista de teams, status, MRR estimado, ações (suspender/reativar)
+**Tabelas novas:**
+- `visit_plans` (id, team_id, rep_user_id, week_start, status, notes)
+- `spin_notes` (id, activity_id, situation, problem, implication, need_payoff, outcome, next_steps, created_at)
 
-### Etapa 6 — Limpeza UI
-- Remover do menu de admin/rep o que é exclusivo de superadmin (ex: configuração global de alertas vira superadmin-only)
-- Botão "Sair" e "Gerenciar assinatura" no perfil
+## Ordem de execução sugerida
+1. **Fase A.6 (Atividades)** — base para SPIN.
+2. **Fase A.3 (Mapa de calor)** — visual rápido, alto impacto.
+3. **Fase B.7 (SMART)** + **B.8 (SPIN)** — módulos novos.
+4. **Fase A.1, A.2, A.4, A.5** — refinos das abas existentes.
 
----
-
-## Detalhes técnicos
-
-**Stack adicional:**
-- `qrcode.react` — gerar QR
-- Stripe built-in (sem chaves manuais)
-- Lovable Emails (dialog de setup de domínio será aberto na Etapa 4)
-
-**Função SECURITY DEFINER chave:**
-```sql
-current_user_team_id() returns uuid
--- retorna o team_id do user atual (superadmin retorna NULL = vê tudo)
-```
-
-**Webhook Stripe (server route público com verificação HMAC):**
-- Eventos: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
-- Atualiza `teams.subscription_status` e `current_period_end`
-
-**Migração de dados existentes:**
-- Como você acabou de limpar a base, não precisa migrar nada. Você se torna superadmin automaticamente. Os primeiros gestores entrarão pelo `/planos`.
-
----
-
-## Ordem de execução proposta
-
-1. **Hoje (esta resposta):** Etapas 1+2+3 — banco, Stripe, checkout, onboarding básico do gestor. Você já consegue testar o fluxo "pagar → criar equipe".
-2. **Próxima rodada:** Etapa 4 — sistema de convites (link + QR primeiro; email depois do setup do domínio).
-3. **Última rodada:** Etapas 5+6 — travas finais, painel de superadmin, limpeza.
-
-Isso evita um PR gigantesco e te deixa testar passo a passo.
-
----
-
-## Pontos de atenção
-
-- **Você precisa ser definido como superadmin manualmente** após esta etapa (rodo um INSERT no fim da Etapa 1).
-- **Reset de RLS:** vou reescrever RLS em ~13 tabelas. Após a migração, a base vai ficar invisível até você assinar OU rodar o seed de superadmin (vou fazer junto).
-- **Stripe ativa em modo teste** primeiro — você consegue simular pagamentos com cartão `4242 4242 4242 4242` antes de ir para live.
-- **Email de convite:** se quiser pular agora, link+QR já cobrem 100% dos casos. Posso configurar email depois sem retrabalho.
-
-Confirma o plano para eu começar pela Etapa 1+2+3?
+## Pergunta antes de começar
+Quer que eu execute **tudo na ordem sugerida**, ou prefere começar por um módulo específico (ex: SMART/SPIN primeiro porque são os novos)?

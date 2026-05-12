@@ -20,6 +20,8 @@ import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
 import { Route as AppRegistroCampoRouteImport } from './routes/_app/registro-campo'
 import { Route as AppPropostasRouteImport } from './routes/_app/propostas'
 import { Route as AppPreferenciasRouteImport } from './routes/_app/preferencias'
+import { Route as AppPlanejamentoVisitasRouteImport } from './routes/_app/planejamento-visitas'
+import { Route as AppPlanejamentoRouteImport } from './routes/_app/planejamento'
 import { Route as AppPedidosRouteImport } from './routes/_app/pedidos'
 import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
 import { Route as AppMetasRouteImport } from './routes/_app/metas'
@@ -91,6 +93,16 @@ const AppPropostasRoute = AppPropostasRouteImport.update({
 const AppPreferenciasRoute = AppPreferenciasRouteImport.update({
   id: '/preferencias',
   path: '/preferencias',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlanejamentoVisitasRoute = AppPlanejamentoVisitasRouteImport.update({
+  id: '/planejamento-visitas',
+  path: '/planejamento-visitas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlanejamentoRoute = AppPlanejamentoRouteImport.update({
+  id: '/planejamento',
+  path: '/planejamento',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPedidosRoute = AppPedidosRouteImport.update({
@@ -204,6 +216,8 @@ export interface FileRoutesByFullPath {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/pedidos': typeof AppPedidosRoute
+  '/planejamento': typeof AppPlanejamentoRoute
+  '/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/preferencias': typeof AppPreferenciasRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
@@ -234,6 +248,8 @@ export interface FileRoutesByTo {
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
   '/pedidos': typeof AppPedidosRoute
+  '/planejamento': typeof AppPlanejamentoRoute
+  '/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/preferencias': typeof AppPreferenciasRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
@@ -266,6 +282,8 @@ export interface FileRoutesById {
   '/_app/metas': typeof AppMetasRoute
   '/_app/oportunidades': typeof AppOportunidadesRoute
   '/_app/pedidos': typeof AppPedidosRoute
+  '/_app/planejamento': typeof AppPlanejamentoRoute
+  '/_app/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/_app/preferencias': typeof AppPreferenciasRoute
   '/_app/propostas': typeof AppPropostasRoute
   '/_app/registro-campo': typeof AppRegistroCampoRoute
@@ -298,6 +316,8 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/pedidos'
+    | '/planejamento'
+    | '/planejamento-visitas'
     | '/preferencias'
     | '/propostas'
     | '/registro-campo'
@@ -328,6 +348,8 @@ export interface FileRouteTypes {
     | '/metas'
     | '/oportunidades'
     | '/pedidos'
+    | '/planejamento'
+    | '/planejamento-visitas'
     | '/preferencias'
     | '/propostas'
     | '/registro-campo'
@@ -359,6 +381,8 @@ export interface FileRouteTypes {
     | '/_app/metas'
     | '/_app/oportunidades'
     | '/_app/pedidos'
+    | '/_app/planejamento'
+    | '/_app/planejamento-visitas'
     | '/_app/preferencias'
     | '/_app/propostas'
     | '/_app/registro-campo'
@@ -462,6 +486,20 @@ declare module '@tanstack/react-router' {
       path: '/preferencias'
       fullPath: '/preferencias'
       preLoaderRoute: typeof AppPreferenciasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/planejamento-visitas': {
+      id: '/_app/planejamento-visitas'
+      path: '/planejamento-visitas'
+      fullPath: '/planejamento-visitas'
+      preLoaderRoute: typeof AppPlanejamentoVisitasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/planejamento': {
+      id: '/_app/planejamento'
+      path: '/planejamento'
+      fullPath: '/planejamento'
+      preLoaderRoute: typeof AppPlanejamentoRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/pedidos': {
@@ -619,6 +657,8 @@ interface AppRouteChildren {
   AppMetasRoute: typeof AppMetasRoute
   AppOportunidadesRoute: typeof AppOportunidadesRoute
   AppPedidosRoute: typeof AppPedidosRoute
+  AppPlanejamentoRoute: typeof AppPlanejamentoRoute
+  AppPlanejamentoVisitasRoute: typeof AppPlanejamentoVisitasRoute
   AppPreferenciasRoute: typeof AppPreferenciasRoute
   AppPropostasRoute: typeof AppPropostasRoute
   AppRegistroCampoRoute: typeof AppRegistroCampoRoute
@@ -641,6 +681,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppMetasRoute: AppMetasRoute,
   AppOportunidadesRoute: AppOportunidadesRoute,
   AppPedidosRoute: AppPedidosRoute,
+  AppPlanejamentoRoute: AppPlanejamentoRoute,
+  AppPlanejamentoVisitasRoute: AppPlanejamentoVisitasRoute,
   AppPreferenciasRoute: AppPreferenciasRoute,
   AppPropostasRoute: AppPropostasRoute,
   AppRegistroCampoRoute: AppRegistroCampoRoute,
@@ -665,13 +707,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, Building2, Target, Briefcase, Activity,
   Map, BarChart3, Bell, Settings, Upload, Brain, LogOut, Sprout,
   TrendingUp, LineChart, Smartphone, ClipboardList, Zap, ShoppingCart, FileCheck,
-  Menu,
+  Menu, Compass, Route as RouteIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
@@ -30,6 +30,13 @@ const groups = [
       { to: "/propostas", label: "Propostas", icon: FileCheck },
       { to: "/metas", label: "Metas", icon: Target },
       { to: "/atividades", label: "Atividades", icon: Activity },
+    ],
+  },
+  {
+    label: "Planejamento",
+    items: [
+      { to: "/planejamento", label: "Plano SMART (Gestor)", icon: Compass },
+      { to: "/planejamento-visitas", label: "Visitas SPIN (Rep.)", icon: RouteIcon },
     ],
   },
   {
