@@ -73,7 +73,7 @@ function RepDetailPage() {
     enabled: !!repUserId,
     queryKey: ["rep-quotes", repUserId],
     queryFn: async () => (await supabase.from("quotes").select("id, status, total")
-      .eq("rep_user_id", repUserId).eq("status", "pending")).data ?? [],
+      .eq("rep_user_id", repUserId!).eq("status", "pending")).data ?? [],
   });
 
   // 4. Metas
