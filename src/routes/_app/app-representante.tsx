@@ -18,6 +18,7 @@ import {
   Users, MapPin, Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
+import { RepTodayPanel } from "@/components/RepTodayPanel";
 
 export const Route = createFileRoute("/_app/app-representante")({ component: RepAppPage });
 
@@ -178,6 +179,9 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Painel "Hoje" — orientação rápida em campo */}
+        <RepTodayPanel repId={rep.id} />
+
         {/* Counters */}
         <div className="grid grid-cols-4 gap-2">
           <CounterCard color="emerald" icon={<Home className="size-5" />} label="Visitas" count={counts.visit} />
