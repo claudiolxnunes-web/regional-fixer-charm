@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
@@ -56,5 +57,5 @@ function AppLayout() {
   if (loading || checking) return <div className="min-h-screen grid place-items-center text-muted-foreground">Carregando...</div>;
   if (!session) return null;
 
-  return <DashboardLayout><Outlet /></DashboardLayout>;
+  return <DashboardLayout><RouteErrorBoundary><Outlet /></RouteErrorBoundary></DashboardLayout>;
 }
