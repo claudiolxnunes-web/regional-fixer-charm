@@ -84,8 +84,8 @@ function PedidosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Carteira de Pedidos</h1>
-        <p className="text-sm text-muted-foreground">{rows.length} itens em carteira (snapshot)</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Pedidos em Aberto</h1>
+        <p className="text-sm text-muted-foreground">{rows.length} itens na carteira (último snapshot importado)</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
