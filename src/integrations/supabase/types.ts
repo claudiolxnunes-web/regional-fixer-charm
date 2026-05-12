@@ -1347,6 +1347,219 @@ export type Database = {
           },
         ]
       }
+      spin_notes: {
+        Row: {
+          activity_id: string | null
+          client_id: string | null
+          created_at: string
+          id: string
+          implication: string | null
+          need_payoff: string | null
+          next_steps: string | null
+          opportunity_id: string | null
+          outcome: string | null
+          problem: string | null
+          rep_user_id: string
+          representative_id: string | null
+          situation: string | null
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          implication?: string | null
+          need_payoff?: string | null
+          next_steps?: string | null
+          opportunity_id?: string | null
+          outcome?: string | null
+          problem?: string | null
+          rep_user_id?: string
+          representative_id?: string | null
+          situation?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          implication?: string | null
+          need_payoff?: string | null
+          next_steps?: string | null
+          opportunity_id?: string | null
+          outcome?: string | null
+          problem?: string | null
+          rep_user_id?: string
+          representative_id?: string | null
+          situation?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spin_notes_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategic_actions: {
+        Row: {
+          created_at: string
+          done: boolean
+          done_at: string | null
+          id: string
+          objective_id: string
+          team_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          objective_id: string
+          team_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          objective_id?: string
+          team_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_actions_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_objectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategic_objectives: {
+        Row: {
+          achievable: string | null
+          assigned_rep_id: string | null
+          created_at: string
+          current_value: number | null
+          description: string | null
+          due_date: string | null
+          id: string
+          measurable: string | null
+          metric: string | null
+          plan_id: string
+          relevant: string | null
+          specific: string | null
+          status: string
+          target_value: number | null
+          team_id: string | null
+          time_bound: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          achievable?: string | null
+          assigned_rep_id?: string | null
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          measurable?: string | null
+          metric?: string | null
+          plan_id: string
+          relevant?: string | null
+          specific?: string | null
+          status?: string
+          target_value?: number | null
+          team_id?: string | null
+          time_bound?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          achievable?: string | null
+          assigned_rep_id?: string | null
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          measurable?: string | null
+          metric?: string | null
+          plan_id?: string
+          relevant?: string | null
+          specific?: string | null
+          status?: string
+          target_value?: number | null
+          team_id?: string | null
+          time_bound?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_objectives_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategic_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          owner_id: string
+          period_type: string
+          start_date: string
+          status: string
+          team_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          owner_id: string
+          period_type?: string
+          start_date: string
+          status?: string
+          team_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          owner_id?: string
+          period_type?: string
+          start_date?: string
+          status?: string
+          team_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions_log: {
         Row: {
           created_at: string
