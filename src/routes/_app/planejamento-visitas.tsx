@@ -342,38 +342,41 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
           </TabsList>
 
           <TabsContent value="spin" className="space-y-3 mt-3">
+            <p className="text-xs text-muted-foreground">
+              4 perguntas-chave. Foque em <b>uma</b> por etapa — visita de 30-60 min.
+            </p>
             <div>
-              <Label><b className="text-primary">S</b> — Situação</Label>
-              <Textarea rows={2} placeholder="Contexto atual: o que ele compra hoje, volume, fornecedores, sazonalidade..."
+              <Label><b className="text-primary">S</b> — Situação <span className="text-muted-foreground font-normal">(fato atual)</span></Label>
+              <Textarea rows={2} placeholder='Ex.: "Quantos animais estão em confinamento hoje?" / "Qual o volume mensal de ração?"'
                 value={form.situation} onChange={(e) => setForm({ ...form, situation: e.target.value })} />
             </div>
             <div>
-              <Label><b className="text-primary">P</b> — Problema</Label>
-              <Textarea rows={2} placeholder="Dor identificada: preço, atraso, qualidade, falta de produto, atendimento..."
+              <Label><b className="text-primary">P</b> — Problema <span className="text-muted-foreground font-normal">(dor explícita)</span></Label>
+              <Textarea rows={2} placeholder='Ex.: "Quais desafios tem com o fornecedor atual?" / "O que impede maior ganho de peso?"'
                 value={form.problem} onChange={(e) => setForm({ ...form, problem: e.target.value })} />
             </div>
             <div>
-              <Label><b className="text-primary">I</b> — Implicação</Label>
-              <Textarea rows={2} placeholder="Consequência da dor: perda de margem, churn, retrabalho, risco operacional..."
+              <Label><b className="text-primary">I</b> — Implicação <span className="text-muted-foreground font-normal">(consequência)</span></Label>
+              <Textarea rows={2} placeholder='Ex.: "Quanto isso custa por mês?" / "Como isso afeta sua margem no fim do ciclo?"'
                 value={form.implication} onChange={(e) => setForm({ ...form, implication: e.target.value })} />
             </div>
             <div>
-              <Label><b className="text-primary">N</b> — Necessidade de solução</Label>
-              <Textarea rows={2} placeholder="Como nossa proposta resolve: produto X, condição Y, prazo Z..."
+              <Label><b className="text-primary">N</b> — Necessidade <span className="text-muted-foreground font-normal">(ganho)</span></Label>
+              <Textarea rows={2} placeholder='Ex.: "O que mudaria se resolvêssemos isso?" / "Quanto ganhariam com X?"'
                 value={form.need_payoff} onChange={(e) => setForm({ ...form, need_payoff: e.target.value })} />
             </div>
           </TabsContent>
 
           <TabsContent value="post" className="space-y-3 mt-3">
+            <p className="text-xs text-muted-foreground">
+              Registre em até 24-48h. Um campo só: o que ficou combinado e quando.
+            </p>
             <div>
-              <Label>Resultado da visita</Label>
-              <Textarea rows={3} placeholder="O que aconteceu? Concordou? Pediu proposta? Recusou?"
-                value={form.outcome} onChange={(e) => setForm({ ...form, outcome: e.target.value })} />
-            </div>
-            <div>
-              <Label>Próximos passos</Label>
-              <Textarea rows={3} placeholder="Enviar proposta até..., ligar dia..., agendar nova visita..."
-                value={form.next_steps} onChange={(e) => setForm({ ...form, next_steps: e.target.value })} />
+              <Label>Resultado + próximo passo</Label>
+              <Textarea rows={5}
+                placeholder="Ex.: Cliente pediu proposta de 5t para entrega dia 20. Enviar amanhã e ligar na quinta para fechar."
+                value={form.next_steps}
+                onChange={(e) => setForm({ ...form, next_steps: e.target.value, outcome: e.target.value })} />
             </div>
             {activity.status !== "completed" && (
               <Button variant="outline" onClick={markCompleted} className="w-full">
