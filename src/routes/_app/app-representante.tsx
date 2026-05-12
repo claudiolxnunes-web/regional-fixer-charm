@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { RepTodayPanel } from "@/components/RepTodayPanel";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 export const Route = createFileRoute("/_app/app-representante")({ component: RepAppPage });
 
@@ -179,6 +180,9 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Banner instalar como app (PWA) */}
+        <InstallAppButton />
+
         {/* Painel "Hoje" — orientação rápida em campo */}
         <RepTodayPanel repId={rep.id} />
 
