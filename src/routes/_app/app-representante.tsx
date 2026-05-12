@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { RepTodayPanel } from "@/components/RepTodayPanel";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 export const Route = createFileRoute("/_app/app-representante")({ component: RepAppPage });
 
