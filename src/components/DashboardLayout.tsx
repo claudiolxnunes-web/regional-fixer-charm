@@ -33,6 +33,13 @@ const groups = [
     ],
   },
   {
+    label: "Planejamento",
+    items: [
+      { to: "/planejamento", label: "Plano SMART (Gestor)", icon: Compass },
+      { to: "/planejamento-visitas", label: "Visitas SPIN (Rep.)", icon: RouteIcon },
+    ],
+  },
+  {
     label: "Análise & IA",
     items: [
       { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
