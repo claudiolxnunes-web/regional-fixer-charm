@@ -445,9 +445,10 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button onClick={save}>Salvar</Button>
+          <Button variant="outline" onClick={exportRoteiro}>Exportar roteiro</Button>
+          <Button onClick={() => save()}>Salvar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
