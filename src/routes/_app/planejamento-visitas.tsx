@@ -54,6 +54,55 @@ function SpinPage() {
     queryFn: async () => (await supabase.from("spin_notes").select("*").limit(500)).data ?? [],
   });
 
+  // Prioridades: clientes a visitar por necessidade
+  const { data: priorities } = useQuery({
+    queryKey: ["visit-priorities"],
+    queryFn: async () => {
+      const today = new Date();
+      const m3 = new Date(today); m3.setMonth(m3.getMonth() - 3);
+      const m5 = new Date(today); m5.setMonth(m5.getMonth() - 5);
+      const m6 = new Date(today); m6.setMonth(m6.getMonth() - 6);
+
+      const [alertsRes, clientsRes] = await Promise.all([
+        supabase
+          .from("alerts")
+          .select("*")
+          .in("type", ["low_stock", "inactive_client", "consumption_drop"])
+          .is("resolved_at", null)
+          .order("severity", { ascending: false })
+          .limit(200),
+        supabase
+          .from("clients")
+          .select("id, name, city, state, production_type, farming_system, animal_types, last_purchase_date, status")
+          .eq("status", "active")
+          .limit(500),
+      ]);
+      const alerts = alertsRes.data ?? [];
+      const clients = clientsRes.data ?? [];
+
+      const restock = alerts.filter((a) => a.type === "low_stock");
+      const nearInactive = alerts.filter(
+        (a) => a.type === "inactive_client" && (a.metadata as any)?.months_inactive < 6
+      );
+      const confinement = clients.filter((c) => {
+        const t = `${c.production_type ?? ""} ${c.farming_system ?? ""} ${c.animal_types ?? ""}`.toLowerCase();
+        return /confina|engorda|terminaç/.test(t);
+      });
+      // Transição de estação: meses 3, 6, 9, 12 (entrada de outono/inverno/primavera/verão no Brasil)
+      const currentMonth = today.getMonth() + 1;
+      const seasonMonths = [3, 6, 9, 12];
+      const isSeasonTransition = seasonMonths.includes(currentMonth);
+      const seasonal = isSeasonTransition
+        ? clients.filter((c) => {
+            const t = `${c.production_type ?? ""} ${c.animal_types ?? ""}`.toLowerCase();
+            return /pasto|cria|recria|leite|corte|aves|suín/.test(t);
+          })
+        : [];
+
+      return { restock, nearInactive, confinement, seasonal, isSeasonTransition };
+    },
+  });
+
   const byDay = useMemo(() => {
     const map: Record<string, any[]> = {};
     (activities ?? []).forEach((a) => {
