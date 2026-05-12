@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Package, Snowflake, Beef, Clock } from "lucide-react";
+import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Package, Snowflake, Beef, Clock, Download } from "lucide-react";
 
 export const Route = createFileRoute("/_app/planejamento-visitas")({ component: SpinPage });
 
@@ -150,12 +150,15 @@ function SpinPage() {
           </h1>
           <p className="text-sm text-muted-foreground">Roteiro semanal otimizado por proximidade. Use o método SPIN: Situação · Problema · Implicação · Necessidade.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={() => { const d = new Date(weekStart); d.setDate(d.getDate() - 7); setWeekStart(d); }}>← Semana anterior</Button>
           <div className="text-sm font-medium px-2">
             {weekStart.toLocaleDateString("pt-BR")} – {new Date(weekEnd.getTime() - 1).toLocaleDateString("pt-BR")}
           </div>
           <Button variant="outline" size="sm" onClick={() => { const d = new Date(weekStart); d.setDate(d.getDate() + 7); setWeekStart(d); }}>Próxima semana →</Button>
+          <Button size="sm" variant="secondary" onClick={() => exportWeeklyRoteiro(weekStart, days, byDay, spinNotes ?? [])}>
+            <Download className="size-4 mr-1" /> Baixar roteiro
+          </Button>
         </div>
       </div>
 
