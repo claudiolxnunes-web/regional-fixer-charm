@@ -480,3 +480,54 @@ function PriorityColumn({ icon, title, tone, items, empty }: {
     </div>
   );
 }
+
+function exportWeeklyRoteiro(weekStart: Date, days: Date[], byDay: Record<string, any[]>, spinNotes: any[]) {
+  const noteFor = (id: string) => spinNotes.find((n) => n.activity_id === id);
+  const lines: string[] = [];
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  lines.push("ROTEIRO SEMANAL DE VISITAS — SPIN");
+  lines.push(`Semana: ${weekStart.toLocaleDateString("pt-BR")} a ${weekEnd.toLocaleDateString("pt-BR")}`);
+  lines.push("=".repeat(60));
+  lines.push("");
+
+  let totalVisits = 0;
+  days.forEach((d) => {
+    const k = d.toISOString().slice(0, 10);
+    const items = byDay[k] ?? [];
+    if (!items.length) return;
+    lines.push(d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }).toUpperCase());
+    lines.push("-".repeat(60));
+    items.forEach((a, idx) => {
+      totalVisits++;
+      const c = a.clients;
+      lines.push(`${idx + 1}. ${c?.name ?? a.title}`);
+      if (c?.address || c?.city) lines.push(`   📍 ${[c?.address, c?.city, c?.state].filter(Boolean).join(", ")}`);
+      const note = noteFor(a.id);
+      if (note) {
+        lines.push(`   ✓ SPIN registrado`);
+      } else {
+        lines.push(`   [ ] S — Situação: _____________________________________`);
+        lines.push(`   [ ] P — Problema: _____________________________________`);
+        lines.push(`   [ ] I — Implicação: ___________________________________`);
+        lines.push(`   [ ] N — Necessidade: __________________________________`);
+      }
+      lines.push("");
+    });
+    lines.push("");
+  });
+
+  if (totalVisits === 0) {
+    lines.push("Nenhuma visita planejada nessa semana.");
+  } else {
+    lines.push("=".repeat(60));
+    lines.push(`Total: ${totalVisits} visitas`);
+  }
+
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `roteiro-semana-${weekStart.toISOString().slice(0, 10)}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
