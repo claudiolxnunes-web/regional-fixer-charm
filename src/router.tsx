@@ -23,7 +23,7 @@ export const getRouter = () => {
     try {
       const persister = createSyncStoragePersister({ storage: window.localStorage, key: "lvbl-rq-cache" });
       persistQueryClient({
-        queryClient,
+        queryClient: queryClient as any,
         persister,
         maxAge: 24 * 60 * 60 * 1000,
         // Persiste apenas queries que o rep precisa offline (agenda, clientes, alertas, metas).
