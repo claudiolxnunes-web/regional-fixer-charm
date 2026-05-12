@@ -33,6 +33,8 @@ type Props = {
   matchBy?: string;
   /** Auto-detect handler — returns rows that can be created automatically */
   autoDetect?: () => Promise<Array<Record<string, any>>>;
+  /** Snapshot mode — deletes ALL existing rows in the team before insert */
+  snapshot?: boolean;
 };
 
 const norm = (s: string) =>
@@ -47,6 +49,7 @@ export function ImportDialog({
   templateSample,
   matchBy,
   autoDetect,
+  snapshot,
 }: Props) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -96,11 +99,21 @@ export function ImportDialog({
     setBusy(true);
     try {
       const tbl: any = supabase.from(table as any);
-      const { error } = await (matchBy
+      if (snapshot) {
+        const { error: delErr } = await (supabase.from(table as any) as any)
+          .delete()
+          .not("id", "is", null);
+        if (delErr) throw delErr;
+      }
+      const { error } = await (snapshot
+        ? tbl.insert(parsed)
+        : matchBy
         ? tbl.upsert(parsed, { onConflict: matchBy, ignoreDuplicates: false })
         : tbl.insert(parsed));
       if (error) throw error;
-      toast.success(`${parsed.length} registro(s) importado(s)`);
+      toast.success(snapshot
+        ? `Snapshot atualizado: ${parsed.length} registro(s)`
+        : `${parsed.length} registro(s) importado(s)`);
       qc.invalidateQueries({ queryKey: [invalidateKey] });
       setParsed([]);
       setErrors([]);
