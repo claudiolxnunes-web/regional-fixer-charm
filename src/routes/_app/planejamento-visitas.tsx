@@ -391,3 +391,26 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
     </Dialog>
   );
 }
+
+function PriorityColumn({ icon, title, tone, items, empty }: {
+  icon: React.ReactNode; title: string; tone: string;
+  items: { id: string; name: string; subtitle?: string }[]; empty: string;
+}) {
+  return (
+    <div className={`border rounded-lg ${tone}`}>
+      <div className="px-3 py-2 border-b border-current/10 flex items-center gap-2 text-sm font-semibold">
+        {icon} {title}
+        <Badge variant="outline" className="ml-auto text-[10px] bg-background">{items.length}</Badge>
+      </div>
+      <div className="p-2 space-y-1.5 max-h-64 overflow-y-auto">
+        {items.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">{empty}</p>}
+        {items.map((it) => (
+          <div key={it.id} className="text-xs bg-background/60 rounded px-2 py-1.5 border border-current/10">
+            <div className="font-medium text-foreground truncate">{it.name}</div>
+            {it.subtitle && <div className="text-muted-foreground truncate text-[11px]">{it.subtitle}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
