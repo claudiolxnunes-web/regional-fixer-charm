@@ -211,7 +211,7 @@ function SpinPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
-
+        {days.map((d) => {
           const k = d.toISOString().slice(0, 10);
           const items = byDay[k] ?? [];
           const isToday = k === new Date().toISOString().slice(0, 10);
