@@ -159,8 +159,59 @@ function SpinPage() {
         </div>
       </div>
 
+      {/* Prioridades da semana */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertTriangle className="size-4 text-primary" /> Prioridades da semana
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Clientes que merecem atenção — use para montar o roteiro abaixo.</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <PriorityColumn
+              icon={<Package className="size-4" />}
+              title="Reposição de estoque"
+              tone="bg-amber-500/10 text-amber-600 border-amber-500/30"
+              items={(priorities?.restock ?? []).map((a) => ({
+                id: a.id, name: a.client_name ?? a.client_code ?? "Cliente", subtitle: a.message ?? "",
+              }))}
+              empty="Sem clientes em ponto de reposição."
+            />
+            <PriorityColumn
+              icon={<Beef className="size-4" />}
+              title="Início de confinamento"
+              tone="bg-orange-500/10 text-orange-600 border-orange-500/30"
+              items={(priorities?.confinement ?? []).slice(0, 20).map((c) => ({
+                id: c.id, name: c.name, subtitle: `${c.city ?? ""}/${c.state ?? ""} · ${c.animal_types ?? c.production_type ?? ""}`,
+              }))}
+              empty="Nenhum cliente com perfil de confinamento."
+            />
+            <PriorityColumn
+              icon={<Snowflake className="size-4" />}
+              title={priorities?.isSeasonTransition ? "Transição de estação" : "Transição (fora de janela)"}
+              tone="bg-sky-500/10 text-sky-600 border-sky-500/30"
+              items={(priorities?.seasonal ?? []).slice(0, 20).map((c) => ({
+                id: c.id, name: c.name, subtitle: `${c.city ?? ""}/${c.state ?? ""}`,
+              }))}
+              empty={priorities?.isSeasonTransition ? "Sem clientes sensíveis a estação." : "Janela ativa em mar/jun/set/dez."}
+            />
+            <PriorityColumn
+              icon={<Clock className="size-4" />}
+              title="Próximos da inativação"
+              tone="bg-rose-500/10 text-rose-600 border-rose-500/30"
+              items={(priorities?.nearInactive ?? []).map((a) => ({
+                id: a.id, name: a.client_name ?? a.client_code ?? "Cliente",
+                subtitle: `${(a.metadata as any)?.months_inactive ?? "?"} meses sem comprar — inativa em 6m`,
+              }))}
+              empty="Nenhum cliente entre 3 e 5 meses sem comprar."
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
-        {days.map((d) => {
+
           const k = d.toISOString().slice(0, 10);
           const items = byDay[k] ?? [];
           const isToday = k === new Date().toISOString().slice(0, 10);
