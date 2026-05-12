@@ -245,15 +245,15 @@ function ImportacaoPage() {
 
         <ImportCard
           icon={<ShoppingCart className="size-5" />}
-          title="Carteira de Pedidos"
-          description="Snapshot dos pedidos em aberto. Deduplicação por número do pedido + produto."
+          title="Pedidos em Aberto"
+          description="Snapshot da carteira: ao importar, substitui completamente a foto anterior (apaga tudo e insere a nova)."
           action={
             <ImportDialog
-              triggerLabel="Importar Excel"
+              triggerLabel="Importar Snapshot"
               table="open_orders"
               invalidateKey="open_orders"
-              title="Importar carteira de pedidos"
-              matchBy="order_number,product_code"
+              title="Importar pedidos em aberto (snapshot)"
+              snapshot
               templateSample={{
                 "Status Tracking": "1. Bloqueado", "Filial": "010057", "Pedido": "012139",
                 "Cód Cliente": "055538", "Cliente": "Cliente Exemplo",
