@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
@@ -42,6 +43,11 @@ import { Route as ApiPublicHooksSendWelcomeRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksRunAlertsRouteImport } from './routes/api/public/hooks/run-alerts'
 import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanosRoute = PlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/planos': typeof PlanosRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/alertas': typeof AppAlertasRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/planos': typeof PlanosRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/alertas': typeof AppAlertasRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/app-representante': typeof AppAppRepresentanteRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/planos': typeof PlanosRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_app/alertas': typeof AppAlertasRouteWithChildren
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/app-representante': typeof AppAppRepresentanteRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/planos'
+    | '/reset-password'
     | '/alertas'
     | '/analytics'
     | '/app-representante'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/planos'
+    | '/reset-password'
     | '/alertas'
     | '/analytics'
     | '/app-representante'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/planos'
+    | '/reset-password'
     | '/_app/alertas'
     | '/_app/analytics'
     | '/_app/app-representante'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   PlanosRoute: typeof PlanosRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
   ApiPublicHooksRunAlertsRoute: typeof ApiPublicHooksRunAlertsRoute
@@ -423,6 +436,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/planos': {
       id: '/planos'
       path: '/planos'
@@ -728,6 +748,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   PlanosRoute: PlanosRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
   ApiPublicHooksRunAlertsRoute: ApiPublicHooksRunAlertsRoute,
@@ -737,13 +758,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
