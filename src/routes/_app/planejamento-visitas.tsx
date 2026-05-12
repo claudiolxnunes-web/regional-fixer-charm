@@ -342,9 +342,20 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
           </TabsList>
 
           <TabsContent value="spin" className="space-y-3 mt-3">
-            <p className="text-xs text-muted-foreground">
-              4 perguntas-chave. Foque em <b>uma</b> por etapa — visita de 30-60 min.
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                4 perguntas-chave. Foque em <b>uma</b> por etapa — visita de 30-60 min.
+              </p>
+              <Button type="button" size="sm" variant="outline" onClick={() => setForm((f) => ({
+                ...f,
+                situation: f.situation || 'Quantos animais estão em confinamento hoje? Qual o volume mensal de ração utilizado e quais fornecedores atendem?',
+                problem: f.problem || 'Quais desafios enfrenta com o fornecedor atual (preço, prazo, qualidade)? O que impede maior ganho de peso ou eficiência alimentar?',
+                implication: f.implication || 'Quanto isso custa por mês em perda de margem ou retrabalho? Como afeta o resultado no fechamento do ciclo?',
+                need_payoff: f.need_payoff || 'O que mudaria se resolvêssemos esse ponto? Quanto ganhariam em produtividade/lucro com a nossa solução?',
+              }))}>
+                Preencher com perguntas-modelo
+              </Button>
+            </div>
             <div>
               <Label><b className="text-primary">S</b> — Situação <span className="text-muted-foreground font-normal">(fato atual)</span></Label>
               <Textarea rows={2} placeholder='Ex.: "Quantos animais estão em confinamento hoje?" / "Qual o volume mensal de ração?"'
