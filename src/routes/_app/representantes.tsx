@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -139,6 +139,7 @@ function RepsPage() {
                   <td className="p-3 text-right">R$ {Number(r.total_sales ?? 0).toLocaleString("pt-BR")}</td>
                   <td className="p-3 text-right">{r.total_clients ?? 0}</td>
                   <td className="p-3 text-right whitespace-nowrap">
+                    <Button asChild size="sm" variant="ghost"><Link to="/representantes/$id" params={{ id: r.id }}>Detalhes</Link></Button>
                     <RepBreakdownDialog repCode={r.rep_code} repName={r.name} showMargins={isStaff} />
                     {isStaff && (
                       <>

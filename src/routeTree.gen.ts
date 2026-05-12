@@ -35,6 +35,7 @@ import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
 import { Route as AppAppRepresentanteRouteImport } from './routes/_app/app-representante'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
+import { Route as AppRepresentantesIdRouteImport } from './routes/_app/representantes.$id'
 import { Route as AppAlertasConfigRouteImport } from './routes/_app/alertas.config'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendWelcomeRouteImport } from './routes/api/public/hooks/send-welcome'
@@ -170,6 +171,11 @@ const AppAlertasRoute = AppAlertasRouteImport.update({
   path: '/alertas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRepresentantesIdRoute = AppRepresentantesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppRepresentantesRoute,
+} as any)
 const AppAlertasConfigRoute = AppAlertasConfigRouteImport.update({
   id: '/config',
   path: '/config',
@@ -222,10 +228,11 @@ export interface FileRoutesByFullPath {
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
-  '/representantes': typeof AppRepresentantesRoute
+  '/representantes': typeof AppRepresentantesRouteWithChildren
   '/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
+  '/representantes/$id': typeof AppRepresentantesIdRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
   '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
@@ -254,10 +261,11 @@ export interface FileRoutesByTo {
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
-  '/representantes': typeof AppRepresentantesRoute
+  '/representantes': typeof AppRepresentantesRouteWithChildren
   '/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
+  '/representantes/$id': typeof AppRepresentantesIdRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
   '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
@@ -288,10 +296,11 @@ export interface FileRoutesById {
   '/_app/propostas': typeof AppPropostasRoute
   '/_app/registro-campo': typeof AppRegistroCampoRoute
   '/_app/relatorios': typeof AppRelatoriosRoute
-  '/_app/representantes': typeof AppRepresentantesRoute
+  '/_app/representantes': typeof AppRepresentantesRouteWithChildren
   '/_app/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/_app/alertas/config': typeof AppAlertasConfigRoute
+  '/_app/representantes/$id': typeof AppRepresentantesIdRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
   '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/checkout/return'
     | '/alertas/config'
+    | '/representantes/$id'
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
     | '/api/public/hooks/send-welcome'
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/checkout/return'
     | '/alertas/config'
+    | '/representantes/$id'
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
     | '/api/public/hooks/send-welcome'
@@ -391,6 +402,7 @@ export interface FileRouteTypes {
     | '/_app/vendas'
     | '/checkout/return'
     | '/_app/alertas/config'
+    | '/_app/representantes/$id'
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
     | '/api/public/hooks/send-welcome'
@@ -593,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/representantes/$id': {
+      id: '/_app/representantes/$id'
+      path: '/$id'
+      fullPath: '/representantes/$id'
+      preLoaderRoute: typeof AppRepresentantesIdRouteImport
+      parentRoute: typeof AppRepresentantesRoute
+    }
     '/_app/alertas/config': {
       id: '/_app/alertas/config'
       path: '/config'
@@ -643,6 +662,17 @@ const AppAlertasRouteWithChildren = AppAlertasRoute._addFileChildren(
   AppAlertasRouteChildren,
 )
 
+interface AppRepresentantesRouteChildren {
+  AppRepresentantesIdRoute: typeof AppRepresentantesIdRoute
+}
+
+const AppRepresentantesRouteChildren: AppRepresentantesRouteChildren = {
+  AppRepresentantesIdRoute: AppRepresentantesIdRoute,
+}
+
+const AppRepresentantesRouteWithChildren =
+  AppRepresentantesRoute._addFileChildren(AppRepresentantesRouteChildren)
+
 interface AppRouteChildren {
   AppAlertasRoute: typeof AppAlertasRouteWithChildren
   AppAnalyticsRoute: typeof AppAnalyticsRoute
@@ -663,7 +693,7 @@ interface AppRouteChildren {
   AppPropostasRoute: typeof AppPropostasRoute
   AppRegistroCampoRoute: typeof AppRegistroCampoRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
-  AppRepresentantesRoute: typeof AppRepresentantesRoute
+  AppRepresentantesRoute: typeof AppRepresentantesRouteWithChildren
   AppVendasRoute: typeof AppVendasRoute
 }
 
@@ -687,7 +717,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPropostasRoute: AppPropostasRoute,
   AppRegistroCampoRoute: AppRegistroCampoRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
-  AppRepresentantesRoute: AppRepresentantesRoute,
+  AppRepresentantesRoute: AppRepresentantesRouteWithChildren,
   AppVendasRoute: AppVendasRoute,
 }
 
