@@ -20,6 +20,7 @@ import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
 import { Route as AppRegistroCampoRouteImport } from './routes/_app/registro-campo'
 import { Route as AppPropostasRouteImport } from './routes/_app/propostas'
 import { Route as AppPreferenciasRouteImport } from './routes/_app/preferencias'
+import { Route as AppPlanejamentoVisitasRouteImport } from './routes/_app/planejamento-visitas'
 import { Route as AppPlanejamentoRouteImport } from './routes/_app/planejamento'
 import { Route as AppPedidosRouteImport } from './routes/_app/pedidos'
 import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
@@ -92,6 +93,11 @@ const AppPropostasRoute = AppPropostasRouteImport.update({
 const AppPreferenciasRoute = AppPreferenciasRouteImport.update({
   id: '/preferencias',
   path: '/preferencias',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlanejamentoVisitasRoute = AppPlanejamentoVisitasRouteImport.update({
+  id: '/planejamento-visitas',
+  path: '/planejamento-visitas',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPlanejamentoRoute = AppPlanejamentoRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/oportunidades': typeof AppOportunidadesRoute
   '/pedidos': typeof AppPedidosRoute
   '/planejamento': typeof AppPlanejamentoRoute
+  '/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/preferencias': typeof AppPreferenciasRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/oportunidades': typeof AppOportunidadesRoute
   '/pedidos': typeof AppPedidosRoute
   '/planejamento': typeof AppPlanejamentoRoute
+  '/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/preferencias': typeof AppPreferenciasRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/_app/oportunidades': typeof AppOportunidadesRoute
   '/_app/pedidos': typeof AppPedidosRoute
   '/_app/planejamento': typeof AppPlanejamentoRoute
+  '/_app/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/_app/preferencias': typeof AppPreferenciasRoute
   '/_app/propostas': typeof AppPropostasRoute
   '/_app/registro-campo': typeof AppRegistroCampoRoute
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/oportunidades'
     | '/pedidos'
     | '/planejamento'
+    | '/planejamento-visitas'
     | '/preferencias'
     | '/propostas'
     | '/registro-campo'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/oportunidades'
     | '/pedidos'
     | '/planejamento'
+    | '/planejamento-visitas'
     | '/preferencias'
     | '/propostas'
     | '/registro-campo'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/_app/oportunidades'
     | '/_app/pedidos'
     | '/_app/planejamento'
+    | '/_app/planejamento-visitas'
     | '/_app/preferencias'
     | '/_app/propostas'
     | '/_app/registro-campo'
@@ -474,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/preferencias'
       fullPath: '/preferencias'
       preLoaderRoute: typeof AppPreferenciasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/planejamento-visitas': {
+      id: '/_app/planejamento-visitas'
+      path: '/planejamento-visitas'
+      fullPath: '/planejamento-visitas'
+      preLoaderRoute: typeof AppPlanejamentoVisitasRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/planejamento': {
@@ -639,6 +658,7 @@ interface AppRouteChildren {
   AppOportunidadesRoute: typeof AppOportunidadesRoute
   AppPedidosRoute: typeof AppPedidosRoute
   AppPlanejamentoRoute: typeof AppPlanejamentoRoute
+  AppPlanejamentoVisitasRoute: typeof AppPlanejamentoVisitasRoute
   AppPreferenciasRoute: typeof AppPreferenciasRoute
   AppPropostasRoute: typeof AppPropostasRoute
   AppRegistroCampoRoute: typeof AppRegistroCampoRoute
@@ -662,6 +682,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppOportunidadesRoute: AppOportunidadesRoute,
   AppPedidosRoute: AppPedidosRoute,
   AppPlanejamentoRoute: AppPlanejamentoRoute,
+  AppPlanejamentoVisitasRoute: AppPlanejamentoVisitasRoute,
   AppPreferenciasRoute: AppPreferenciasRoute,
   AppPropostasRoute: AppPropostasRoute,
   AppRegistroCampoRoute: AppRegistroCampoRoute,
