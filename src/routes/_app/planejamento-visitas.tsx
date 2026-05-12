@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Route as RouteIcon, MapPin, ChevronRight, Calendar } from "lucide-react";
+import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Package, Snowflake, Beef, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_app/planejamento-visitas")({ component: SpinPage });
 
@@ -52,6 +52,55 @@ function SpinPage() {
   const { data: spinNotes } = useQuery({
     queryKey: ["spin-notes"],
     queryFn: async () => (await supabase.from("spin_notes").select("*").limit(500)).data ?? [],
+  });
+
+  // Prioridades: clientes a visitar por necessidade
+  const { data: priorities } = useQuery({
+    queryKey: ["visit-priorities"],
+    queryFn: async () => {
+      const today = new Date();
+      const m3 = new Date(today); m3.setMonth(m3.getMonth() - 3);
+      const m5 = new Date(today); m5.setMonth(m5.getMonth() - 5);
+      const m6 = new Date(today); m6.setMonth(m6.getMonth() - 6);
+
+      const [alertsRes, clientsRes] = await Promise.all([
+        supabase
+          .from("alerts")
+          .select("*")
+          .in("type", ["low_stock", "inactive_client", "consumption_drop"])
+          .is("resolved_at", null)
+          .order("severity", { ascending: false })
+          .limit(200),
+        supabase
+          .from("clients")
+          .select("id, name, city, state, production_type, farming_system, animal_types, last_purchase_date, status")
+          .eq("status", "active")
+          .limit(500),
+      ]);
+      const alerts = alertsRes.data ?? [];
+      const clients = clientsRes.data ?? [];
+
+      const restock = alerts.filter((a) => a.type === "low_stock");
+      const nearInactive = alerts.filter(
+        (a) => a.type === "inactive_client" && (a.metadata as any)?.months_inactive < 6
+      );
+      const confinement = clients.filter((c) => {
+        const t = `${c.production_type ?? ""} ${c.farming_system ?? ""} ${c.animal_types ?? ""}`.toLowerCase();
+        return /confina|engorda|terminaç/.test(t);
+      });
+      // Transição de estação: meses 3, 6, 9, 12 (entrada de outono/inverno/primavera/verão no Brasil)
+      const currentMonth = today.getMonth() + 1;
+      const seasonMonths = [3, 6, 9, 12];
+      const isSeasonTransition = seasonMonths.includes(currentMonth);
+      const seasonal = isSeasonTransition
+        ? clients.filter((c) => {
+            const t = `${c.production_type ?? ""} ${c.animal_types ?? ""}`.toLowerCase();
+            return /pasto|cria|recria|leite|corte|aves|suín/.test(t);
+          })
+        : [];
+
+      return { restock, nearInactive, confinement, seasonal, isSeasonTransition };
+    },
   });
 
   const byDay = useMemo(() => {
@@ -109,6 +158,57 @@ function SpinPage() {
           <Button variant="outline" size="sm" onClick={() => { const d = new Date(weekStart); d.setDate(d.getDate() + 7); setWeekStart(d); }}>Próxima semana →</Button>
         </div>
       </div>
+
+      {/* Prioridades da semana */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertTriangle className="size-4 text-primary" /> Prioridades da semana
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Clientes que merecem atenção — use para montar o roteiro abaixo.</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <PriorityColumn
+              icon={<Package className="size-4" />}
+              title="Reposição de estoque"
+              tone="bg-amber-500/10 text-amber-600 border-amber-500/30"
+              items={(priorities?.restock ?? []).map((a) => ({
+                id: a.id, name: a.client_name ?? a.client_code ?? "Cliente", subtitle: a.message ?? "",
+              }))}
+              empty="Sem clientes em ponto de reposição."
+            />
+            <PriorityColumn
+              icon={<Beef className="size-4" />}
+              title="Início de confinamento"
+              tone="bg-orange-500/10 text-orange-600 border-orange-500/30"
+              items={(priorities?.confinement ?? []).slice(0, 20).map((c) => ({
+                id: c.id, name: c.name, subtitle: `${c.city ?? ""}/${c.state ?? ""} · ${c.animal_types ?? c.production_type ?? ""}`,
+              }))}
+              empty="Nenhum cliente com perfil de confinamento."
+            />
+            <PriorityColumn
+              icon={<Snowflake className="size-4" />}
+              title={priorities?.isSeasonTransition ? "Transição de estação" : "Transição (fora de janela)"}
+              tone="bg-sky-500/10 text-sky-600 border-sky-500/30"
+              items={(priorities?.seasonal ?? []).slice(0, 20).map((c) => ({
+                id: c.id, name: c.name, subtitle: `${c.city ?? ""}/${c.state ?? ""}`,
+              }))}
+              empty={priorities?.isSeasonTransition ? "Sem clientes sensíveis a estação." : "Janela ativa em mar/jun/set/dez."}
+            />
+            <PriorityColumn
+              icon={<Clock className="size-4" />}
+              title="Próximos da inativação"
+              tone="bg-rose-500/10 text-rose-600 border-rose-500/30"
+              items={(priorities?.nearInactive ?? []).map((a) => ({
+                id: a.id, name: a.client_name ?? a.client_code ?? "Cliente",
+                subtitle: `${(a.metadata as any)?.months_inactive ?? "?"} meses sem comprar — inativa em 6m`,
+              }))}
+              empty="Nenhum cliente entre 3 e 5 meses sem comprar."
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
         {days.map((d) => {
@@ -289,5 +389,28 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PriorityColumn({ icon, title, tone, items, empty }: {
+  icon: React.ReactNode; title: string; tone: string;
+  items: { id: string; name: string; subtitle?: string }[]; empty: string;
+}) {
+  return (
+    <div className={`border rounded-lg ${tone}`}>
+      <div className="px-3 py-2 border-b border-current/10 flex items-center gap-2 text-sm font-semibold">
+        {icon} {title}
+        <Badge variant="outline" className="ml-auto text-[10px] bg-background">{items.length}</Badge>
+      </div>
+      <div className="p-2 space-y-1.5 max-h-64 overflow-y-auto">
+        {items.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">{empty}</p>}
+        {items.map((it) => (
+          <div key={it.id} className="text-xs bg-background/60 rounded px-2 py-1.5 border border-current/10">
+            <div className="font-medium text-foreground truncate">{it.name}</div>
+            {it.subtitle && <div className="text-muted-foreground truncate text-[11px]">{it.subtitle}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
