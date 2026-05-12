@@ -17,6 +17,12 @@ function planFromPriceId(priceId?: string): string {
   return 'mensal';
 }
 
+function monthsForOneTimePlan(plan: string): number {
+  if (plan === 'anual') return 12;
+  if (plan === 'semestral') return 6;
+  return 1;
+}
+
 async function logEvent(eventId: string, eventType: string, teamId: string | null, payload: any) {
   await getSupabase().from('subscriptions_log').insert({
     stripe_event_id: eventId, event_type: eventType, team_id: teamId, payload,
