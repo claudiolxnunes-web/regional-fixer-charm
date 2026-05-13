@@ -40,7 +40,7 @@ function PlanosPage() {
   return (
     <div className="min-h-screen bg-background">
       <PaymentTestModeBanner />
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+      <main className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="mb-8">
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: session ? "/dashboard" : "/login" })}>
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -89,7 +89,7 @@ function PlanosPage() {
         <p className="text-center text-sm text-muted-foreground mt-12">
           Pagamento seguro processado pelo Stripe. Cancele quando quiser pelo portal do cliente.
         </p>
-      </div>
+      </main>
 
       <Dialog open={!!selectedPrice} onOpenChange={(o) => !o && setSelectedPrice(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

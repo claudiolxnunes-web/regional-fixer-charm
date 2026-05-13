@@ -89,6 +89,6 @@ function ResetPasswordPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
