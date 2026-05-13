@@ -21,6 +21,23 @@ export const Route = createFileRoute("/planos")({
       { property: "og:url", content: "https://regional-fixer-charm.lovable.app/planos" },
     ],
     links: [{ rel: "canonical", href: "https://regional-fixer-charm.lovable.app/planos" }],
+    scripts: PLANS.map((plan) => ({
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: `AgroGestão CRM — Plano ${plan.name}`,
+        description: plan.description,
+        brand: { "@type": "Brand", name: "AgroGestão CRM" },
+        offers: {
+          "@type": "Offer",
+          price: plan.price.replace(/[^\d,]/g, "").replace(",", "."),
+          priceCurrency: "BRL",
+          url: "https://regional-fixer-charm.lovable.app/planos",
+          availability: "https://schema.org/InStock",
+        },
+      }),
+    })),
   }),
 });
 
