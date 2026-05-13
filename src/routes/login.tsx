@@ -189,7 +189,7 @@ function LoginPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   );
 }
 
