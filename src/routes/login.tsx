@@ -107,7 +107,7 @@ function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto size-20 rounded-xl bg-white grid place-items-center mb-3 overflow-hidden border">
-            <img src={logo} alt="AgroGestão CRM" className="size-19 object-contain" />
+            <img src={logo} alt="AgroGestão CRM" className="size-19 object-contain" width={76} height={76} fetchPriority="high" decoding="async" />
           </div>
           <CardTitle className="text-2xl">AgroGestão CRM</CardTitle>
           <CardDescription>{mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}</CardDescription>
