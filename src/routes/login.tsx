@@ -10,7 +10,19 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
-export const Route = createFileRoute("/login")({ component: LoginPage });
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+  head: () => ({
+    meta: [
+      { title: "Entrar — AgroGestão CRM" },
+      { name: "description", content: "Acesse sua conta no AgroGestão CRM ou crie uma nova para gerenciar seu time comercial do agronegócio." },
+      { property: "og:title", content: "Entrar — AgroGestão CRM" },
+      { property: "og:description", content: "Acesse o AgroGestão CRM ou crie sua conta para gerenciar seu time comercial." },
+      { property: "og:url", content: "https://regional-fixer-charm.lovable.app/login" },
+    ],
+    links: [{ rel: "canonical", href: "https://regional-fixer-charm.lovable.app/login" }],
+  }),
+});
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -91,11 +103,11 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen grid place-items-center bg-gradient-to-br from-primary/10 via-background to-accent/20 p-4">
+    <main className="min-h-screen grid place-items-center bg-gradient-to-br from-primary/10 via-background to-accent/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto size-20 rounded-xl bg-white grid place-items-center mb-3 overflow-hidden border">
-            <img src={logo} alt="AgroGestão CRM" className="size-19 object-contain" />
+            <img src={logo} alt="AgroGestão CRM" className="size-19 object-contain" width={76} height={76} fetchPriority="high" decoding="async" />
           </div>
           <CardTitle className="text-2xl">AgroGestão CRM</CardTitle>
           <CardDescription>{mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}</CardDescription>
@@ -177,7 +189,7 @@ function LoginPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   );
 }
 
