@@ -1,0 +1,9 @@
+# AgroGestão CRM
+
+> CRM regional para o agronegócio: gestão de representantes, clientes, vendas, metas, pedidos e insights com IA para equipes comerciais do agro.
+
+## Pages
+
+- [Início](/): Visão geral do AgroGestão CRM.
+- [Login](/login): Entrar ou criar conta.
+- [Planos](/planos): Planos e preços de assinatura.

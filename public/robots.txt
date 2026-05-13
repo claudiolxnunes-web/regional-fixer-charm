@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /representantes
+Disallow: /clientes
+Disallow: /vendas
+Disallow: /pedidos
+Disallow: /oportunidades
+Disallow: /propostas
+Disallow: /metas
+Disallow: /atividades
+Disallow: /planejamento
+Disallow: /planejamento-visitas
+Disallow: /relatorios
+Disallow: /ia-insights
+Disallow: /analytics
+Disallow: /mapa
+Disallow: /alertas
+Disallow: /automacoes
+Disallow: /importacao
+Disallow: /preferencias
+Disallow: /app-representante
+Disallow: /registro-campo
+Disallow: /api/
+
+Sitemap: https://regional-fixer-charm.lovable.app/sitemap.xml
