@@ -10,7 +10,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StripeEmbeddedCheckoutForm } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
-export const Route = createFileRoute("/planos")({ component: PlanosPage });
+export const Route = createFileRoute("/planos")({
+  component: PlanosPage,
+  head: () => ({
+    meta: [
+      { title: "Planos e preços — AgroGestão CRM" },
+      { name: "description", content: "Conheça os planos do AgroGestão CRM e escolha a assinatura ideal para sua equipe comercial do agronegócio." },
+      { property: "og:title", content: "Planos e preços — AgroGestão CRM" },
+      { property: "og:description", content: "Escolha o plano ideal do AgroGestão CRM para sua equipe comercial do agronegócio." },
+      { property: "og:url", content: "https://regional-fixer-charm.lovable.app/planos" },
+    ],
+    links: [{ rel: "canonical", href: "https://regional-fixer-charm.lovable.app/planos" }],
+  }),
+});
 
 function PlanosPage() {
   const { session, loading } = useAuth();

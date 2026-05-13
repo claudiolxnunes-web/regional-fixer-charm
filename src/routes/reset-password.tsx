@@ -8,7 +8,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
-export const Route = createFileRoute("/reset-password")({ component: ResetPasswordPage });
+export const Route = createFileRoute("/reset-password")({
+  component: ResetPasswordPage,
+  head: () => ({
+    meta: [
+      { title: "Redefinir senha — AgroGestão CRM" },
+      { name: "description", content: "Defina uma nova senha para sua conta no AgroGestão CRM." },
+      { property: "og:title", content: "Redefinir senha — AgroGestão CRM" },
+      { property: "og:description", content: "Defina uma nova senha para acessar o AgroGestão CRM." },
+      { property: "og:url", content: "https://regional-fixer-charm.lovable.app/reset-password" },
+      { name: "robots", content: "noindex" },
+    ],
+    links: [{ rel: "canonical", href: "https://regional-fixer-charm.lovable.app/reset-password" }],
+  }),
+});
 
 function ResetPasswordPage() {
   const navigate = useNavigate();

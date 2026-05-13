@@ -10,7 +10,19 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
-export const Route = createFileRoute("/login")({ component: LoginPage });
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+  head: () => ({
+    meta: [
+      { title: "Entrar — AgroGestão CRM" },
+      { name: "description", content: "Acesse sua conta no AgroGestão CRM ou crie uma nova para gerenciar seu time comercial do agronegócio." },
+      { property: "og:title", content: "Entrar — AgroGestão CRM" },
+      { property: "og:description", content: "Acesse o AgroGestão CRM ou crie sua conta para gerenciar seu time comercial." },
+      { property: "og:url", content: "https://regional-fixer-charm.lovable.app/login" },
+    ],
+    links: [{ rel: "canonical", href: "https://regional-fixer-charm.lovable.app/login" }],
+  }),
+});
 
 function LoginPage() {
   const navigate = useNavigate();
