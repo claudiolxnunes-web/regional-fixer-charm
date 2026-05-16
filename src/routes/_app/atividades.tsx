@@ -22,6 +22,17 @@ const TYPES: Record<string, { label: string; icon: any }> = {
   meeting: { label: "Reunião", icon: Calendar },
 };
 
+const SUGGESTED_ACTIVITIES = [
+  "Visita Técnica",
+  "Prospecção de Novo Cliente",
+  "Demonstração de Produto",
+  "Entrega de Pedido",
+  "Cobrança / Financeiro",
+  "Acompanhamento Pós-Venda",
+  "Treinamento / Dia de Campo",
+  "Reunião de Fechamento",
+];
+
 function Atividades() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
