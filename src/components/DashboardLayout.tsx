@@ -151,7 +151,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         />
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
         {/* Mobile top bar */}
         <header className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 h-14 bg-sidebar text-sidebar-foreground border-b border-sidebar-border">
           <Sheet open={open} onOpenChange={setOpen}>
