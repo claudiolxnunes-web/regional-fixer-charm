@@ -663,16 +663,33 @@ function NewActivityDialog({ open, onClose, clients, onCreated }: { open: boolea
 
           <div className="space-y-2">
             <Label>Cliente (Opcional)</Label>
-            <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o cliente..." />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap gap-1.5 p-2 border rounded-md bg-muted/30">
+              {(!clients || clients.length === 0) && (
+                <p className="text-[10px] text-muted-foreground w-full text-center">Carregando clientes...</p>
+              )}
+              {clients?.slice(0, 8).map((c: any) => (
+                <Button
+                  key={c.id}
+                  type="button"
+                  variant={form.client_id === c.id ? "default" : "outline"}
+                  className="h-7 px-2 text-[10px]"
+                  onClick={() => setForm({ ...form, client_id: c.id })}
+                >
+                  {c.name}
+                </Button>
+              ))}
+              <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v === "none" ? "" : v })}>
+                <SelectTrigger className="h-7 text-[10px]">
+                  <SelectValue placeholder="Mais clientes..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {clients.map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
