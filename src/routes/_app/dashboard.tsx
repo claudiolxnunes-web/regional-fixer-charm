@@ -2,8 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Users, Briefcase, TrendingUp } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
+import { Building2, Users, Briefcase, TrendingUp, Target, PieChart as PieChartIcon } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid } from "recharts";
+import { RepRanking } from "@/components/RepRanking";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
@@ -30,13 +32,21 @@ function Dashboard() {
       const abc = ["A","B","C"].map((k) => ({ name: `Classe ${k}`, value: clients.filter((c) => c.abc_class === k).length }));
       const totalTarget = goals.reduce((s, x) => s + Number(x.target_value ?? 0), 0);
       const totalCurrent = goals.reduce((s, x) => s + Number(x.current_value ?? 0), 0);
+      const weightedForecast = opps.reduce((s, x) => s + (Number(x.value ?? 0) * (Number(x.probability ?? 0) / 100)), 0);
+      const wonOpps = opps.filter(o => o.stage === 'won');
+      const conversionRate = opps.length > 0 ? (wonOpps.length / opps.length) * 100 : 0;
+
       return {
         clientsCount: clients.length,
         repsCount: reps.length,
         oppsCount: opps.length,
         totalSales,
+        weightedForecast,
+        conversionRate,
         oppsByStage, abc,
         goalProgress: totalTarget > 0 ? Math.round((totalCurrent / totalTarget) * 100) : 0,
+        totalTarget,
+        totalCurrent
       };
     },
   });

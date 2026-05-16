@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ClipboardCheck, Target, MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/_app/registro-campo")({ component: RegistroCampo });
 
@@ -24,7 +27,9 @@ function RegistroCampo() {
   async function save() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return toast.error("Não autenticado");
-    const { error } = await supabase.from("daily_reports").insert({
+    
+    // Save daily report
+    const { error: reportError } = await supabase.from("daily_reports").insert({
       rep_user_id: user.id,
       report_date: form.report_date,
       visits_count: Number(form.visits_count || 0),
@@ -34,9 +39,42 @@ function RegistroCampo() {
       observations: form.observations || null,
       submitted_at: new Date().toISOString(),
     });
-    if (error) return toast.error(error.message);
-    toast.success("Registro salvo");
+
+    if (reportError) return toast.error(reportError.message);
+
+    // If activity linked, save SPIN and complete activity
+    if (form.activity_id) {
+      const activity = activities?.find(a => a.id === form.activity_id);
+      await supabase.from("spin_notes").insert({
+        activity_id: form.activity_id,
+        rep_user_id: user.id,
+        situation: form.spin_s,
+        problem: form.spin_p,
+        implication: form.spin_i,
+        need_payoff: form.spin_n,
+      });
+      await supabase.from("activities").update({ 
+        status: "completed", 
+        completed_at: new Date().toISOString() 
+      }).eq("id", form.activity_id);
+    }
+
+    toast.success("Registro e SPIN salvos com sucesso!");
+    setForm({ 
+      report_date: today, 
+      visits_count: "0", 
+      calls_count: "0", 
+      proposals_count: "0", 
+      orders_count: "0", 
+      observations: "",
+      activity_id: "",
+      spin_s: "",
+      spin_p: "",
+      spin_i: "",
+      spin_n: ""
+    });
     qc.invalidateQueries({ queryKey: ["daily-reports"] });
+    qc.invalidateQueries({ queryKey: ["pending-visits"] });
   }
 
   return (
