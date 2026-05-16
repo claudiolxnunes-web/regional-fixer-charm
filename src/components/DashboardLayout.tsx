@@ -189,7 +189,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </Link>
           <Link to="/app-representante" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/app-representante" ? "text-primary" : "text-sidebar-foreground/60"}`}>
             <Smartphone className="size-5" />
-            <span>App Rep</span>
+            <span>App Campo</span>
           </Link>
           <Link to="/planejamento-visitas" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/planejamento-visitas" ? "text-primary" : "text-sidebar-foreground/60"}`}>
             <RouteIcon className="size-5" />
