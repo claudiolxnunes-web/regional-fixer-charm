@@ -8,13 +8,41 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ClipboardCheck, Target, MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/_app/registro-campo")({ component: RegistroCampo });
 
 function RegistroCampo() {
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
-  const [form, setForm] = useState({ report_date: today, visits_count: "0", calls_count: "0", proposals_count: "0", orders_count: "0", observations: "" });
+  const [form, setForm] = useState({ 
+    report_date: today, 
+    visits_count: "0", 
+    calls_count: "0", 
+    proposals_count: "0", 
+    orders_count: "0", 
+    observations: "",
+    activity_id: "",
+    spin_s: "",
+    spin_p: "",
+    spin_i: "",
+    spin_n: ""
+  });
+
+  const { data: activities } = useQuery({
+    queryKey: ["pending-visits"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("activities")
+        .select("id, title, clients(name)")
+        .eq("status", "pending")
+        .eq("type", "visit")
+        .order("scheduled_at", { ascending: true });
+      return data ?? [];
+    },
+  });
 
   const { data: list } = useQuery({
     queryKey: ["daily-reports"],
@@ -24,7 +52,9 @@ function RegistroCampo() {
   async function save() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return toast.error("Não autenticado");
-    const { error } = await supabase.from("daily_reports").insert({
+    
+    // Save daily report
+    const { error: reportError } = await supabase.from("daily_reports").insert({
       rep_user_id: user.id,
       report_date: form.report_date,
       visits_count: Number(form.visits_count || 0),
@@ -34,9 +64,41 @@ function RegistroCampo() {
       observations: form.observations || null,
       submitted_at: new Date().toISOString(),
     });
-    if (error) return toast.error(error.message);
-    toast.success("Registro salvo");
+
+    if (reportError) return toast.error(reportError.message);
+
+    // If activity linked, save SPIN and complete activity
+    if (form.activity_id && form.activity_id !== "none") {
+      await supabase.from("spin_notes").insert({
+        activity_id: form.activity_id,
+        rep_user_id: user.id,
+        situation: form.spin_s,
+        problem: form.spin_p,
+        implication: form.spin_i,
+        need_payoff: form.spin_n,
+      });
+      await supabase.from("activities").update({ 
+        status: "completed", 
+        completed_at: new Date().toISOString() 
+      }).eq("id", form.activity_id);
+    }
+
+    toast.success("Registro e SPIN salvos com sucesso!");
+    setForm({ 
+      report_date: today, 
+      visits_count: "0", 
+      calls_count: "0", 
+      proposals_count: "0", 
+      orders_count: "0", 
+      observations: "",
+      activity_id: "",
+      spin_s: "",
+      spin_p: "",
+      spin_i: "",
+      spin_n: ""
+    });
     qc.invalidateQueries({ queryKey: ["daily-reports"] });
+    qc.invalidateQueries({ queryKey: ["pending-visits"] });
   }
 
   return (
@@ -49,15 +111,80 @@ function RegistroCampo() {
       <Card>
         <CardHeader><CardTitle>Novo registro</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-            <div><Label>Data</Label><Input type="date" value={form.report_date} onChange={(e) => setForm({ ...form, report_date: e.target.value })} /></div>
-            <div><Label>Visitas</Label><Input type="number" value={form.visits_count} onChange={(e) => setForm({ ...form, visits_count: e.target.value })} /></div>
-            <div><Label>Ligações</Label><Input type="number" value={form.calls_count} onChange={(e) => setForm({ ...form, calls_count: e.target.value })} /></div>
-            <div><Label>Propostas</Label><Input type="number" value={form.proposals_count} onChange={(e) => setForm({ ...form, proposals_count: e.target.value })} /></div>
-            <div><Label>Pedidos</Label><Input type="number" value={form.orders_count} onChange={(e) => setForm({ ...form, orders_count: e.target.value })} /></div>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2">
+              <Label>Vincular a uma visita agendada (Opcional)</Label>
+              <Select value={form.activity_id} onValueChange={(v) => setForm({ ...form, activity_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma visita para registrar o SPIN" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhuma visita específica</SelectItem>
+                  {activities?.map((a: any) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.title} - {a.clients?.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {form.activity_id && form.activity_id !== "none" && (
+              <div className="bg-primary/5 p-4 rounded-lg border border-primary/10 space-y-3">
+                <div className="flex items-center gap-2 text-primary font-medium text-sm">
+                  <ClipboardCheck className="size-4" /> Registro SPIN (Método Consultivo)
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">S - Situação</Label>
+                    <Textarea 
+                      placeholder="Fatos, dados, contexto..." 
+                      className="text-xs h-20"
+                      value={form.spin_s}
+                      onChange={(e) => setForm({ ...form, spin_s: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">P - Problema</Label>
+                    <Textarea 
+                      placeholder="Dificuldades, insatisfações..." 
+                      className="text-xs h-20"
+                      value={form.spin_p}
+                      onChange={(e) => setForm({ ...form, spin_p: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">I - Implicação</Label>
+                    <Textarea 
+                      placeholder="Consequências do problema..." 
+                      className="text-xs h-20"
+                      value={form.spin_i}
+                      onChange={(e) => setForm({ ...form, spin_i: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">N - Necessidade</Label>
+                    <Textarea 
+                      placeholder="Valor da solução, benefícios..." 
+                      className="text-xs h-20"
+                      value={form.spin_n}
+                      onChange={(e) => setForm({ ...form, spin_n: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div><Label className="text-xs">Data</Label><Input type="date" value={form.report_date} onChange={(e) => setForm({ ...form, report_date: e.target.value })} /></div>
+              <div><Label className="text-xs">Visitas</Label><Input type="number" inputMode="numeric" value={form.visits_count} onChange={(e) => setForm({ ...form, visits_count: e.target.value })} /></div>
+              <div><Label className="text-xs">Ligações</Label><Input type="number" inputMode="numeric" value={form.calls_count} onChange={(e) => setForm({ ...form, calls_count: e.target.value })} /></div>
+              <div><Label className="text-xs">Propostas</Label><Input type="number" inputMode="numeric" value={form.proposals_count} onChange={(e) => setForm({ ...form, proposals_count: e.target.value })} /></div>
+              <div><Label className="text-xs">Pedidos</Label><Input type="number" inputMode="numeric" value={form.orders_count} onChange={(e) => setForm({ ...form, orders_count: e.target.value })} /></div>
+            </div>
+            <div><Label className="text-xs">Observações Gerais</Label><Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} placeholder="Resumo do dia..." /></div>
+            <Button onClick={save} className="w-full sm:w-auto">Enviar Registro Diário</Button>
           </div>
-          <div><Label>Observações</Label><Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} placeholder="Resumo do dia, ocorrências, próximos passos..." /></div>
-          <Button onClick={save}>Salvar registro</Button>
         </CardContent>
       </Card>
 

@@ -1,0 +1,1 @@
+ALTER TABLE public.spin_notes ADD COLUMN IF NOT EXISTS smart_objective TEXT;

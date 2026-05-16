@@ -1362,6 +1362,7 @@ export type Database = {
           rep_user_id: string
           representative_id: string | null
           situation: string | null
+          smart_objective: string | null
           team_id: string | null
           updated_at: string
         }
@@ -1379,6 +1380,7 @@ export type Database = {
           rep_user_id?: string
           representative_id?: string | null
           situation?: string | null
+          smart_objective?: string | null
           team_id?: string | null
           updated_at?: string
         }
@@ -1396,6 +1398,7 @@ export type Database = {
           rep_user_id?: string
           representative_id?: string | null
           situation?: string | null
+          smart_objective?: string | null
           team_id?: string | null
           updated_at?: string
         }

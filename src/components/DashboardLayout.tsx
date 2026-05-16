@@ -17,6 +17,8 @@ const groups = [
     label: "Principal",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/planejamento-visitas", label: "Agenda SMART", icon: RouteIcon },
+      { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
     ],
   },
   {
@@ -33,13 +35,6 @@ const groups = [
     ],
   },
   {
-    label: "Planejamento",
-    items: [
-      { to: "/planejamento", label: "Plano SMART (Gestor)", icon: Compass },
-      { to: "/planejamento-visitas", label: "Visitas SPIN (Rep.)", icon: RouteIcon },
-    ],
-  },
-  {
     label: "Análise & IA",
     items: [
       { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
@@ -51,10 +46,7 @@ const groups = [
   {
     label: "Operações",
     items: [
-      { to: "/app-representante", label: "App Representante", icon: Smartphone },
-      { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
       { to: "/alertas", label: "Alertas", icon: Bell },
-      { to: "/alertas/config", label: "Config. Alertas", icon: Settings },
       { to: "/preferencias", label: "Preferências", icon: Settings },
       { to: "/importacao", label: "Importar Dados", icon: Upload },
       { to: "/automacoes", label: "Automações", icon: Zap },

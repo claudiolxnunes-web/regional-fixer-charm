@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Package, Snowflake, Beef, Clock, Download } from "lucide-react";
+import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Package, Snowflake, Beef, Clock, Download, Target } from "lucide-react";
 
 export const Route = createFileRoute("/_app/planejamento-visitas")({ component: SpinPage });
 
@@ -282,6 +282,7 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
     need_payoff: existing?.need_payoff ?? "",
     outcome: existing?.outcome ?? "",
     next_steps: existing?.next_steps ?? "",
+    smart_objective: existing?.smart_objective ?? "",
   });
 
   // reset form when activity changes
@@ -293,9 +294,10 @@ function SpinDialog({ activity, existing, userId, onClose, onSaved }: { activity
       need_payoff: existing?.need_payoff ?? "",
       outcome: existing?.outcome ?? "",
       next_steps: existing?.next_steps ?? "",
+      smart_objective: existing?.smart_objective ?? "",
     });
     setTab("spin");
-  }, [activity?.id]);
+  }, [activity?.id, existing?.id]);
 
   if (!activity) return null;
 
