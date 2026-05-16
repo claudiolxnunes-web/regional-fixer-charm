@@ -16,6 +16,17 @@ import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Pack
 
 export const Route = createFileRoute("/_app/planejamento-visitas")({ component: SpinPage });
 
+const SUGGESTED_ACTIVITIES = [
+  "Visita Técnica",
+  "Prospecção de Novo Cliente",
+  "Demonstração de Produto",
+  "Entrega de Pedido",
+  "Cobrança / Financeiro",
+  "Acompanhamento Pós-Venda",
+  "Treinamento / Dia de Campo",
+  "Reunião de Fechamento",
+];
+
 function startOfWeek(d = new Date()) {
   const dt = new Date(d);
   const day = dt.getDay();
