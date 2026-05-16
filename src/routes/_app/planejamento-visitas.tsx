@@ -548,6 +548,135 @@ function exportWeeklyRoteiro(weekStart: Date, days: Date[], byDay: Record<string
     lines.push("");
   });
 
+function NewActivityDialog({ open, onClose, clients, onCreated }: { open: boolean; onClose: () => void; clients: any[]; onCreated: () => void }) {
+  const [form, setForm] = useState({ title: "", type: "visit", scheduled_at: "", description: "", client_id: "" });
+  const [isOther, setIsOther] = useState(false);
+
+  async function create() {
+    if (!form.title && !isOther) return toast.error("Selecione ou descreva a atividade");
+    if (isOther && !form.title) return toast.error("Descreva a atividade");
+    
+    const { error } = await supabase.from("activities").insert({
+      title: form.title,
+      type: form.type,
+      scheduled_at: form.scheduled_at || new Date().toISOString(),
+      description: form.description || null,
+      client_id: form.client_id || null,
+      status: "pending",
+    });
+    
+    if (error) return toast.error(error.message);
+    toast.success("Atividade planejada com sucesso");
+    onCreated();
+    onClose();
+    setForm({ title: "", type: "visit", scheduled_at: "", description: "", client_id: "" });
+    setIsOther(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Planejar Nova Atividade</DialogTitle></DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>Atividade Principal</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {SUGGESTED_ACTIVITIES.map((act) => (
+                <Button 
+                  key={act} 
+                  variant={form.title === act && !isOther ? "default" : "outline"} 
+                  className="text-xs h-auto py-2 px-1 text-center whitespace-normal leading-tight"
+                  onClick={() => {
+                    setForm({ ...form, title: act });
+                    setIsOther(false);
+                  }}
+                >
+                  {act}
+                </Button>
+              ))}
+              <Button 
+                variant={isOther ? "default" : "outline"} 
+                className="text-xs h-auto py-2 px-1 text-center"
+                onClick={() => {
+                  setIsOther(true);
+                  if (!SUGGESTED_ACTIVITIES.includes(form.title)) {
+                    // keep it
+                  } else {
+                    setForm({ ...form, title: "" });
+                  }
+                }}
+              >
+                Outros...
+              </Button>
+            </div>
+          </div>
+
+          {isOther && (
+            <div className="space-y-2">
+              <Label>Descrição da Atividade</Label>
+              <Input 
+                placeholder="Ex: Entrega de amostras específicas" 
+                value={form.title} 
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Data/Hora</Label>
+              <Input 
+                type="datetime-local" 
+                value={form.scheduled_at} 
+                onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="visit">Visita</SelectItem>
+                  <SelectItem value="call">Ligação</SelectItem>
+                  <SelectItem value="meeting">Reunião</SelectItem>
+                  <SelectItem value="task">Tarefa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Cliente (Opcional)</Label>
+            <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o cliente..." />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Observações</Label>
+            <Textarea 
+              placeholder="Detalhes adicionais..." 
+              value={form.description} 
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={2}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button onClick={create}>Salvar no Planejamento</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
   if (totalVisits === 0) {
     lines.push("Nenhuma visita planejada nessa semana.");
   } else {
