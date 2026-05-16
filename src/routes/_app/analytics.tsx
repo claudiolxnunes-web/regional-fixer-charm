@@ -13,7 +13,7 @@ function Analytics() {
     queryFn: async () => {
       const since = new Date();
       since.setMonth(since.getMonth() - 12);
-      return (await supabase.from("sales")
+      return (await supabase.from("sales_secure_view")
         .select("invoice_date, revenue, volume_sales, line, product_group, state, region")
         .gte("invoice_date", since.toISOString().slice(0, 10))
         .limit(10000)).data ?? [];
