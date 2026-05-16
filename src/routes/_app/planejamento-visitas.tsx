@@ -290,6 +290,15 @@ function SpinPage() {
         onClose={() => setSelectedActivity(null)}
         onSaved={() => qc.invalidateQueries({ queryKey: ["spin-notes"] })}
       />
+
+      <NewActivityDialog
+        open={newPlanOpen}
+        onClose={() => setNewPlanOpen(false)}
+        clients={clients ?? []}
+        onCreated={() => {
+          qc.invalidateQueries({ queryKey: ["spin-activities"] });
+        }}
+      />
     </div>
   );
 }
