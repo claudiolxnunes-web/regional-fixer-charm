@@ -58,9 +58,28 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Visão geral do seu CRM</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Visão geral do seu CRM</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+            <Link to="/app-representante" className="flex items-center gap-2">
+              <Smartphone className="size-4" /> App do Representante
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/registro-campo" className="flex items-center gap-2">
+              <ClipboardList className="size-4" /> Registro de Campo
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/planejamento-visitas" className="flex items-center gap-2">
+              <Calendar className="size-4" /> Agenda SMART
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
