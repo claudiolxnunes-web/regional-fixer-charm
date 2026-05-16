@@ -1876,6 +1876,212 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_secure_view: {
+        Row: {
+          bonus: number | null
+          branch: string | null
+          branch_code: string | null
+          category: string | null
+          cfop: string | null
+          city: string | null
+          client_code: string | null
+          client_group: string | null
+          client_id: string | null
+          client_name: string | null
+          cofins_total: number | null
+          commercial_expense: number | null
+          commission_pct: number | null
+          commission_value: number | null
+          cost_total: number | null
+          created_at: string | null
+          currency: string | null
+          customized: string | null
+          discount_pct: number | null
+          fl_vef: string | null
+          freight: number | null
+          gnv: string | null
+          group_code: string | null
+          grv: string | null
+          icms_total: number | null
+          id: string | null
+          import_source: string | null
+          invoice_date: string | null
+          invoice_number: string | null
+          line: string | null
+          mb_cb_pct: number | null
+          mb_cb_total: number | null
+          ml_cb_pct: number | null
+          ml_cb_total: number | null
+          month_year: string | null
+          operation_type: string | null
+          order_date: string | null
+          order_number: string | null
+          pis_total: number | null
+          pmr: number | null
+          price_per_bag: number | null
+          price_per_kg: number | null
+          product_code: string | null
+          product_group: string | null
+          product_group_code: string | null
+          product_name: string | null
+          qty_bags: number | null
+          region: string | null
+          rep_code: string | null
+          representative: string | null
+          representative_id: string | null
+          revenue: number | null
+          revenue_no_charges: number | null
+          segmentation: string | null
+          solution: string | null
+          state: string | null
+          subsolution: string | null
+          team_id: string | null
+          updated_at: string | null
+          volume_converted: number | null
+          volume_sales: number | null
+          volume_sales_bonus: number | null
+          year: number | null
+        }
+        Insert: {
+          bonus?: number | null
+          branch?: string | null
+          branch_code?: string | null
+          category?: string | null
+          cfop?: string | null
+          city?: string | null
+          client_code?: string | null
+          client_group?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          cofins_total?: number | null
+          commercial_expense?: never
+          commission_pct?: number | null
+          commission_value?: number | null
+          cost_total?: never
+          created_at?: string | null
+          currency?: string | null
+          customized?: string | null
+          discount_pct?: number | null
+          fl_vef?: string | null
+          freight?: never
+          gnv?: string | null
+          group_code?: string | null
+          grv?: string | null
+          icms_total?: number | null
+          id?: string | null
+          import_source?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line?: string | null
+          mb_cb_pct?: never
+          mb_cb_total?: never
+          ml_cb_pct?: never
+          ml_cb_total?: never
+          month_year?: string | null
+          operation_type?: string | null
+          order_date?: string | null
+          order_number?: string | null
+          pis_total?: number | null
+          pmr?: number | null
+          price_per_bag?: number | null
+          price_per_kg?: number | null
+          product_code?: string | null
+          product_group?: string | null
+          product_group_code?: string | null
+          product_name?: string | null
+          qty_bags?: number | null
+          region?: string | null
+          rep_code?: string | null
+          representative?: string | null
+          representative_id?: string | null
+          revenue?: number | null
+          revenue_no_charges?: number | null
+          segmentation?: string | null
+          solution?: string | null
+          state?: string | null
+          subsolution?: string | null
+          team_id?: string | null
+          updated_at?: string | null
+          volume_converted?: number | null
+          volume_sales?: number | null
+          volume_sales_bonus?: number | null
+          year?: number | null
+        }
+        Update: {
+          bonus?: number | null
+          branch?: string | null
+          branch_code?: string | null
+          category?: string | null
+          cfop?: string | null
+          city?: string | null
+          client_code?: string | null
+          client_group?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          cofins_total?: number | null
+          commercial_expense?: never
+          commission_pct?: number | null
+          commission_value?: number | null
+          cost_total?: never
+          created_at?: string | null
+          currency?: string | null
+          customized?: string | null
+          discount_pct?: number | null
+          fl_vef?: string | null
+          freight?: never
+          gnv?: string | null
+          group_code?: string | null
+          grv?: string | null
+          icms_total?: number | null
+          id?: string | null
+          import_source?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line?: string | null
+          mb_cb_pct?: never
+          mb_cb_total?: never
+          ml_cb_pct?: never
+          ml_cb_total?: never
+          month_year?: string | null
+          operation_type?: string | null
+          order_date?: string | null
+          order_number?: string | null
+          pis_total?: number | null
+          pmr?: number | null
+          price_per_bag?: number | null
+          price_per_kg?: number | null
+          product_code?: string | null
+          product_group?: string | null
+          product_group_code?: string | null
+          product_name?: string | null
+          qty_bags?: number | null
+          region?: string | null
+          rep_code?: string | null
+          representative?: string | null
+          representative_id?: string | null
+          revenue?: number | null
+          revenue_no_charges?: number | null
+          segmentation?: string | null
+          solution?: string | null
+          state?: string | null
+          subsolution?: string | null
+          team_id?: string | null
+          updated_at?: string | null
+          volume_converted?: number | null
+          volume_sales?: number | null
+          volume_sales_bonus?: number | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       alert_setting: {
@@ -1899,6 +2105,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_own_rep_data: { Args: { target_rep_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
     }

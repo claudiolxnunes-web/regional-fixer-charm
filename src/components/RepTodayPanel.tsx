@@ -35,7 +35,7 @@ export function RepTodayPanel({ repId }: { repId: string }) {
       const y = today.getFullYear(), m = today.getMonth() + 1;
       const [tRes, sRes] = await Promise.all([
         supabase.from("goal_targets").select("revenue_target").eq("representative_id", repId).eq("year", y).eq("month", m),
-        supabase.from("sales").select("revenue").eq("representative_id", repId).gte("invoice_date", monthStart),
+        supabase.from("sales_secure_view").select("revenue").eq("representative_id", repId).gte("invoice_date", monthStart),
       ]);
       const target = (tRes.data ?? []).reduce((s, x) => s + Number(x.revenue_target || 0), 0);
       const achieved = (sRes.data ?? []).reduce((s, x) => s + Number(x.revenue || 0), 0);
