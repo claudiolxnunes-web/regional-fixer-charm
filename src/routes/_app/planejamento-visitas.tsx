@@ -8,13 +8,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Package, Snowflake, Beef, Clock, Download, Target } from "lucide-react";
+import { Route as RouteIcon, MapPin, ChevronRight, Calendar, AlertTriangle, Package, Snowflake, Beef, Clock, Download, Target, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_app/planejamento-visitas")({ component: SpinPage });
+
+const SUGGESTED_ACTIVITIES = [
+  "Visita Técnica",
+  "Prospecção de Novo Cliente",
+  "Demonstração de Produto",
+  "Entrega de Pedido",
+  "Cobrança / Financeiro",
+  "Acompanhamento Pós-Venda",
+  "Treinamento / Dia de Campo",
+  "Reunião de Fechamento",
+];
 
 function startOfWeek(d = new Date()) {
   const dt = new Date(d);
@@ -30,6 +42,12 @@ function SpinPage() {
   const qc = useQueryClient();
   const [weekStart, setWeekStart] = useState(startOfWeek());
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [newPlanOpen, setNewPlanOpen] = useState(false);
+
+  const { data: clients } = useQuery({
+    queryKey: ["clients-min"],
+    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(500)).data ?? [],
+  });
 
   const weekEnd = useMemo(() => {
     const d = new Date(weekStart); d.setDate(d.getDate() + 7); return d;
@@ -156,6 +174,9 @@ function SpinPage() {
             {weekStart.toLocaleDateString("pt-BR")} – {new Date(weekEnd.getTime() - 1).toLocaleDateString("pt-BR")}
           </div>
           <Button variant="outline" size="sm" onClick={() => { const d = new Date(weekStart); d.setDate(d.getDate() + 7); setWeekStart(d); }}>Próxima semana →</Button>
+          <Button size="sm" variant="outline" onClick={() => setNewPlanOpen(true)}>
+            <Plus className="size-4 mr-1" /> Novo Planejamento
+          </Button>
           <Button size="sm" variant="secondary" onClick={() => exportWeeklyRoteiro(weekStart, days, byDay, spinNotes ?? [])}>
             <Download className="size-4 mr-1" /> Baixar roteiro
           </Button>
@@ -268,6 +289,15 @@ function SpinPage() {
         userId={user?.id}
         onClose={() => setSelectedActivity(null)}
         onSaved={() => qc.invalidateQueries({ queryKey: ["spin-notes"] })}
+      />
+
+      <NewActivityDialog
+        open={newPlanOpen}
+        onClose={() => setNewPlanOpen(false)}
+        clients={clients ?? []}
+        onCreated={() => {
+          qc.invalidateQueries({ queryKey: ["spin-activities"] });
+        }}
       />
     </div>
   );
@@ -532,4 +562,134 @@ function exportWeeklyRoteiro(weekStart: Date, days: Date[], byDay: Record<string
   a.download = `roteiro-semana-${weekStart.toISOString().slice(0, 10)}.txt`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function NewActivityDialog({ open, onClose, clients, onCreated }: { open: boolean; onClose: () => void; clients: any[]; onCreated: () => void }) {
+  const [form, setForm] = useState({ title: "", type: "visit", scheduled_at: "", description: "", client_id: "" });
+  const [isOther, setIsOther] = useState(false);
+
+  async function create() {
+    if (!form.title && !isOther) return toast.error("Selecione ou descreva a atividade");
+    if (isOther && !form.title) return toast.error("Descreva a atividade");
+    
+    const { error } = await supabase.from("activities").insert({
+      title: form.title,
+      type: form.type,
+      scheduled_at: form.scheduled_at || new Date().toISOString(),
+      description: form.description || null,
+      client_id: form.client_id || null,
+      status: "pending",
+    });
+    
+    if (error) return toast.error(error.message);
+    toast.success("Atividade planejada com sucesso");
+    onCreated();
+    onClose();
+    setForm({ title: "", type: "visit", scheduled_at: "", description: "", client_id: "" });
+    setIsOther(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Planejar Nova Atividade</DialogTitle></DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>Atividade Principal</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {SUGGESTED_ACTIVITIES.map((act) => (
+                <Button 
+                  key={act} 
+                  variant={form.title === act && !isOther ? "default" : "outline"} 
+                  className="text-xs h-auto py-2 px-1 text-center whitespace-normal leading-tight"
+                  onClick={() => {
+                    setForm({ ...form, title: act });
+                    setIsOther(false);
+                  }}
+                >
+                  {act}
+                </Button>
+              ))}
+              <Button 
+                variant={isOther ? "default" : "outline"} 
+                className="text-xs h-auto py-2 px-1 text-center"
+                onClick={() => {
+                  setIsOther(true);
+                  if (!SUGGESTED_ACTIVITIES.includes(form.title)) {
+                    // keep it
+                  } else {
+                    setForm({ ...form, title: "" });
+                  }
+                }}
+              >
+                Outros...
+              </Button>
+            </div>
+          </div>
+
+          {isOther && (
+            <div className="space-y-2">
+              <Label>Descrição da Atividade</Label>
+              <Input 
+                placeholder="Ex: Entrega de amostras específicas" 
+                value={form.title} 
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Data/Hora</Label>
+              <Input 
+                type="datetime-local" 
+                value={form.scheduled_at} 
+                onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="visit">Visita</SelectItem>
+                  <SelectItem value="call">Ligação</SelectItem>
+                  <SelectItem value="meeting">Reunião</SelectItem>
+                  <SelectItem value="task">Tarefa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Cliente (Opcional)</Label>
+            <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o cliente..." />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Observações</Label>
+            <Textarea 
+              placeholder="Detalhes adicionais..." 
+              value={form.description} 
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={2}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button onClick={create}>Salvar no Planejamento</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
