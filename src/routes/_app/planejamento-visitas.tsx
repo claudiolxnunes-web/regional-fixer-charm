@@ -42,6 +42,12 @@ function SpinPage() {
   const qc = useQueryClient();
   const [weekStart, setWeekStart] = useState(startOfWeek());
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [newPlanOpen, setNewPlanOpen] = useState(false);
+
+  const { data: clients } = useQuery({
+    queryKey: ["clients-min"],
+    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(500)).data ?? [],
+  });
 
   const weekEnd = useMemo(() => {
     const d = new Date(weekStart); d.setDate(d.getDate() + 7); return d;
