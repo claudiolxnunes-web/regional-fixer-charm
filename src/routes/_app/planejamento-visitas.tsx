@@ -548,6 +548,22 @@ function exportWeeklyRoteiro(weekStart: Date, days: Date[], byDay: Record<string
     lines.push("");
   });
 
+  if (totalVisits === 0) {
+    lines.push("Nenhuma visita planejada nessa semana.");
+  } else {
+    lines.push("=".repeat(60));
+    lines.push(`Total: ${totalVisits} visitas`);
+  }
+
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `roteiro-semana-${weekStart.toISOString().slice(0, 10)}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function NewActivityDialog({ open, onClose, clients, onCreated }: { open: boolean; onClose: () => void; clients: any[]; onCreated: () => void }) {
   const [form, setForm] = useState({ title: "", type: "visit", scheduled_at: "", description: "", client_id: "" });
   const [isOther, setIsOther] = useState(false);
@@ -652,7 +668,7 @@ function NewActivityDialog({ open, onClose, clients, onCreated }: { open: boolea
                 <SelectValue placeholder="Selecione o cliente..." />
               </SelectTrigger>
               <SelectContent>
-                {clients.map((c) => (
+                {clients.map((c: any) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -676,19 +692,4 @@ function NewActivityDialog({ open, onClose, clients, onCreated }: { open: boolea
       </DialogContent>
     </Dialog>
   );
-}
-  if (totalVisits === 0) {
-    lines.push("Nenhuma visita planejada nessa semana.");
-  } else {
-    lines.push("=".repeat(60));
-    lines.push(`Total: ${totalVisits} visitas`);
-  }
-
-  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `roteiro-semana-${weekStart.toISOString().slice(0, 10)}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
 }
