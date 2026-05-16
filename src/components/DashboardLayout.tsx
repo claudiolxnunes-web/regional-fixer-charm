@@ -14,9 +14,10 @@ import logo from "@/assets/logo.png";
 
 const groups = [
   {
-    label: "Principal",
+    label: "Uso Diário (Representante)",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/app-representante", label: "App de Registro (Campo)", icon: Smartphone },
       { to: "/planejamento-visitas", label: "Agenda SMART", icon: RouteIcon },
       { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
     ],
@@ -150,7 +151,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         />
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
         {/* Mobile top bar */}
         <header className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 h-14 bg-sidebar text-sidebar-foreground border-b border-sidebar-border">
           <Sheet open={open} onOpenChange={setOpen}>
@@ -179,6 +180,26 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 overflow-x-hidden">
           <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 max-w-[1400px] mx-auto w-full">{children}</div>
         </main>
+
+        {/* Mobile Bottom Nav */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-sidebar border-t border-sidebar-border flex items-center justify-around px-2 z-40">
+          <Link to="/dashboard" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/dashboard" ? "text-primary" : "text-sidebar-foreground/60"}`}>
+            <LayoutDashboard className="size-5" />
+            <span>Painel</span>
+          </Link>
+          <Link to="/app-representante" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/app-representante" ? "text-primary" : "text-sidebar-foreground/60"}`}>
+            <Smartphone className="size-5" />
+            <span>App Campo</span>
+          </Link>
+          <Link to="/planejamento-visitas" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/planejamento-visitas" ? "text-primary" : "text-sidebar-foreground/60"}`}>
+            <RouteIcon className="size-5" />
+            <span>Agenda</span>
+          </Link>
+          <Link to="/registro-campo" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/registro-campo" ? "text-primary" : "text-sidebar-foreground/60"}`}>
+            <ClipboardList className="size-5" />
+            <span>Check-in</span>
+          </Link>
+        </nav>
       </div>
     </div>
   );

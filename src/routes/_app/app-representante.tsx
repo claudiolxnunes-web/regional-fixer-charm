@@ -200,7 +200,7 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
           className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow"
           onClick={() => setOpenForm(true)}
         >
-          <Plus className="size-5 mr-2" /> Registrar Atividade
+          <Plus className="size-5 mr-2" /> Registro de Campo (Check-in)
         </Button>
 
         {/* Daily observations */}
