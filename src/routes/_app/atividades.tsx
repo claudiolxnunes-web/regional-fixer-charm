@@ -137,12 +137,35 @@ function Atividades() {
                 </div>
                 <div><Label>Data</Label><Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} /></div>
               </div>
-              <div>
-                <Label>Cliente</Label>
-                <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
-                  <SelectTrigger><SelectValue placeholder="(opcional)" /></SelectTrigger>
-                  <SelectContent>{(clients ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                </Select>
+              <div className="space-y-2">
+                <Label>Cliente (Opcional)</Label>
+                <div className="flex flex-wrap gap-1.5 p-2 border rounded-md bg-muted/30">
+                  {(!clients || clients.length === 0) && (
+                    <p className="text-[10px] text-muted-foreground w-full text-center">Carregando clientes...</p>
+                  )}
+                  {clients?.slice(0, 8).map((c) => (
+                    <Button
+                      key={c.id}
+                      type="button"
+                      variant={form.client_id === c.id ? "default" : "outline"}
+                      className="h-7 px-2 text-[10px]"
+                      onClick={() => setForm({ ...form, client_id: c.id })}
+                    >
+                      {c.name}
+                    </Button>
+                  ))}
+                  <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
+                    <SelectTrigger className="h-7 text-[10px]">
+                      <SelectValue placeholder="Mais clientes..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhum</SelectItem>
+                      {(clients ?? []).map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
             </div>
