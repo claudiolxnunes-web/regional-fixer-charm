@@ -174,6 +174,9 @@ function SpinPage() {
             {weekStart.toLocaleDateString("pt-BR")} – {new Date(weekEnd.getTime() - 1).toLocaleDateString("pt-BR")}
           </div>
           <Button variant="outline" size="sm" onClick={() => { const d = new Date(weekStart); d.setDate(d.getDate() + 7); setWeekStart(d); }}>Próxima semana →</Button>
+          <Button size="sm" variant="outline" onClick={() => setNewPlanOpen(true)}>
+            <Plus className="size-4 mr-1" /> Novo Planejamento
+          </Button>
           <Button size="sm" variant="secondary" onClick={() => exportWeeklyRoteiro(weekStart, days, byDay, spinNotes ?? [])}>
             <Download className="size-4 mr-1" /> Baixar roteiro
           </Button>
