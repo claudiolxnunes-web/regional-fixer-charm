@@ -14,7 +14,7 @@ import logo from "@/assets/logo.png";
 
 const groups = [
   {
-    label: "Principal",
+    label: "Uso Diário (Representante)",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/app-representante", label: "App do Representante", icon: Smartphone },
