@@ -17,7 +17,7 @@ const groups = [
     label: "Uso Diário (Representante)",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { to: "/app-representante", label: "App do Representante", icon: Smartphone },
+      { to: "/app-representante", label: "App de Registro (Campo)", icon: Smartphone },
       { to: "/planejamento-visitas", label: "Agenda SMART", icon: RouteIcon },
       { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
     ],
