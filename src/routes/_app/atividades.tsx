@@ -93,7 +93,40 @@ function Atividades() {
           <DialogContent>
             <DialogHeader><DialogTitle>Nova atividade</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label>Título</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+              <div>
+                <Label>Atividade</Label>
+                <Select 
+                  value={SUGGESTED_ACTIVITIES.includes(form.title) ? form.title : (form.title ? "other" : "")} 
+                  onValueChange={(v) => {
+                    if (v === "other") {
+                      setForm({ ...form, title: "" });
+                    } else {
+                      setForm({ ...form, title: v });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a atividade..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUGGESTED_ACTIVITIES.map(act => (
+                      <SelectItem key={act} value={act}>{act}</SelectItem>
+                    ))}
+                    <SelectItem value="other">Outros (especificar...)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {(!SUGGESTED_ACTIVITIES.includes(form.title) || !form.title) && (
+                <div className="mt-2">
+                  <Label>Título Específico</Label>
+                  <Input 
+                    value={form.title} 
+                    onChange={(e) => setForm({ ...form, title: e.target.value })} 
+                    placeholder="Descreva a atividade..."
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Tipo</Label>
