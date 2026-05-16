@@ -20,7 +20,7 @@ function Relatorios() {
       const since = new Date();
       since.setMonth(since.getMonth() - months);
       const { data } = await supabase
-        .from("sales")
+        .from("sales_secure_view")
         .select("invoice_date, revenue, volume_sales, representative, rep_code, client_name, product_name")
         .gte("invoice_date", since.toISOString().slice(0, 10))
         .limit(10000);
