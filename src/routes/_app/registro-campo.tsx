@@ -104,89 +104,41 @@ function RegistroCampo() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Registro de Campo</h1>
-        <p className="text-sm text-muted-foreground">Reporte diário das atividades do representante.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Registro de Atividades</h1>
+        <p className="text-sm text-muted-foreground">Histórico e contagem diária das atividades realizadas em campo.</p>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Novo registro</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex flex-col gap-2">
-              <Label>Vincular a uma visita agendada (Opcional)</Label>
-              <Select value={form.activity_id} onValueChange={(v) => setForm({ ...form, activity_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma visita para registrar o SPIN" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhuma visita específica</SelectItem>
-                  {activities?.map((a: any) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.title} - {a.clients?.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {form.activity_id && form.activity_id !== "none" && (
-              <div className="bg-primary/5 p-4 rounded-lg border border-primary/10 space-y-3">
-                <div className="flex items-center gap-2 text-primary font-medium text-sm">
-                  <ClipboardCheck className="size-4" /> Registro SPIN (Método Consultivo)
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">S - Situação</Label>
-                    <Textarea 
-                      placeholder="Fatos, dados, contexto..." 
-                      className="text-xs h-20"
-                      value={form.spin_s}
-                      onChange={(e) => setForm({ ...form, spin_s: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">P - Problema</Label>
-                    <Textarea 
-                      placeholder="Dificuldades, insatisfações..." 
-                      className="text-xs h-20"
-                      value={form.spin_p}
-                      onChange={(e) => setForm({ ...form, spin_p: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">I - Implicação</Label>
-                    <Textarea 
-                      placeholder="Consequências do problema..." 
-                      className="text-xs h-20"
-                      value={form.spin_i}
-                      onChange={(e) => setForm({ ...form, spin_i: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[10px] uppercase font-bold text-muted-foreground">N - Necessidade</Label>
-                    <Textarea 
-                      placeholder="Valor da solução, benefícios..." 
-                      className="text-xs h-20"
-                      value={form.spin_n}
-                      onChange={(e) => setForm({ ...form, spin_n: e.target.value })}
-                    />
-                  </div>
+        <CardHeader><CardTitle>Histórico de Reportes (últimos 30 dias)</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          {(list ?? []).map((r) => (
+            <div key={r.id} className="border rounded-md p-3 text-sm bg-card hover:bg-accent/50 transition-colors">
+              <div className="flex items-center justify-between mb-2">
+                <div className="font-semibold text-primary">{new Date(r.report_date).toLocaleDateString("pt-BR", { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">Visitas: {r.visits_count}</Badge>
+                  <Badge variant="outline" className="text-[10px] bg-rose-50 text-rose-700 border-rose-200">Ligações: {r.calls_count}</Badge>
+                  <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200">Propostas: {r.proposals_count}</Badge>
+                  <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-700 border-slate-200">Pedidos: {r.orders_count}</Badge>
                 </div>
               </div>
-            )}
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <div><Label className="text-xs">Data</Label><Input type="date" value={form.report_date} onChange={(e) => setForm({ ...form, report_date: e.target.value })} /></div>
-              <div><Label className="text-xs">Visitas</Label><Input type="number" inputMode="numeric" value={form.visits_count} onChange={(e) => setForm({ ...form, visits_count: e.target.value })} /></div>
-              <div><Label className="text-xs">Ligações</Label><Input type="number" inputMode="numeric" value={form.calls_count} onChange={(e) => setForm({ ...form, calls_count: e.target.value })} /></div>
-              <div><Label className="text-xs">Propostas</Label><Input type="number" inputMode="numeric" value={form.proposals_count} onChange={(e) => setForm({ ...form, proposals_count: e.target.value })} /></div>
-              <div><Label className="text-xs">Pedidos</Label><Input type="number" inputMode="numeric" value={form.orders_count} onChange={(e) => setForm({ ...form, orders_count: e.target.value })} /></div>
+              {r.observations && (
+                <div className="bg-muted/30 p-2 rounded mt-2 border-l-2 border-primary/20">
+                  <p className="text-xs text-muted-foreground italic">"{r.observations}"</p>
+                </div>
+              )}
             </div>
-            <div><Label className="text-xs">Observações Gerais</Label><Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} placeholder="Resumo do dia..." /></div>
-            <Button onClick={save} className="w-full sm:w-auto">Enviar Registro Diário</Button>
-          </div>
+          ))}
+          {(!list || list.length === 0) && (
+            <div className="text-center py-12">
+              <ClipboardCheck className="size-12 text-muted-foreground/20 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">Nenhum registro encontrado.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
+    </div>
+  );
 
       <Card>
         <CardHeader><CardTitle>Histórico (últimos 30 registros)</CardTitle></CardHeader>
