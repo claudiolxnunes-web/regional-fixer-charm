@@ -114,10 +114,10 @@ function MetasPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Kpi icon={<Target className="size-4" />} label="Representantes" value={grouped.length.toString()} />
-        <Kpi icon={<TrendingUp className="size-4" />} label="Meta de Faturamento" value={`R$ ${fmt(totalRev)}`} />
-        <Kpi icon={<TrendingUp className="size-4" />} label="Meta de Volume (kg)" value={fmtV(totalVol)} />
-        <Kpi icon={<Target className="size-4" />} label="Linhas de meta" value={goals.length.toString()} />
+        <KpiCard label="Representantes" value={grouped.length.toString()} />
+        <KpiCard label="Meta de Faturamento" value={`R$ ${formatCurrencyCompact(totalRev)}`} />
+        <KpiCard label="Meta de Volume (kg)" value={formatCurrencyCompact(totalVol)} />
+        <KpiCard label="Linhas de meta" value={goals.length.toString()} />
       </div>
 
       {isLoading && <Card className="p-8 text-center text-muted-foreground">Carregando...</Card>}
