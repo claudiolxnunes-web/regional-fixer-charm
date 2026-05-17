@@ -23,11 +23,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Get initial session
+    // 1. Get initial session — do NOT await DB calls here either.
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
-      if (s?.user) loadRoles(s.user.id);
       setLoading(false);
+      if (s?.user) setTimeout(() => { loadRoles(s.user.id); }, 0);
     });
 
     // 2. Listen for changes
