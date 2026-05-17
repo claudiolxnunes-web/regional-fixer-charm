@@ -21,6 +21,7 @@ import { Route as AppRepresentantesRouteImport } from './routes/_app/representan
 import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
 import { Route as AppRegistroCampoRouteImport } from './routes/_app/registro-campo'
 import { Route as AppPropostasRouteImport } from './routes/_app/propostas'
+import { Route as AppProdutosRouteImport } from './routes/_app/produtos'
 import { Route as AppPreferenciasRouteImport } from './routes/_app/preferencias'
 import { Route as AppPlanejamentoVisitasRouteImport } from './routes/_app/planejamento-visitas'
 import { Route as AppPlanejamentoRouteImport } from './routes/_app/planejamento'
@@ -101,6 +102,11 @@ const AppRegistroCampoRoute = AppRegistroCampoRouteImport.update({
 const AppPropostasRoute = AppPropostasRouteImport.update({
   id: '/propostas',
   path: '/propostas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProdutosRoute = AppProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPreferenciasRoute = AppPreferenciasRouteImport.update({
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/planejamento': typeof AppPlanejamentoRoute
   '/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/preferencias': typeof AppPreferenciasRoute
+  '/produtos': typeof AppProdutosRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/planejamento': typeof AppPlanejamentoRoute
   '/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/preferencias': typeof AppPreferenciasRoute
+  '/produtos': typeof AppProdutosRoute
   '/propostas': typeof AppPropostasRoute
   '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/_app/planejamento': typeof AppPlanejamentoRoute
   '/_app/planejamento-visitas': typeof AppPlanejamentoVisitasRoute
   '/_app/preferencias': typeof AppPreferenciasRoute
+  '/_app/produtos': typeof AppProdutosRoute
   '/_app/propostas': typeof AppPropostasRoute
   '/_app/registro-campo': typeof AppRegistroCampoRoute
   '/_app/relatorios': typeof AppRelatoriosRoute
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/planejamento'
     | '/planejamento-visitas'
     | '/preferencias'
+    | '/produtos'
     | '/propostas'
     | '/registro-campo'
     | '/relatorios'
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/planejamento'
     | '/planejamento-visitas'
     | '/preferencias'
+    | '/produtos'
     | '/propostas'
     | '/registro-campo'
     | '/relatorios'
@@ -419,6 +430,7 @@ export interface FileRouteTypes {
     | '/_app/planejamento'
     | '/_app/planejamento-visitas'
     | '/_app/preferencias'
+    | '/_app/produtos'
     | '/_app/propostas'
     | '/_app/registro-campo'
     | '/_app/relatorios'
@@ -531,6 +543,13 @@ declare module '@tanstack/react-router' {
       path: '/propostas'
       fullPath: '/propostas'
       preLoaderRoute: typeof AppPropostasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/produtos': {
+      id: '/_app/produtos'
+      path: '/produtos'
+      fullPath: '/produtos'
+      preLoaderRoute: typeof AppProdutosRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/preferencias': {
@@ -730,6 +749,7 @@ interface AppRouteChildren {
   AppPlanejamentoRoute: typeof AppPlanejamentoRoute
   AppPlanejamentoVisitasRoute: typeof AppPlanejamentoVisitasRoute
   AppPreferenciasRoute: typeof AppPreferenciasRoute
+  AppProdutosRoute: typeof AppProdutosRoute
   AppPropostasRoute: typeof AppPropostasRoute
   AppRegistroCampoRoute: typeof AppRegistroCampoRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
@@ -754,6 +774,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPlanejamentoRoute: AppPlanejamentoRoute,
   AppPlanejamentoVisitasRoute: AppPlanejamentoVisitasRoute,
   AppPreferenciasRoute: AppPreferenciasRoute,
+  AppProdutosRoute: AppProdutosRoute,
   AppPropostasRoute: AppPropostasRoute,
   AppRegistroCampoRoute: AppRegistroCampoRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
@@ -779,3 +800,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
