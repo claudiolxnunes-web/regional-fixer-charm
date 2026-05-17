@@ -127,10 +127,10 @@ function LoginPage() {
       <Card className="w-full max-w-md shadow-lg border-primary/10">
         <CardHeader className="text-center space-y-1">
           <div className="mx-auto size-20 rounded-xl bg-white grid place-items-center mb-3 overflow-hidden border shadow-sm">
-            <img src={logo} alt="AgroGestão CRM" className="size-16 object-contain" width={64} height={64} fetchPriority="high" decoding="async" />
+            <img src={logo || "/placeholder.svg"} alt="AgroGestão CRM" className="size-16 object-contain" width={64} height={64} fetchPriority="high" decoding="async" />
           </div>
           <CardTitle className="text-2xl font-bold text-primary">AgroGestão CRM</CardTitle>
-          <CardDescription className="text-base">
+          <CardDescription className="text-base text-balance">
             {search.invite ? "Você foi convidado! Crie sua conta." : mode === "signin" ? "Bem-vindo de volta" : "Comece a gerenciar seu time agora"}
           </CardDescription>
         </CardHeader>
