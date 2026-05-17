@@ -1,10 +1,10 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Terminal } from "lucide-react";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
@@ -51,6 +51,12 @@ function AppLayout() {
   const [checking, setChecking] = useState(true);
   const [banner, setBanner] = useState<{ tone: "warn" | "danger"; msg: string } | null>(null);
   const [stalled, setStalled] = useState(false);
+  const [showDiagnosticLink, setShowDiagnosticLink] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowDiagnosticLink(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -133,8 +139,22 @@ function AppLayout() {
     };
   }, [loading, session, navigate]);
 
-  if (loading) return <div className="min-h-screen grid place-items-center text-muted-foreground">Autenticando...</div>;
-  if (checking) return <div className="min-h-screen grid place-items-center text-muted-foreground">Iniciando sistema...</div>;
+  if (loading || checking) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground p-4 text-center">
+        <div className="animate-pulse">{loading ? "Autenticando..." : "Iniciando sistema..."}</div>
+        {showDiagnosticLink && (
+          <Link 
+            to="/diagnostics" 
+            className="text-xs flex items-center gap-1.5 opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <Terminal className="h-3 w-3" />
+            Problemas ao iniciar? Ver diagnóstico
+          </Link>
+        )}
+      </div>
+    );
+  }
   if (!session) return null;
 
   return (
@@ -144,12 +164,21 @@ function AppLayout() {
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
           <div className="flex-1">
             <p>A verificação de permissões demorou mais que o esperado. Algumas informações podem não estar atualizadas.</p>
-            <button
-              onClick={() => { try { sessionStorage.removeItem(RELOAD_STORAGE_KEY); } catch {} ; window.location.reload(); }}
-              className="mt-1 underline font-medium"
-            >
-              Tentar novamente
-            </button>
+            <div className="flex gap-4 mt-1">
+              <button
+                onClick={() => { try { sessionStorage.removeItem(RELOAD_STORAGE_KEY); } catch {} ; window.location.reload(); }}
+                className="underline font-medium"
+              >
+                Tentar novamente
+              </button>
+              <Link
+                to="/diagnostics"
+                className="flex items-center gap-1.5 underline font-medium text-destructive/80 hover:text-destructive"
+              >
+                <Terminal className="h-3.5 w-3.5" />
+                Ver Diagnóstico
+              </Link>
+            </div>
           </div>
         </div>
       )}
