@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bot, Clock, Play, Loader2, CheckCircle2 } from "lucide-react";
+import { Bot, Clock, Play, Loader2, CheckCircle2, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { KpiCard } from "@/components/crm/KpiCard";
 
 export const Route = createFileRoute("/_app/automacoes")({ component: Automacoes });
 
