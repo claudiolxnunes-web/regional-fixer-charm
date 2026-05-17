@@ -99,9 +99,9 @@ function Relatorios() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground">Faturamento total</div><div className="text-xl font-semibold">R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div></CardContent></Card>
-        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground">Notas</div><div className="text-xl font-semibold">{(sales ?? []).length}</div></CardContent></Card>
-        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground">Volume total</div><div className="text-xl font-semibold">{monthly.reduce((s, m) => s + m.volume, 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div></CardContent></Card>
+        <KpiCard label="Faturamento total" value={`R$ ${formatCurrencyCompact(total)}`} />
+        <KpiCard label="Notas" value={(sales ?? []).length.toString()} />
+        <KpiCard label="Volume total" value={formatCurrencyCompact(monthly.reduce((s, m) => s + m.volume, 0))} />
       </div>
 
       <Card>
