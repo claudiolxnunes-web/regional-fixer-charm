@@ -1,6 +1,7 @@
 import * as React from "react";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 
 type Props = { children: React.ReactNode };
 type State = { error: Error | null };
