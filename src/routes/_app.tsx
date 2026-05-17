@@ -97,10 +97,19 @@ function AppLayout() {
       }
     })();
 
-    return () => { isMounted = false; };
+    // Fallback security: force loading state to false after 3 seconds if something hangs
+    const timeout = setTimeout(() => {
+      if (isMounted) setChecking(false);
+    }, 3000);
+
+    return () => { 
+      isMounted = false;
+      clearTimeout(timeout);
+    };
   }, [loading, session, navigate]);
 
-  if (loading || checking) return <div className="min-h-screen grid place-items-center text-muted-foreground">Carregando...</div>;
+  if (loading) return <div className="min-h-screen grid place-items-center text-muted-foreground">Autenticando...</div>;
+  if (checking) return <div className="min-h-screen grid place-items-center text-muted-foreground">Iniciando sistema...</div>;
   if (!session) return null;
 
   return (
