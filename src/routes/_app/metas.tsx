@@ -6,9 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronRight, Target, TrendingUp } from "lucide-react";
+import { ChevronDown, ChevronRight, Target, TrendingUp, Trophy } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { GoalsImportDialog } from "@/components/GoalsImportDialog";
+import { KpiCard } from "@/components/crm/KpiCard";
+import { formatCurrencyCompact } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/metas")({ component: MetasPage });
 
