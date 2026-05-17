@@ -41,7 +41,7 @@ function evaluateAccess(team: { subscription_status: string; current_period_end:
   return { ok: false, banner: null };
 }
 
-const PERMISSION_TIMEOUT_MS = 6000;
+const PERMISSION_TIMEOUT_MS = 10000;
 const MAX_AUTO_RELOADS = 2;
 const RELOAD_STORAGE_KEY = "lvbl-app-permission-reload-count";
 
