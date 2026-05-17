@@ -23,22 +23,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Get initial session
+    // 1. Get initial session — do NOT await DB calls here either.
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
-      if (s?.user) loadRoles(s.user.id);
       setLoading(false);
+      if (s?.user) setTimeout(() => { loadRoles(s.user.id); }, 0);
     });
 
     // 2. Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
+    // IMPORTANT: Never call supabase.from() / await async DB queries directly inside
+    // onAuthStateChange — it deadlocks the auth lock. Defer with setTimeout(0).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       if (s?.user) {
-        await loadRoles(s.user.id);
+        setTimeout(() => { loadRoles(s.user.id); }, 0);
       } else {
         setRoles([]);
       }
-      // Se for logout ou token expirado, garante que o loading pare
       if (event === 'SIGNED_OUT') setLoading(false);
     });
 
