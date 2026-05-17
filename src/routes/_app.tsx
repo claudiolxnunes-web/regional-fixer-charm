@@ -144,12 +144,21 @@ function AppLayout() {
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
           <div className="flex-1">
             <p>A verificação de permissões demorou mais que o esperado. Algumas informações podem não estar atualizadas.</p>
-            <button
-              onClick={() => { try { sessionStorage.removeItem(RELOAD_STORAGE_KEY); } catch {} ; window.location.reload(); }}
-              className="mt-1 underline font-medium"
-            >
-              Tentar novamente
-            </button>
+            <div className="flex gap-4 mt-1">
+              <button
+                onClick={() => { try { sessionStorage.removeItem(RELOAD_STORAGE_KEY); } catch {} ; window.location.reload(); }}
+                className="underline font-medium"
+              >
+                Tentar novamente
+              </button>
+              <Link
+                to="/diagnostics"
+                className="flex items-center gap-1.5 underline font-medium text-destructive/80 hover:text-destructive"
+              >
+                <Terminal className="h-3.5 w-3.5" />
+                Ver Diagnóstico
+              </Link>
+            </div>
           </div>
         </div>
       )}
