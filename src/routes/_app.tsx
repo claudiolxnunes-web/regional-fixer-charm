@@ -122,7 +122,7 @@ function AppLayout() {
 
       if (count < MAX_AUTO_RELOADS) {
         try { sessionStorage.setItem(RELOAD_STORAGE_KEY, String(count + 1)); } catch {}
-        console.warn(`[AppLayout] Permission check timeout — auto-reload attempt ${count + 1}/${MAX_AUTO_RELOADS}`);
+        console.warn(`[AppLayout] Permission check timeout (6s) — auto-reload attempt ${count + 1}/${MAX_AUTO_RELOADS}`);
         if (typeof window !== "undefined") window.location.reload();
         return;
       }
