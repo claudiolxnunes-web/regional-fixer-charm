@@ -82,9 +82,11 @@ function StatusPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Status do Sistema</h1>
-        <p className="text-muted-foreground">Saúde das integrações e serviços do AgroGestão CRM.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Status do Sistema</h1>
+          <p className="text-muted-foreground">Saúde das integrações e serviços do AgroGestão CRM.</p>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
