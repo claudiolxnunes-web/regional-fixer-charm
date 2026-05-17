@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Home, Phone, FileText, ShoppingCart, Plus, Send, LogOut,
-  Users, MapPin, Calendar,
+  Users, MapPin, Calendar, ChevronRight, CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { RepTodayPanel } from "@/components/RepTodayPanel";
@@ -179,12 +179,20 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
         </Button>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 pb-20">
         {/* Banner instalar como app (PWA) */}
         <InstallAppButton />
 
         {/* Painel "Hoje" — orientação rápida em campo */}
-        <RepTodayPanel repId={rep.id} />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <Calendar className="size-4 text-emerald-600" /> Agenda de Hoje
+            </h2>
+            <Link to="/planejamento-visitas" className="text-[10px] text-emerald-600 font-medium">Ver semana completa</Link>
+          </div>
+          <RepTodayPanel repId={rep.id} />
+        </div>
 
         {/* Counters */}
         <div className="grid grid-cols-4 gap-2">
@@ -195,50 +203,59 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
         </div>
 
         {/* Action: register */}
-        <Button
-          size="lg"
-          className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow"
-          onClick={() => setOpenForm(true)}
-        >
-          <Plus className="size-5 mr-2" /> Registro de Campo (Check-in)
-        </Button>
-
-        {/* Daily observations */}
-        <Card className="p-4 space-y-2">
-          <Label className="flex items-center gap-1.5 text-sm">
-            📝 <span className="font-semibold">Observações Gerais do Dia</span>
-          </Label>
-          <Textarea
-            placeholder="Situação do mercado, dificuldades encontradas, oportunidades identificadas..."
-            value={observations}
-            onChange={(e) => setObservations(e.target.value)}
-            rows={3}
-          />
-        </Card>
-
-        {/* Send report */}
-        <Button
-          size="lg"
-          className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow"
-          onClick={() => sendReport.mutate()}
-          disabled={sendReport.isPending}
-        >
-          <Send className="size-5 mr-2" />
-          {sendReport.isPending ? "Enviando..." : "Enviar Relatório do Dia"}
-        </Button>
-        <p className="text-center text-[11px] text-muted-foreground -mt-2">
-          Ao enviar, o gerente regional receberá seu relatório imediatamente.
-        </p>
+        <div className="grid grid-cols-1 gap-2">
+          <Button
+            size="lg"
+            className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow flex flex-col items-center justify-center py-0"
+            onClick={() => setOpenForm(true)}
+          >
+            <div className="flex items-center">
+              <Plus className="size-5 mr-2" /> Registro de Atividade
+            </div>
+            <span className="text-[10px] opacity-80 font-normal">Check-in, Visita ou Ligação</span>
+          </Button>
+        </div>
 
         {/* Secondary tabs: my carteira */}
         <Tabs defaultValue="clientes" className="pt-2">
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="clientes"><Users className="size-3.5 mr-1.5" />Carteira</TabsTrigger>
-            <TabsTrigger value="historico"><Calendar className="size-3.5 mr-1.5" />Histórico</TabsTrigger>
+            <TabsTrigger value="clientes" className="text-xs">
+              <Users className="size-3.5 mr-1.5" />Minha Carteira
+            </TabsTrigger>
+            <TabsTrigger value="historico" className="text-xs">
+              <Calendar className="size-3.5 mr-1.5" />Meu Histórico
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="clientes"><MyClients repId={rep.id} /></TabsContent>
-          <TabsContent value="historico"><MyHistory repId={rep.id} /></TabsContent>
+          <TabsContent value="clientes" className="mt-4">
+            <MyClients repId={rep.id} />
+          </TabsContent>
+          <TabsContent value="historico" className="mt-4">
+            <MyHistory repId={rep.id} />
+          </TabsContent>
         </Tabs>
+
+        {/* Daily observations (at the end) */}
+        <Card className="p-4 space-y-3 border-emerald-100 bg-emerald-50/30">
+          <Label className="flex items-center gap-1.5 text-sm">
+            📝 <span className="font-semibold italic">Fechamento do Dia</span>
+          </Label>
+          <Textarea
+            placeholder="Resumo geral: como foi o mercado hoje? Alguma dificuldade ou oportunidade?"
+            value={observations}
+            onChange={(e) => setObservations(e.target.value)}
+            rows={3}
+            className="bg-white"
+          />
+          <Button
+            size="sm"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+            onClick={() => sendReport.mutate()}
+            disabled={sendReport.isPending}
+          >
+            <Send className="size-4 mr-2" />
+            {sendReport.isPending ? "Enviando..." : "Enviar Relatório Diário"}
+          </Button>
+        </Card>
       </div>
 
       <ActivityFormDialog open={openForm} onOpenChange={setOpenForm} rep={rep} />
@@ -263,12 +280,13 @@ function CounterCard({ color, icon, label, count }: { color: string; icon: React
 }
 
 function MyClients({ repId }: { repId: string }) {
+  const [search, setSearch] = useState("");
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["rep_my_clients", repId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")
-        .select("id, name, client_code, city, state")
+        .select("id, name, client_code, city, state, production_type")
         .eq("representative_id", repId)
         .order("name")
         .limit(200);
@@ -277,25 +295,59 @@ function MyClients({ repId }: { repId: string }) {
     },
   });
 
+  const filtered = useMemo(() => {
+    if (!search) return clients;
+    const s = search.toLowerCase();
+    return clients.filter(c => 
+      c.name?.toLowerCase().includes(s) || 
+      c.client_code?.toLowerCase().includes(s) ||
+      c.city?.toLowerCase().includes(s)
+    );
+  }, [clients, search]);
+
   if (isLoading) return <p className="py-6 text-center text-sm text-muted-foreground">Carregando...</p>;
-  if (!clients.length) return <p className="py-6 text-center text-sm text-muted-foreground">Nenhum cliente vinculado a você ainda.</p>;
 
   return (
-    <div className="space-y-2 max-h-80 overflow-auto">
-      {clients.map((c: any) => (
-        <Card key={c.id} className="p-3 flex items-center gap-2">
-          <div className="size-8 rounded-full bg-primary/10 grid place-items-center text-primary text-xs font-semibold">
-            {c.name?.charAt(0)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">{c.name}</div>
-            <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-              {c.client_code && <span className="font-mono">#{c.client_code}</span>}
-              {c.city && <><MapPin className="size-3" />{c.city}/{c.state}</>}
+    <div className="space-y-3">
+      <div className="relative">
+        <Input 
+          placeholder="Buscar cliente na carteira..." 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-10 text-sm pl-9"
+        />
+        <Users className="absolute left-3 top-3 size-4 text-muted-foreground" />
+      </div>
+
+      <div className="space-y-2 max-h-[400px] overflow-auto pb-4">
+        {filtered.map((c: any) => (
+          <Card key={c.id} className="p-3 flex items-center gap-3 active:bg-accent transition-colors">
+            <div className="size-10 rounded-full bg-emerald-100 text-emerald-700 grid place-items-center text-sm font-semibold shrink-0">
+              {c.name?.charAt(0)}
             </div>
-          </div>
-        </Card>
-      ))}
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold truncate text-slate-900">{c.name}</div>
+              <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                {c.client_code && <span className="font-mono bg-slate-100 px-1 rounded">#{c.client_code}</span>}
+                {c.city && <><MapPin className="size-3" />{c.city}/{c.state}</>}
+              </div>
+              {c.production_type && (
+                <div className="text-[10px] text-emerald-600 font-medium mt-0.5 uppercase tracking-tight">
+                  {c.production_type}
+                </div>
+              )}
+            </div>
+            <Button size="icon" variant="ghost" className="size-8" asChild>
+              <Link to={`/clientes?search=${c.name}`}>
+                <ChevronRight className="size-4" />
+              </Link>
+            </Button>
+          </Card>
+        ))}
+        {!filtered.length && (
+          <p className="py-6 text-center text-xs text-muted-foreground">Nenhum cliente encontrado.</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -319,20 +371,32 @@ function MyHistory({ repId }: { repId: string }) {
   if (!items.length) return <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma atividade registrada ainda.</p>;
 
   return (
-    <div className="space-y-2 max-h-80 overflow-auto">
+    <div className="space-y-2 max-h-[400px] overflow-auto pb-4">
       {items.map((a: any) => (
         <Card key={a.id} className="p-3">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <div className="text-sm font-medium truncate">{a.title}</div>
+              <div className="text-sm font-semibold truncate text-slate-900">{a.title}</div>
               <div className="text-[11px] text-muted-foreground">
                 {new Date(a.created_at).toLocaleString("pt-BR")}
               </div>
+              <div className="mt-1">
+                <Badge variant="outline" className="text-[9px] uppercase tracking-wider h-4">{a.type}</Badge>
+              </div>
             </div>
-            <Badge variant="outline" className="text-[10px]">{a.type}</Badge>
+            {a.status === "completed" ? (
+              <div className="size-6 rounded-full bg-emerald-100 text-emerald-600 grid place-items-center">
+                <CheckCircle2 className="size-3.5" />
+              </div>
+            ) : (
+              <Badge variant="secondary" className="text-[9px]">Pendente</Badge>
+            )}
           </div>
         </Card>
       ))}
+      {!items.length && (
+        <p className="py-6 text-center text-xs text-muted-foreground">Nenhuma atividade registrada.</p>
+      )}
     </div>
   );
 }
