@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createPortalSession } from "@/utils/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { Settings } from "lucide-react";
 
 export const Route = createFileRoute("/_app/preferencias")({ component: Preferencias });
 
