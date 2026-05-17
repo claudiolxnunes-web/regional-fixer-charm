@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, CheckCircle2, Eye, RefreshCw, AlertTriangle, Clock, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { KpiCard } from "@/components/crm/KpiCard";
 
 export const Route = createFileRoute("/_app/alertas")({ component: AlertasPage });
 
@@ -125,9 +126,9 @@ function AlertasPage() {
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <Kpi icon={<Clock className="size-4" />} label="Novos" value={counts.new} />
-        <Kpi icon={<AlertTriangle className="size-4 text-destructive" />} label="Alta severidade" value={counts.high} />
-        <Kpi icon={<Bell className="size-4" />} label="Total" value={counts.total} />
+        <KpiCard label="Novos" value={counts.new.toString()} />
+        <KpiCard label="Alta severidade" value={counts.high.toString()} />
+        <KpiCard label="Total" value={counts.total.toString()} />
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>

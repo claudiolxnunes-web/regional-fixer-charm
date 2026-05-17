@@ -6,9 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronRight, Target, TrendingUp } from "lucide-react";
+import { ChevronDown, ChevronRight, Target, TrendingUp, Trophy } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { GoalsImportDialog } from "@/components/GoalsImportDialog";
+import { KpiCard } from "@/components/crm/KpiCard";
+import { formatCurrencyCompact } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/metas")({ component: MetasPage });
 
@@ -88,9 +90,11 @@ function MetasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Metas</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <Trophy className="size-6 text-primary" /> Metas
+          </h1>
           <p className="text-sm text-muted-foreground">
             Faturamento e volume por representante, mês e desdobrados em linha, solução e subsolução.
           </p>
@@ -110,10 +114,10 @@ function MetasPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Kpi icon={<Target className="size-4" />} label="Representantes" value={grouped.length.toString()} />
-        <Kpi icon={<TrendingUp className="size-4" />} label="Meta de Faturamento" value={`R$ ${fmt(totalRev)}`} />
-        <Kpi icon={<TrendingUp className="size-4" />} label="Meta de Volume (kg)" value={fmtV(totalVol)} />
-        <Kpi icon={<Target className="size-4" />} label="Linhas de meta" value={goals.length.toString()} />
+        <KpiCard label="Representantes" value={grouped.length.toString()} />
+        <KpiCard label="Meta de Faturamento" value={`R$ ${formatCurrencyCompact(totalRev)}`} />
+        <KpiCard label="Meta de Volume (kg)" value={formatCurrencyCompact(totalVol)} />
+        <KpiCard label="Linhas de meta" value={goals.length.toString()} />
       </div>
 
       {isLoading && <Card className="p-8 text-center text-muted-foreground">Carregando...</Card>}

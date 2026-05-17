@@ -1,66 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, MessageCircle, Share2, Mail } from "lucide-react";
-import { toast } from "sonner";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, UserCog } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { ImportDialog } from "@/components/ImportDialog";
 import { RepBreakdownDialog } from "@/components/RepBreakdownDialog";
+import { useRepresentatives } from "@/hooks/useRepresentatives";
+import { RepForm } from "@/components/crm/reps/RepForm";
+import { InviteButton } from "@/components/crm/reps/InviteButton";
+import { formatCurrency } from "@/utils/formatters";
+import type { Representative } from "@/types/crm";
 
 export const Route = createFileRoute("/_app/representantes")({ component: RepsPage });
 
-type Rep = {
-  id: string;
-  rep_code: string | null;
-  name: string;
-  company: string | null;
-  company_cnpj: string | null;
-  email: string | null;
-  phone: string | null;
-  status: "active" | "inactive";
-  total_sales: number | null;
-  total_clients: number | null;
-  home_state: string | null;
-  home_city: string | null;
-};
-
 function RepsPage() {
-  const qc = useQueryClient();
   const { isStaff } = useAuth();
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<Rep | null>(null);
+  const [editing, setEditing] = useState<Representative | null>(null);
 
-  const { data: reps = [], isLoading } = useQuery({
-    queryKey: ["reps"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("representatives").select("*").order("name");
-      if (error) throw error;
-      return data as Rep[];
-    },
-  });
-
-  const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("representatives").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["reps"] }); toast.success("Removido"); },
-    onError: (e: any) => toast.error(e.message),
-  });
+  const { reps, isLoading, deleteRep, saveRep, isSaving } = useRepresentatives();
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Representantes</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <UserCog className="size-6 text-primary" /> Representantes
+          </h1>
           <p className="text-sm text-muted-foreground">{reps.length} cadastrados</p>
         </div>
         {isStaff && (
@@ -96,7 +66,6 @@ function RepsPage() {
                 { header: "telefone", field: "phone" },
               ]}
               autoDetect={async () => {
-                // Find rep IDs referenced by clients but missing in representatives
                 const { data: refs } = await supabase.from("clients").select("representative_id").not("representative_id", "is", null);
                 const { data: existing } = await supabase.from("representatives").select("id");
                 const existingIds = new Set((existing ?? []).map((r) => r.id));
@@ -108,7 +77,13 @@ function RepsPage() {
               <DialogTrigger asChild>
                 <Button onClick={() => setEditing(null)}><Plus className="size-4 mr-2" /> Novo</Button>
               </DialogTrigger>
-              <RepForm key={editing?.id ?? "new"} editing={editing} onClose={() => setOpen(false)} />
+              <RepForm 
+                key={editing?.id ?? "new"} 
+                editing={editing} 
+                onClose={() => setOpen(false)} 
+                onSave={(payload, id) => saveRep({ payload, id })}
+                isSaving={isSaving}
+              />
             </Dialog>
           </div>
         )}
@@ -136,7 +111,7 @@ function RepsPage() {
                   <td className="p-3">{r.company || "-"}</td>
                   <td className="p-3">{[r.home_city, r.home_state].filter(Boolean).join(" / ") || "-"}</td>
                   <td className="p-3"><Badge variant={r.status === "active" ? "default" : "secondary"}>{r.status}</Badge></td>
-                  <td className="p-3 text-right">R$ {Number(r.total_sales ?? 0).toLocaleString("pt-BR")}</td>
+                  <td className="p-3 text-right">{formatCurrency(r.total_sales)}</td>
                   <td className="p-3 text-right">{r.total_clients ?? 0}</td>
                   <td className="p-3 text-right whitespace-nowrap">
                     <Button asChild size="sm" variant="ghost"><Link to="/representantes/$id" params={{ id: r.id }}>Detalhes</Link></Button>
@@ -144,7 +119,7 @@ function RepsPage() {
                     {isStaff && (
                       <>
                         <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil className="size-4" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir?")) del.mutate(r.id); }}><Trash2 className="size-4 text-destructive" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => { if (confirm("Excluir?")) deleteRep(r.id); }}><Trash2 className="size-4 text-destructive" /></Button>
                       </>
                     )}
                   </td>
@@ -155,189 +130,5 @@ function RepsPage() {
         </div>
       </Card>
     </div>
-  );
-}
-
-function RepForm({ editing, onClose }: { editing: Rep | null; onClose: () => void }) {
-  const qc = useQueryClient();
-  const [form, setForm] = useState({
-    rep_code: editing?.rep_code ?? "",
-    name: editing?.name ?? "",
-    company: editing?.company ?? "",
-    company_cnpj: editing?.company_cnpj ?? "",
-    email: editing?.email ?? "",
-    phone: editing?.phone ?? "",
-    home_city: editing?.home_city ?? "",
-    home_state: editing?.home_state ?? "",
-    status: editing?.status ?? "active",
-  });
-
-  const save = useMutation({
-    mutationFn: async () => {
-      if (editing) {
-        const { error } = await supabase.from("representatives").update(form).eq("id", editing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("representatives").insert(form);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["reps"] }); toast.success("Salvo"); onClose(); },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  return (
-    <DialogContent className="max-w-2xl">
-      <DialogHeader><DialogTitle>{editing ? "Editar" : "Novo"} representante</DialogTitle></DialogHeader>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5"><Label className="text-xs">Código</Label><Input value={form.rep_code} onChange={(e) => setForm({ ...form, rep_code: e.target.value })} /></div>
-        <div className="space-y-1.5"><Label className="text-xs">Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-        <div className="space-y-1.5"><Label className="text-xs">Empresa de representação</Label><Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} /></div>
-        <div className="space-y-1.5"><Label className="text-xs">CNPJ da empresa</Label><Input value={form.company_cnpj} onChange={(e) => setForm({ ...form, company_cnpj: e.target.value })} /></div>
-        <div className="space-y-1.5"><Label className="text-xs">Cidade sede</Label><Input value={form.home_city} onChange={(e) => setForm({ ...form, home_city: e.target.value })} /></div>
-        <div className="space-y-1.5"><Label className="text-xs">UF sede</Label><Input maxLength={2} value={form.home_state} onChange={(e) => setForm({ ...form, home_state: e.target.value.toUpperCase() })} /></div>
-        <div className="space-y-1.5"><Label className="text-xs">E-mail</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-        <div className="space-y-1.5"><Label className="text-xs">Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Status</Label>
-          <Select value={form.status} onValueChange={(v: any) => setForm({ ...form, status: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Ativo</SelectItem>
-              <SelectItem value="inactive">Inativo</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={onClose}>Cancelar</Button>
-        <Button onClick={() => save.mutate()} disabled={save.isPending || !form.name}>Salvar</Button>
-      </DialogFooter>
-    </DialogContent>
-  );
-}
-
-function InviteButton() {
-  const { user } = useAuth();
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "manager" | "rep">("rep");
-  const [loading, setLoading] = useState(false);
-
-  async function sendEmail() {
-    if (!user || !email) return;
-    setLoading(true);
-    try {
-      const { data: tm } = await supabase.from("team_members").select("team_id").eq("user_id", user.id).maybeSingle();
-      if (!tm?.team_id) throw new Error("Sem time associado");
-      
-      const { sendInviteWithTeam } = await import("@/lib/email.functions");
-      await sendInviteWithTeam({ data: { email, role, teamId: tm.team_id, createdBy: user.id } });
-      
-      toast.success("Convite enviado por e-mail!");
-      setOpen(false);
-      setEmail("");
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function inviteViaWhatsApp() {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const { data: tm } = await supabase.from("team_members").select("team_id").eq("user_id", user.id).maybeSingle();
-      if (!tm?.team_id) throw new Error("Sem time associado");
-
-      const { data: inv, error } = await supabase
-        .from("invites")
-        .insert({
-          team_id: tm.team_id,
-          role,
-          created_by: user.id,
-        })
-        .select("token")
-        .single();
-
-      if (error) throw error;
-
-      const base = window.location.origin;
-      const link = `${base}/login?invite=${inv.token}`;
-      const message = encodeURIComponent(`Olá! Você foi convidado para participar da equipe no AgroGestão CRM como ${role === 'rep' ? 'Vendedor' : role}. Crie sua conta aqui: ${link}`);
-      
-      window.open(`https://wa.me/?text=${message}`, "_blank");
-      toast.success("Link gerado e WhatsApp aberto!");
-      setOpen(false);
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha ao gerar link");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Share2 className="size-4" /> Convidar Membro
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Convidar para a equipe</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label>Função do novo membro</Label>
-            <Select value={role} onValueChange={(v) => setRole(v as any)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="rep">Vendedor / Representante</SelectItem>
-                <SelectItem value="manager">Gestor</SelectItem>
-                <SelectItem value="admin">Administrador (Total)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Convidar por E-mail</Label>
-              <div className="flex gap-2">
-                <Input 
-                  type="email" 
-                  placeholder="email@exemplo.com" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                />
-                <Button onClick={sendEmail} disabled={loading || !email} size="icon">
-                  <Mail className="size-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">ou</span>
-              </div>
-            </div>
-
-            <Button 
-              variant="outline" 
-              className="w-full gap-2 border-green-500/50 hover:bg-green-50 hover:text-green-700 text-green-600"
-              onClick={inviteViaWhatsApp}
-              disabled={loading}
-            >
-              <MessageCircle className="size-4" />
-              Gerar Link e Enviar via WhatsApp
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }

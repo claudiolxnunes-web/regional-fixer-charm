@@ -9,10 +9,10 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { KpiCard } from "@/components/crm/KpiCard";
+import { formatCurrency } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/pedidos")({ component: PedidosPage });
-
-const fmt = (v: any) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function statusVariant(s: string | null | undefined): any {
   if (!s) return "outline";
@@ -83,17 +83,19 @@ function PedidosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Pedidos em Aberto</h1>
-        <p className="text-sm text-muted-foreground">{rows.length} itens na carteira (último snapshot importado)</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Pedidos em Aberto</h1>
+          <p className="text-sm text-muted-foreground">{rows.length} itens na carteira</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <Kpi label="Valor em carteira" value={`R$ ${fmt(k.total)}`} />
-        <Kpi label="Volume (kg/sc)" value={k.vol.toLocaleString("pt-BR")} />
-        <Kpi label="Pedidos" value={k.orders.toString()} sub={`${k.clients} clientes`} />
-        <Kpi label="Bloqueados" value={`R$ ${fmt(k.blockedVal)}`} sub={`${k.blockedCount} itens`} />
-        <Kpi label="Linhas" value={filtered.length.toString()} />
+        <KpiCard label="Valor em carteira" value={formatCurrency(k.total)} />
+        <KpiCard label="Volume (kg/sc)" value={k.vol.toLocaleString("pt-BR")} />
+        <KpiCard label="Pedidos" value={k.orders.toString()} sub={`${k.clients} clientes`} />
+        <KpiCard label="Bloqueados" value={formatCurrency(k.blockedVal)} sub={`${k.blockedCount} itens`} />
+        <KpiCard label="Linhas" value={filtered.length.toString()} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -103,7 +105,7 @@ function PedidosPage() {
             {Object.entries(k.byStatus).sort((a, b) => b[1].val - a[1].val).map(([s, v]) => (
               <div key={s} className="flex justify-between items-center text-xs">
                 <Badge variant={statusVariant(s)} className="text-[10px]">{s}</Badge>
-                <span className="font-mono">R$ {fmt(v.val)} <span className="text-muted-foreground">({v.qty})</span></span>
+                <span className="font-mono">{formatCurrency(v.val)} <span className="text-muted-foreground">({v.qty})</span></span>
               </div>
             ))}
           </div>
@@ -114,7 +116,7 @@ function PedidosPage() {
             {Object.entries(k.byErc).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([s, v]) => (
               <div key={s} className="flex justify-between text-xs">
                 <span className="truncate pr-2">{s}</span>
-                <span className="font-mono">R$ {fmt(v)}</span>
+                <span className="font-mono">{formatCurrency(v)}</span>
               </div>
             ))}
           </div>
@@ -137,7 +139,7 @@ function PedidosPage() {
 
       <Card>
         <div className="overflow-x-auto max-h-[700px]">
-          <table className="w-full text-xs">
+          <table className="w-full text-sm">
             <thead className="bg-muted/50 text-muted-foreground sticky top-0">
               <tr>
                 <th className="text-left p-2 font-medium">Status</th>
@@ -163,7 +165,7 @@ function PedidosPage() {
                   <td className="p-2">{r.client_name}</td>
                   <td className="p-2">{r.product_name}</td>
                   <td className="p-2">{r.line || "-"}</td>
-                  <td className="p-2 text-right">{fmt(r.order_value)}</td>
+                  <td className="p-2 text-right">{formatCurrency(r.order_value)}</td>
                   <td className="p-2 text-right">{Number(r.order_volume ?? 0).toLocaleString("pt-BR")}</td>
                   <td className="p-2 whitespace-nowrap">{r.forecast_billing_requested ? new Date(r.forecast_billing_requested).toLocaleDateString("pt-BR") : "-"}</td>
                   <td className="p-2 text-[11px]">{r.financial_block_reason || r.prescription_block_reason || "-"}</td>
@@ -180,12 +182,3 @@ function PedidosPage() {
   );
 }
 
-function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <Card className="p-4">
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="text-xl font-semibold mt-1">{value}</div>
-      {sub && <div className="text-[11px] text-muted-foreground">{sub}</div>}
-    </Card>
-  );
-}

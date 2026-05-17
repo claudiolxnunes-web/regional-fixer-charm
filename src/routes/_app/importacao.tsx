@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ImportDialog } from "@/components/ImportDialog";
 import { GoalsImportDialog } from "@/components/GoalsImportDialog";
-import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target, RefreshCw } from "lucide-react";
+import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target, RefreshCw, FileInput } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -51,9 +51,11 @@ function ImportacaoPage() {
   };
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Importações</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <FileInput className="size-6 text-primary" /> Importações
+          </h1>
           <p className="text-sm text-muted-foreground">
             Importe planilhas Excel ou arquivos diversos para alimentar a base de dados.
           </p>

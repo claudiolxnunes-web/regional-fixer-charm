@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createPortalSession } from "@/utils/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { Settings } from "lucide-react";
 
 export const Route = createFileRoute("/_app/preferencias")({ component: Preferencias });
 
@@ -75,9 +76,13 @@ function Preferencias() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Preferências</h1>
-        <p className="text-sm text-muted-foreground">Atualize seus dados de perfil e senha.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <Settings className="size-6 text-primary" /> Preferências
+          </h1>
+          <p className="text-sm text-muted-foreground">Atualize seus dados de perfil e senha.</p>
+        </div>
       </div>
       <Card>
         <CardHeader><CardTitle>Perfil</CardTitle></CardHeader>

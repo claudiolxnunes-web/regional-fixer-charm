@@ -103,9 +103,13 @@ function RegistroCampo() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Registro de Campo</h1>
-        <p className="text-sm text-muted-foreground">Reporte diário das atividades do representante.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <ClipboardCheck className="size-6 text-primary" /> Registro de Campo
+          </h1>
+          <p className="text-sm text-muted-foreground">Reporte diário das atividades do representante.</p>
+        </div>
       </div>
 
       <Card>

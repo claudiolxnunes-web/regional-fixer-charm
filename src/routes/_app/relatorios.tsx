@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid } from "recharts";
-import { Download } from "lucide-react";
+import { Download, BarChart3 } from "lucide-react";
+import { KpiCard } from "@/components/crm/KpiCard";
+import { formatCurrencyCompact } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/relatorios")({ component: Relatorios });
 
@@ -75,9 +77,11 @@ function Relatorios() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Relatórios</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <BarChart3 className="size-6 text-primary" /> Relatórios
+          </h1>
           <p className="text-sm text-muted-foreground">Análise de vendas, representantes e clientes.</p>
         </div>
         <div className="flex gap-2">
@@ -95,9 +99,9 @@ function Relatorios() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground">Faturamento total</div><div className="text-xl font-semibold">R$ {total.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div></CardContent></Card>
-        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground">Notas</div><div className="text-xl font-semibold">{(sales ?? []).length}</div></CardContent></Card>
-        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground">Volume total</div><div className="text-xl font-semibold">{monthly.reduce((s, m) => s + m.volume, 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div></CardContent></Card>
+        <KpiCard label="Faturamento total" value={`R$ ${formatCurrencyCompact(total)}`} />
+        <KpiCard label="Notas" value={(sales ?? []).length.toString()} />
+        <KpiCard label="Volume total" value={formatCurrencyCompact(monthly.reduce((s, m) => s + m.volume, 0))} />
       </div>
 
       <Card>

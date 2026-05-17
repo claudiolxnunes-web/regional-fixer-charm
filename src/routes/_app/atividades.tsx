@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Phone, MapPin, ClipboardCheck, Calendar, CheckCircle2 } from "lucide-react";
+import { Phone, MapPin, ClipboardCheck, Calendar, CheckCircle2, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/_app/atividades")({ component: Atividades });
 
@@ -83,9 +83,11 @@ function Atividades() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Atividades</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <Activity className="size-6 text-primary" /> Atividades
+          </h1>
           <p className="text-sm text-muted-foreground">Visitas, ligações, reuniões e tarefas dos representantes.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
