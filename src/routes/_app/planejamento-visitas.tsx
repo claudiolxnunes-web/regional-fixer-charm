@@ -667,28 +667,30 @@ function NewActivityDialog({ open, onClose, clients, onCreated }: { open: boolea
               {(!clients || clients.length === 0) && (
                 <p className="text-[10px] text-muted-foreground w-full text-center">Carregando clientes...</p>
               )}
-              {clients?.slice(0, 8).map((c: any) => (
+              {clients?.slice(0, 10).map((c: any) => (
                 <Button
                   key={c.id}
                   type="button"
                   variant={form.client_id === c.id ? "default" : "outline"}
-                  className="h-7 px-2 text-[10px]"
-                  onClick={() => setForm({ ...form, client_id: c.id })}
+                  className="h-7 px-2 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]"
+                  onClick={() => setForm({ ...form, client_id: form.client_id === c.id ? "" : c.id })}
                 >
                   {c.name}
                 </Button>
               ))}
-              <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v === "none" ? "" : v })}>
-                <SelectTrigger className="h-7 text-[10px]">
-                  <SelectValue placeholder="Mais clientes..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum</SelectItem>
-                  {clients.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="w-full mt-1">
+                <Select value={form.client_id || "none"} onValueChange={(v) => setForm({ ...form, client_id: v === "none" ? "" : v })}>
+                  <SelectTrigger className="h-7 text-[10px] w-full">
+                    <SelectValue placeholder="Pesquisar todos os clientes..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {clients.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
