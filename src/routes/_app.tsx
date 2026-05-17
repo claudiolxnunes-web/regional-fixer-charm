@@ -1,10 +1,10 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Terminal } from "lucide-react";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
