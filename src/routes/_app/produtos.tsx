@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { ImportDialog } from "@/components/ImportDialog";
 
-export const Route = createFileRoute("/_app/produtos" as any)({ component: ProdutosPage });
+export const Route = createFileRoute("/_app/produtos")({ component: ProdutosPage });
 
 type Product = {
   id: string;
