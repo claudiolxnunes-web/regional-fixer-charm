@@ -48,8 +48,14 @@ function AppLayout() {
   const [banner, setBanner] = useState<{ tone: "warn" | "danger"; msg: string } | null>(null);
 
   useEffect(() => {
+    // If auth is still loading, wait.
     if (loading) return;
-    if (!session) { navigate({ to: "/login", search: { invite: undefined } }); return; }
+    
+    // If not authenticated, redirect to login.
+    if (!session) {
+      navigate({ to: "/login", search: { invite: undefined } });
+      return;
+    }
     
     let isMounted = true;
 
@@ -65,6 +71,7 @@ function AppLayout() {
 
         if (error) {
           console.error("Erro ao verificar acesso:", error);
+          // Don't block loading on error, just log it.
           setChecking(false);
           return;
         }

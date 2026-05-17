@@ -8,14 +8,14 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        // Mantém dados frescos por 2min (equilíbrio entre performance e realtime)
+        // Mantém dados frescos por 2min
         staleTime: 2 * 60 * 1000,
         gcTime: 24 * 60 * 60 * 1000,
         retry: 1,
-        refetchOnWindowFocus: false, // Evita requests excessivos ao trocar de aba
-        networkMode: "offlineFirst",
+        refetchOnWindowFocus: false,
+        networkMode: "always", // Use "always" instead of "offlineFirst" to avoid indefinite loading if online detection is flaky
       },
-      mutations: { networkMode: "offlineFirst" },
+      mutations: { networkMode: "always" },
     },
   });
 
