@@ -68,9 +68,11 @@ function VendasPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Vendas & Faturamento</h1>
-        <p className="text-sm text-muted-foreground">{rows.length.toLocaleString("pt-BR")} notas no período</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Vendas & Faturamento</h1>
+          <p className="text-sm text-muted-foreground">{rows.length.toLocaleString("pt-BR")} notas no período</p>
+        </div>
       </div>
 
       <div className={`grid grid-cols-2 ${isStaff ? "md:grid-cols-5" : "md:grid-cols-3"} gap-3`}>
