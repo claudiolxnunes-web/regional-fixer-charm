@@ -2098,6 +2098,7 @@ export type Database = {
       generate_inactive_client_alerts: { Args: never; Returns: number }
       generate_low_stock_alerts: { Args: never; Returns: number }
       generate_quote_expiring_alerts: { Args: never; Returns: number }
+      get_my_team_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

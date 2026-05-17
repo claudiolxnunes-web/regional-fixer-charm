@@ -50,23 +50,47 @@ function AppLayout() {
   useEffect(() => {
     if (loading) return;
     if (!session) { navigate({ to: "/login", search: { invite: undefined } }); return; }
-    (async () => {
-      const { data: tm } = await supabase
-        .from("team_members")
-        .select("role, team_id, teams!inner(subscription_status, current_period_end, plan)")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+    
+    let isMounted = true;
 
-      if (!tm) { navigate({ to: "/planos" }); return; }
-      const team = (tm as any).teams;
-      const { ok, banner: b } = evaluateAccess(team);
-      if (!ok) {
-        navigate({ to: tm.role === "admin" ? "/planos" : "/login" });
-        return;
+    (async () => {
+      try {
+        const { data: tm, error } = await supabase
+          .from("team_members")
+          .select("role, team_id, teams!inner(subscription_status, current_period_end, plan)")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (!isMounted) return;
+
+        if (error) {
+          console.error("Erro ao verificar acesso:", error);
+          setChecking(false);
+          return;
+        }
+
+        if (!tm) { 
+          navigate({ to: "/planos" }); 
+          return; 
+        }
+        
+        const team = (tm as any).teams;
+        const { ok, banner: b } = evaluateAccess(team);
+        
+        if (!ok) {
+          navigate({ to: tm.role === "admin" ? "/planos" : "/login" });
+          return;
+        }
+        
+        setBanner(b);
+      } catch (err) {
+        console.error("Falha silenciosa na verificação de layout:", err);
+      } finally {
+        if (isMounted) setChecking(false);
       }
-      setBanner(b);
-      setChecking(false);
     })();
+
+    return () => { isMounted = false; };
   }, [loading, session, navigate]);
 
   if (loading || checking) return <div className="min-h-screen grid place-items-center text-muted-foreground">Carregando...</div>;
