@@ -86,7 +86,7 @@ function ClientesPage() {
                 key={editing?.id ?? "new"} 
                 editing={editing} 
                 onClose={() => setOpen(false)} 
-                onSave={saveClient}
+                onSave={(payload, id) => saveClient({ payload, id })}
                 isSaving={isSaving}
               />
             </Dialog>
