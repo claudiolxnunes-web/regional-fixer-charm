@@ -77,9 +77,11 @@ function Relatorios() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Relatórios</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <BarChart3 className="size-6 text-primary" /> Relatórios
+          </h1>
           <p className="text-sm text-muted-foreground">Análise de vendas, representantes e clientes.</p>
         </div>
         <div className="flex gap-2">
