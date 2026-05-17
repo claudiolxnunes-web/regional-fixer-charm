@@ -49,7 +49,7 @@ function AppLayout() {
 
   useEffect(() => {
     if (loading) return;
-    if (!session) { navigate({ to: "/login" }); return; }
+    if (!session) { navigate({ to: "/login", search: { invite: undefined } }); return; }
     (async () => {
       const { data: tm } = await supabase
         .from("team_members")
