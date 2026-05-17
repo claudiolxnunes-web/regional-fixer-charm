@@ -174,7 +174,7 @@ export function DiagnosticScreen() {
           <CardContent className="text-sm space-y-2">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Tentativas de Recarregamento:</span> 
-              <Badge variant={reloadCount > 0 ? "warning" : "secondary"}>{reloadCount}</Badge>
+              <Badge variant={reloadCount > 0 ? "outline" : "secondary"}>{reloadCount}</Badge>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Plataforma:</span> 
