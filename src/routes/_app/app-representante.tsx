@@ -280,12 +280,13 @@ function CounterCard({ color, icon, label, count }: { color: string; icon: React
 }
 
 function MyClients({ repId }: { repId: string }) {
+  const [search, setSearch] = useState("");
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["rep_my_clients", repId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")
-        .select("id, name, client_code, city, state")
+        .select("id, name, client_code, city, state, production_type")
         .eq("representative_id", repId)
         .order("name")
         .limit(200);
@@ -294,25 +295,59 @@ function MyClients({ repId }: { repId: string }) {
     },
   });
 
+  const filtered = useMemo(() => {
+    if (!search) return clients;
+    const s = search.toLowerCase();
+    return clients.filter(c => 
+      c.name?.toLowerCase().includes(s) || 
+      c.client_code?.toLowerCase().includes(s) ||
+      c.city?.toLowerCase().includes(s)
+    );
+  }, [clients, search]);
+
   if (isLoading) return <p className="py-6 text-center text-sm text-muted-foreground">Carregando...</p>;
-  if (!clients.length) return <p className="py-6 text-center text-sm text-muted-foreground">Nenhum cliente vinculado a você ainda.</p>;
 
   return (
-    <div className="space-y-2 max-h-80 overflow-auto">
-      {clients.map((c: any) => (
-        <Card key={c.id} className="p-3 flex items-center gap-2">
-          <div className="size-8 rounded-full bg-primary/10 grid place-items-center text-primary text-xs font-semibold">
-            {c.name?.charAt(0)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">{c.name}</div>
-            <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-              {c.client_code && <span className="font-mono">#{c.client_code}</span>}
-              {c.city && <><MapPin className="size-3" />{c.city}/{c.state}</>}
+    <div className="space-y-3">
+      <div className="relative">
+        <Input 
+          placeholder="Buscar cliente na carteira..." 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-10 text-sm pl-9"
+        />
+        <Users className="absolute left-3 top-3 size-4 text-muted-foreground" />
+      </div>
+
+      <div className="space-y-2 max-h-[400px] overflow-auto pb-4">
+        {filtered.map((c: any) => (
+          <Card key={c.id} className="p-3 flex items-center gap-3 active:bg-accent transition-colors">
+            <div className="size-10 rounded-full bg-emerald-100 text-emerald-700 grid place-items-center text-sm font-semibold shrink-0">
+              {c.name?.charAt(0)}
             </div>
-          </div>
-        </Card>
-      ))}
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold truncate text-slate-900">{c.name}</div>
+              <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                {c.client_code && <span className="font-mono bg-slate-100 px-1 rounded">#{c.client_code}</span>}
+                {c.city && <><MapPin className="size-3" />{c.city}/{c.state}</>}
+              </div>
+              {c.production_type && (
+                <div className="text-[10px] text-emerald-600 font-medium mt-0.5 uppercase tracking-tight">
+                  {c.production_type}
+                </div>
+              )}
+            </div>
+            <Button size="icon" variant="ghost" className="size-8" asChild>
+              <Link to={`/clientes?search=${c.name}`}>
+                <ChevronRight className="size-4" />
+              </Link>
+            </Button>
+          </Card>
+        ))}
+        {!filtered.length && (
+          <p className="py-6 text-center text-xs text-muted-foreground">Nenhum cliente encontrado.</p>
+        )}
+      </div>
     </div>
   );
 }
