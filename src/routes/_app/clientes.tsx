@@ -460,11 +460,4 @@ function ClientActivitiesTab({ clientId }: { clientId: string }) {
   );
 }
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
-  return (
-    <div className={`space-y-1.5 ${full ? "col-span-2" : ""}`}>
-      <Label className="text-xs">{label}</Label>
-      {children}
-    </div>
-  );
-}
+// Field function was moved to the top of the file
