@@ -179,12 +179,20 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
         </Button>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 pb-20">
         {/* Banner instalar como app (PWA) */}
         <InstallAppButton />
 
         {/* Painel "Hoje" — orientação rápida em campo */}
-        <RepTodayPanel repId={rep.id} />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <Calendar className="size-4 text-emerald-600" /> Agenda de Hoje
+            </h2>
+            <Link to="/planejamento-visitas" className="text-[10px] text-emerald-600 font-medium">Ver semana completa</Link>
+          </div>
+          <RepTodayPanel repId={rep.id} />
+        </div>
 
         {/* Counters */}
         <div className="grid grid-cols-4 gap-2">
@@ -195,50 +203,59 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
         </div>
 
         {/* Action: register */}
-        <Button
-          size="lg"
-          className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow"
-          onClick={() => setOpenForm(true)}
-        >
-          <Plus className="size-5 mr-2" /> Registro de Campo (Check-in)
-        </Button>
-
-        {/* Daily observations */}
-        <Card className="p-4 space-y-2">
-          <Label className="flex items-center gap-1.5 text-sm">
-            📝 <span className="font-semibold">Observações Gerais do Dia</span>
-          </Label>
-          <Textarea
-            placeholder="Situação do mercado, dificuldades encontradas, oportunidades identificadas..."
-            value={observations}
-            onChange={(e) => setObservations(e.target.value)}
-            rows={3}
-          />
-        </Card>
-
-        {/* Send report */}
-        <Button
-          size="lg"
-          className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow"
-          onClick={() => sendReport.mutate()}
-          disabled={sendReport.isPending}
-        >
-          <Send className="size-5 mr-2" />
-          {sendReport.isPending ? "Enviando..." : "Enviar Relatório do Dia"}
-        </Button>
-        <p className="text-center text-[11px] text-muted-foreground -mt-2">
-          Ao enviar, o gerente regional receberá seu relatório imediatamente.
-        </p>
+        <div className="grid grid-cols-1 gap-2">
+          <Button
+            size="lg"
+            className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold shadow flex flex-col items-center justify-center py-0"
+            onClick={() => setOpenForm(true)}
+          >
+            <div className="flex items-center">
+              <Plus className="size-5 mr-2" /> Registro de Atividade
+            </div>
+            <span className="text-[10px] opacity-80 font-normal">Check-in, Visita ou Ligação</span>
+          </Button>
+        </div>
 
         {/* Secondary tabs: my carteira */}
         <Tabs defaultValue="clientes" className="pt-2">
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="clientes"><Users className="size-3.5 mr-1.5" />Carteira</TabsTrigger>
-            <TabsTrigger value="historico"><Calendar className="size-3.5 mr-1.5" />Histórico</TabsTrigger>
+            <TabsTrigger value="clientes" className="text-xs">
+              <Users className="size-3.5 mr-1.5" />Minha Carteira
+            </TabsTrigger>
+            <TabsTrigger value="historico" className="text-xs">
+              <Calendar className="size-3.5 mr-1.5" />Meu Histórico
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="clientes"><MyClients repId={rep.id} /></TabsContent>
-          <TabsContent value="historico"><MyHistory repId={rep.id} /></TabsContent>
+          <TabsContent value="clientes" className="mt-4">
+            <MyClients repId={rep.id} />
+          </TabsContent>
+          <TabsContent value="historico" className="mt-4">
+            <MyHistory repId={rep.id} />
+          </TabsContent>
         </Tabs>
+
+        {/* Daily observations (at the end) */}
+        <Card className="p-4 space-y-3 border-emerald-100 bg-emerald-50/30">
+          <Label className="flex items-center gap-1.5 text-sm">
+            📝 <span className="font-semibold italic">Fechamento do Dia</span>
+          </Label>
+          <Textarea
+            placeholder="Resumo geral: como foi o mercado hoje? Alguma dificuldade ou oportunidade?"
+            value={observations}
+            onChange={(e) => setObservations(e.target.value)}
+            rows={3}
+            className="bg-white"
+          />
+          <Button
+            size="sm"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+            onClick={() => sendReport.mutate()}
+            disabled={sendReport.isPending}
+          >
+            <Send className="size-4 mr-2" />
+            {sendReport.isPending ? "Enviando..." : "Enviar Relatório Diário"}
+          </Button>
+        </Card>
       </div>
 
       <ActivityFormDialog open={openForm} onOpenChange={setOpenForm} rep={rep} />
