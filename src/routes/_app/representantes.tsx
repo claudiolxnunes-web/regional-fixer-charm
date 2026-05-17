@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, UserCog } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { ImportDialog } from "@/components/ImportDialog";
 import { RepBreakdownDialog } from "@/components/RepBreakdownDialog";
@@ -26,9 +26,11 @@ function RepsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Representantes</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <UserCog className="size-6 text-primary" /> Representantes
+          </h1>
           <p className="text-sm text-muted-foreground">{reps.length} cadastrados</p>
         </div>
         {isStaff && (
