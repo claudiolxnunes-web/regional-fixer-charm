@@ -31,14 +31,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // 2. Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
+    // IMPORTANT: Never call supabase.from() / await async DB queries directly inside
+    // onAuthStateChange — it deadlocks the auth lock. Defer with setTimeout(0).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       if (s?.user) {
-        await loadRoles(s.user.id);
+        setTimeout(() => { loadRoles(s.user.id); }, 0);
       } else {
         setRoles([]);
       }
-      // Se for logout ou token expirado, garante que o loading pare
       if (event === 'SIGNED_OUT') setLoading(false);
     });
 
