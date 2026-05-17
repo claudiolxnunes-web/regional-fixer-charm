@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, TrendingUp, Target, PieChart as PieChartIcon } from "lucide-react";
+import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
 import { RepRanking } from "@/components/RepRanking";
 import { Badge } from "@/components/ui/badge";
