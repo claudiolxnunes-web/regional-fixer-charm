@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { ImportDialog } from "@/components/ImportDialog";
 import { useClients } from "@/hooks/useClients";
@@ -38,9 +38,11 @@ function ClientesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Clientes</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <Users className="size-6 text-primary" /> Clientes
+          </h1>
           <p className="text-sm text-muted-foreground">{clients.length} cadastrados</p>
         </div>
         {isStaff && (
