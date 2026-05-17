@@ -66,14 +66,8 @@ function Automacoes() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card><CardContent className="pt-4">
-          <div className="text-xs text-muted-foreground">Alertas (7 dias)</div>
-          <div className="text-2xl font-semibold mt-1">{stats?.total ?? 0}</div>
-        </CardContent></Card>
-        <Card><CardContent className="pt-4">
-          <div className="text-xs text-muted-foreground">Regras ativas</div>
-          <div className="text-2xl font-semibold mt-1">{RULES.length}</div>
-        </CardContent></Card>
+        <KpiCard label="Alertas (7 dias)" value={(stats?.total ?? 0).toString()} />
+        <KpiCard label="Regras ativas" value={RULES.length.toString()} />
         <Card><CardContent className="pt-4 flex items-center gap-3">
           <Clock className="size-5 text-muted-foreground" />
           <div>
