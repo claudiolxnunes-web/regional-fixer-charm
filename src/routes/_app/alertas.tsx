@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, CheckCircle2, Eye, RefreshCw, AlertTriangle, Clock, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { KpiCard } from "@/components/crm/KpiCard";
 
 export const Route = createFileRoute("/_app/alertas")({ component: AlertasPage });
 
