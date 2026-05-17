@@ -54,7 +54,7 @@ const groups = [
       { to: "/status", label: "Status do Sistema", icon: Activity },
     ],
   },
-],
+] as const;
 
 function SidebarContent({
   onNavigate,
