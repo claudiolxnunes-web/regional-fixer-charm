@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid } from "recharts";
-import { Download } from "lucide-react";
+import { Download, BarChart3 } from "lucide-react";
+import { KpiCard } from "@/components/crm/KpiCard";
+import { formatCurrencyCompact } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/relatorios")({ component: Relatorios });
 
