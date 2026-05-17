@@ -12,4 +12,11 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      hmr: {
+        overlay: false,
+      },
+    },
+  },
 });
