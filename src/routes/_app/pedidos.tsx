@@ -83,9 +83,11 @@ function PedidosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Pedidos em Aberto</h1>
-        <p className="text-sm text-muted-foreground">{rows.length} itens na carteira</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Pedidos em Aberto</h1>
+          <p className="text-sm text-muted-foreground">{rows.length} itens na carteira</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
