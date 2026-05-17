@@ -130,7 +130,7 @@ function RepsPage() {
               {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
               {!isLoading && reps.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum representante cadastrado</td></tr>}
               {reps.map((r) => (
-                <tr key={r.id} className="border-t hover:bg-muted/30">
+                <tr key={r.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => { if (isStaff) { setEditing(r); setOpen(true); } }}>
                   <td className="p-3 font-mono text-xs">{r.rep_code || "-"}</td>
                   <td className="p-3 font-medium">{r.name}</td>
                   <td className="p-3">{r.company || "-"}</td>

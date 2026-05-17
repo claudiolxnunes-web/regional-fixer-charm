@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +37,15 @@ type Client = {
   last_purchase_date?: string | null;
   abc_class: string | null;
   total_purchases: number | null;
+  representative_id: string | null;
 };
+
+const Field = ({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) => (
+  <div className={`space-y-1.5 ${full ? "col-span-2" : ""}`}>
+    <Label className="text-xs font-medium">{label}</Label>
+    {children}
+  </div>
+);
 
 const STATUS_LABEL: Record<string, string> = {
   active: "Ativo",
@@ -53,6 +61,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 function ClientesPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { isStaff } = useAuth();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -156,7 +165,7 @@ function ClientesPage() {
               {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
               {!isLoading && filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>}
               {filtered.map((c) => (
-                <tr key={c.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => { setEditing(c); setOpen(true); }}>
+                <tr key={c.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => { if (isStaff) { setEditing(c); setOpen(true); } else { navigate({ to: "/clientes", search: { search: c.name } }); } }}>
                   <td className="p-3 font-mono text-xs">{c.client_code || "-"}</td>
                   <td className="p-3 font-medium text-primary hover:underline">{c.name}</td>
                   <td className="p-3">{TYPE_LABEL[c.type]}</td>
@@ -194,11 +203,22 @@ function ClientForm({ editing, onClose }: { editing: Client | null; onClose: () 
     status: editing?.status ?? "active",
     abc_class: editing?.abc_class ?? "",
     total_purchases: editing?.total_purchases ?? 0,
+    representative_id: editing?.representative_id ?? "",
+  });
+
+  const { data: reps = [] } = useQuery({
+    queryKey: ["reps-min"],
+    queryFn: async () => (await supabase.from("representatives").select("id, name").order("name")).data ?? [],
   });
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, abc_class: form.abc_class || null, total_purchases: Number(form.total_purchases) || 0 };
+      const payload = { 
+        ...form, 
+        abc_class: form.abc_class || null, 
+        total_purchases: Number(form.total_purchases) || 0,
+        representative_id: form.representative_id || null
+      };
       if (editing) {
         const { error } = await supabase.from("clients").update(payload).eq("id", editing.id);
         if (error) throw error;
@@ -269,6 +289,17 @@ function ClientForm({ editing, onClose }: { editing: Client | null; onClose: () 
               </Select>
             </Field>
             <Field label="Total de compras (R$)"><Input type="number" value={form.total_purchases} onChange={(e) => setForm({ ...form, total_purchases: Number(e.target.value) })} /></Field>
+            <Field label="Representante">
+              <Select value={form.representative_id || "none"} onValueChange={(v) => setForm({ ...form, representative_id: v === "none" ? "" : v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem representante</SelectItem>
+                  {reps.map((r: any) => (
+                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={onClose}>Cancelar</Button>
@@ -429,11 +460,4 @@ function ClientActivitiesTab({ clientId }: { clientId: string }) {
   );
 }
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
-  return (
-    <div className={`space-y-1.5 ${full ? "col-span-2" : ""}`}>
-      <Label className="text-xs">{label}</Label>
-      {children}
-    </div>
-  );
-}
+// Field function was moved to the top of the file
