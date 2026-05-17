@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { Briefcase } from "lucide-react";
+import { formatCurrencyCompact } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/oportunidades")({ component: Oportunidades });
 
