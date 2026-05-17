@@ -23,19 +23,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    // 1. Get initial session
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      if (s?.user) loadRoles(s.user.id);
+      setLoading(false);
+    });
+
+    // 2. Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
       setSession(s);
       if (s?.user) {
-        setTimeout(() => loadRoles(s.user.id), 0);
+        await loadRoles(s.user.id);
       } else {
         setRoles([]);
       }
+      // Se for logout ou token expirado, garante que o loading pare
+      if (event === 'SIGNED_OUT') setLoading(false);
     });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      if (data.session?.user) loadRoles(data.session.user.id);
-      setLoading(false);
-    });
+
     return () => subscription.unsubscribe();
   }, []);
 

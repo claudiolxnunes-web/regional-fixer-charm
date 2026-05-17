@@ -98,22 +98,42 @@ export function ImportDialog({
     if (!parsed.length) return;
     setBusy(true);
     try {
+      // Obter o team_id do usuário atual para garantir o isolamento
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: tm } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!tm?.team_id) throw new Error("Usuário sem time associado");
+
+      // Injetar o team_id em todos os registros
+      const dataWithTeam = parsed.map(row => ({
+        ...row,
+        team_id: tm.team_id
+      }));
+
       const tbl: any = supabase.from(table as any);
       if (snapshot) {
         const { error: delErr } = await (supabase.from(table as any) as any)
           .delete()
-          .not("id", "is", null);
+          .eq("team_id", tm.team_id); // Deleta apenas do próprio time
         if (delErr) throw delErr;
       }
+      
       const { error } = await (snapshot
-        ? tbl.insert(parsed)
+        ? tbl.insert(dataWithTeam)
         : matchBy
-        ? tbl.upsert(parsed, { onConflict: matchBy, ignoreDuplicates: false })
-        : tbl.insert(parsed));
+        ? tbl.upsert(dataWithTeam, { onConflict: matchBy, ignoreDuplicates: false })
+        : tbl.insert(dataWithTeam));
+      
       if (error) throw error;
       toast.success(snapshot
-        ? `Snapshot atualizado: ${parsed.length} registro(s)`
-        : `${parsed.length} registro(s) importado(s)`);
+        ? `Snapshot atualizado: ${dataWithTeam.length} registro(s)`
+        : `${dataWithTeam.length} registro(s) importado(s)`);
       qc.invalidateQueries({ queryKey: [invalidateKey] });
       setParsed([]);
       setErrors([]);
