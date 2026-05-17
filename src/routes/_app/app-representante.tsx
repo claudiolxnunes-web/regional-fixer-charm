@@ -338,7 +338,7 @@ function MyClients({ repId }: { repId: string }) {
               )}
             </div>
             <Button size="icon" variant="ghost" className="size-8" asChild>
-              <Link to={`/clientes?search=${c.name}`}>
+              <Link to="/clientes" search={{ search: c.name }}>
                 <ChevronRight className="size-4" />
               </Link>
             </Button>

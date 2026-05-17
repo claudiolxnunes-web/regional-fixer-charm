@@ -137,7 +137,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const initial = (user?.email ?? "?").charAt(0).toUpperCase();
   const [open, setOpen] = useState(false);
 
-  const handleSignOut = async () => { await signOut(); navigate({ to: "/login" }); };
+  const handleSignOut = async () => { await signOut(); navigate({ to: "/login", search: { invite: undefined } }); };
 
   return (
     <div className="flex min-h-screen bg-background">
