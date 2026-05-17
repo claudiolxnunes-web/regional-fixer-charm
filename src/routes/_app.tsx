@@ -41,7 +41,7 @@ function evaluateAccess(team: { subscription_status: string; current_period_end:
   return { ok: false, banner: null };
 }
 
-const PERMISSION_TIMEOUT_MS = 6000;
+const PERMISSION_TIMEOUT_MS = 10000;
 const MAX_AUTO_RELOADS = 2;
 const RELOAD_STORAGE_KEY = "lvbl-app-permission-reload-count";
 
@@ -115,6 +115,7 @@ function AppLayout() {
 
     // Hard timeout: if the permission check hangs, attempt an auto-reload.
     const timeout = setTimeout(() => {
+      console.log("[AppLayout] Timer finished. isMounted:", isMounted, "resolved:", resolved);
       if (!isMounted || resolved) return;
 
       let count = 0;
@@ -122,7 +123,7 @@ function AppLayout() {
 
       if (count < MAX_AUTO_RELOADS) {
         try { sessionStorage.setItem(RELOAD_STORAGE_KEY, String(count + 1)); } catch {}
-        console.warn(`[AppLayout] Permission check timeout — auto-reload attempt ${count + 1}/${MAX_AUTO_RELOADS}`);
+        console.warn(`[AppLayout] Permission check timeout (6s) — auto-reload attempt ${count + 1}/${MAX_AUTO_RELOADS}`);
         if (typeof window !== "undefined") window.location.reload();
         return;
       }
