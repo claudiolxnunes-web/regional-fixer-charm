@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,13 @@ type Client = {
   representative_id: string | null;
 };
 
+const Field = ({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) => (
+  <div className={`space-y-1.5 ${full ? "col-span-2" : ""}`}>
+    <Label className="text-xs font-medium">{label}</Label>
+    {children}
+  </div>
+);
+
 const STATUS_LABEL: Record<string, string> = {
   active: "Ativo",
   inactive: "Inativo (>6m)",
@@ -54,6 +61,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 function ClientesPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { isStaff } = useAuth();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -157,7 +165,7 @@ function ClientesPage() {
               {isLoading && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
               {!isLoading && filtered.length === 0 && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>}
               {filtered.map((c) => (
-                <tr key={c.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => { if (isStaff) { setEditing(c); setOpen(true); } }}>
+                <tr key={c.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => { if (isStaff) { setEditing(c); setOpen(true); } else { navigate({ to: "/clientes", search: { search: c.name } }); } }}>
                   <td className="p-3 font-mono text-xs">{c.client_code || "-"}</td>
                   <td className="p-3 font-medium text-primary hover:underline">{c.name}</td>
                   <td className="p-3">{TYPE_LABEL[c.type]}</td>
