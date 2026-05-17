@@ -37,6 +37,7 @@ type Client = {
   last_purchase_date?: string | null;
   abc_class: string | null;
   total_purchases: number | null;
+  representative_id: string | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -194,11 +195,22 @@ function ClientForm({ editing, onClose }: { editing: Client | null; onClose: () 
     status: editing?.status ?? "active",
     abc_class: editing?.abc_class ?? "",
     total_purchases: editing?.total_purchases ?? 0,
+    representative_id: editing?.representative_id ?? "",
+  });
+
+  const { data: reps = [] } = useQuery({
+    queryKey: ["reps-min"],
+    queryFn: async () => (await supabase.from("representatives").select("id, name").order("name")).data ?? [],
   });
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, abc_class: form.abc_class || null, total_purchases: Number(form.total_purchases) || 0 };
+      const payload = { 
+        ...form, 
+        abc_class: form.abc_class || null, 
+        total_purchases: Number(form.total_purchases) || 0,
+        representative_id: form.representative_id || null
+      };
       if (editing) {
         const { error } = await supabase.from("clients").update(payload).eq("id", editing.id);
         if (error) throw error;
@@ -269,6 +281,17 @@ function ClientForm({ editing, onClose }: { editing: Client | null; onClose: () 
               </Select>
             </Field>
             <Field label="Total de compras (R$)"><Input type="number" value={form.total_purchases} onChange={(e) => setForm({ ...form, total_purchases: Number(e.target.value) })} /></Field>
+            <Field label="Representante">
+              <Select value={form.representative_id || "none"} onValueChange={(v) => setForm({ ...form, representative_id: v === "none" ? "" : v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem representante</SelectItem>
+                  {reps.map((r: any) => (
+                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={onClose}>Cancelar</Button>

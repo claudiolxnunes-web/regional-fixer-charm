@@ -203,7 +203,7 @@ function ProductForm({ editing, onClose }: { editing: Product | null; onClose: (
         </div>
         <div className="space-y-2">
           <Label>Subsolução</Label>
-          <Input value={form.subsoluction} onChange={(e) => setForm({ ...form, subsoluction: e.target.value })} />
+          <Input value={form.subsolution} onChange={(e) => setForm({ ...form, subsolution: e.target.value })} />
         </div>
         <div className="space-y-2">
           <Label>Preço Base</Label>
