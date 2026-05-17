@@ -115,6 +115,7 @@ function AppLayout() {
 
     // Hard timeout: if the permission check hangs, attempt an auto-reload.
     const timeout = setTimeout(() => {
+      console.log("[AppLayout] Timer finished. isMounted:", isMounted, "resolved:", resolved);
       if (!isMounted || resolved) return;
 
       let count = 0;
