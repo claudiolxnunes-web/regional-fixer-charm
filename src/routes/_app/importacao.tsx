@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ImportDialog } from "@/components/ImportDialog";
 import { GoalsImportDialog } from "@/components/GoalsImportDialog";
-import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target, RefreshCw } from "lucide-react";
+import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target, RefreshCw, FileInput } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
