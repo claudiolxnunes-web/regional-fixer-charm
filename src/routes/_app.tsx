@@ -41,23 +41,34 @@ function evaluateAccess(team: { subscription_status: string; current_period_end:
   return { ok: false, banner: null };
 }
 
+const PERMISSION_TIMEOUT_MS = 6000;
+const MAX_AUTO_RELOADS = 2;
+const RELOAD_STORAGE_KEY = "lvbl-app-permission-reload-count";
+
 function AppLayout() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [banner, setBanner] = useState<{ tone: "warn" | "danger"; msg: string } | null>(null);
+  const [stalled, setStalled] = useState(false);
 
   useEffect(() => {
-    // If auth is still loading, wait.
     if (loading) return;
-    
-    // If not authenticated, redirect to login.
     if (!session) {
       navigate({ to: "/login", search: { invite: undefined } });
       return;
     }
-    
+
     let isMounted = true;
+    let resolved = false;
+
+    const finish = () => {
+      if (!isMounted || resolved) return;
+      resolved = true;
+      setChecking(false);
+      // Reset reload counter on successful boot
+      try { sessionStorage.removeItem(RELOAD_STORAGE_KEY); } catch {}
+    };
 
     (async () => {
       try {
@@ -71,38 +82,52 @@ function AppLayout() {
 
         if (error) {
           console.error("Erro ao verificar acesso:", error);
-          // Don't block loading on error, just log it.
-          setChecking(false);
+          finish();
           return;
         }
 
-        if (!tm) { 
-          navigate({ to: "/planos" }); 
-          return; 
+        if (!tm) {
+          navigate({ to: "/planos" });
+          return;
         }
-        
+
         const team = (tm as any).teams;
         const { ok, banner: b } = evaluateAccess(team);
-        
+
         if (!ok) {
           navigate({ to: tm.role === "admin" ? "/planos" : "/login" });
           return;
         }
-        
+
         setBanner(b);
+        finish();
       } catch (err) {
         console.error("Falha silenciosa na verificação de layout:", err);
-      } finally {
-        if (isMounted) setChecking(false);
+        finish();
       }
     })();
 
-    // Fallback security: force loading state to false after 3 seconds if something hangs
+    // Hard timeout: if the permission check hangs, attempt an auto-reload.
     const timeout = setTimeout(() => {
-      if (isMounted) setChecking(false);
-    }, 3000);
+      if (!isMounted || resolved) return;
 
-    return () => { 
+      let count = 0;
+      try { count = Number(sessionStorage.getItem(RELOAD_STORAGE_KEY) ?? "0") || 0; } catch {}
+
+      if (count < MAX_AUTO_RELOADS) {
+        try { sessionStorage.setItem(RELOAD_STORAGE_KEY, String(count + 1)); } catch {}
+        console.warn(`[AppLayout] Permission check timeout — auto-reload attempt ${count + 1}/${MAX_AUTO_RELOADS}`);
+        if (typeof window !== "undefined") window.location.reload();
+        return;
+      }
+
+      // After max retries, stop blocking the UI and show a manual recovery prompt.
+      console.error("[AppLayout] Permission check stalled after retries — showing manual recovery.");
+      setStalled(true);
+      setChecking(false);
+    }, PERMISSION_TIMEOUT_MS);
+
+    return () => {
       isMounted = false;
       clearTimeout(timeout);
     };
@@ -114,6 +139,20 @@ function AppLayout() {
 
   return (
     <DashboardLayout>
+      {stalled && (
+        <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 text-destructive px-3 py-2 mb-3 text-sm">
+          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p>A verificação de permissões demorou mais que o esperado. Algumas informações podem não estar atualizadas.</p>
+            <button
+              onClick={() => { try { sessionStorage.removeItem(RELOAD_STORAGE_KEY); } catch {} ; window.location.reload(); }}
+              className="mt-1 underline font-medium"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        </div>
+      )}
       {banner && (
         <div className={`flex items-start gap-2 rounded-md border px-3 py-2 mb-3 text-sm ${banner.tone === "danger" ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-amber-400/40 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"}`}>
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
@@ -124,3 +163,4 @@ function AppLayout() {
     </DashboardLayout>
   );
 }
+
