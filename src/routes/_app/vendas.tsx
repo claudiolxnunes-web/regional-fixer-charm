@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { KpiCard } from "@/components/crm/KpiCard";
+import { formatCurrency, formatPercent } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/vendas")({ component: VendasPage });
-
-const fmt = (v: any) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function VendasPage() {
   const { isStaff } = useAuth();
@@ -74,11 +74,11 @@ function VendasPage() {
       </div>
 
       <div className={`grid grid-cols-2 ${isStaff ? "md:grid-cols-5" : "md:grid-cols-3"} gap-3`}>
-        <Kpi label="Faturamento" value={`R$ ${fmt(k.totalRev)}`} />
-        {isStaff && <Kpi label="MB CB" value={`R$ ${fmt(k.totalMB)}`} sub={k.totalRev ? `${((k.totalMB / k.totalRev) * 100).toFixed(1)}%` : ""} />}
-        {isStaff && <Kpi label="ML CB" value={`R$ ${fmt(k.totalML)}`} sub={k.totalRev ? `${((k.totalML / k.totalRev) * 100).toFixed(1)}%` : ""} />}
-        <Kpi label="Volume (sacos)" value={k.totalQty.toLocaleString("pt-BR")} />
-        <Kpi label="Clientes" value={k.clients.toString()} />
+        <KpiCard label="Faturamento" value={formatCurrency(k.totalRev)} />
+        {isStaff && <KpiCard label="MB CB" value={formatCurrency(k.totalMB)} sub={k.totalRev ? formatPercent((k.totalMB / k.totalRev) * 100) : ""} />}
+        {isStaff && <KpiCard label="ML CB" value={formatCurrency(k.totalML)} sub={k.totalRev ? formatPercent((k.totalML / k.totalRev) * 100) : ""} />}
+        <KpiCard label="Volume (sacos)" value={k.totalQty.toLocaleString("pt-BR")} />
+        <KpiCard label="Clientes" value={k.clients.toString()} />
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
@@ -120,9 +120,9 @@ function VendasPage() {
                   <td className="p-2">{r.product_name}</td>
                   <td className="p-2"><Badge variant="outline" className="text-[10px]">{r.line || "-"}</Badge></td>
                   <td className="p-2 text-right">{Number(r.qty_bags ?? 0).toLocaleString("pt-BR")}</td>
-                  <td className="p-2 text-right">{fmt(r.revenue)}</td>
-                  {isStaff && <td className="p-2 text-right">{r.mb_cb_pct != null ? (Number(r.mb_cb_pct) * 100).toFixed(1) + "%" : "-"}</td>}
-                  {isStaff && <td className="p-2 text-right">{fmt(r.mb_cb_total)}</td>}
+                  <td className="p-2 text-right">{formatCurrency(r.revenue)}</td>
+                  {isStaff && <td className="p-2 text-right">{r.mb_cb_pct != null ? formatPercent(Number(r.mb_cb_pct) * 100) : "-"}</td>}
+                  {isStaff && <td className="p-2 text-right">{formatCurrency(r.mb_cb_total)}</td>}
                   <td className="p-2 text-[11px]">{r.representative}</td>
                 </tr>
               ))}
@@ -132,16 +132,6 @@ function VendasPage() {
         </div>
       </Card>
     </div>
-  );
-}
-
-function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <Card className="p-4">
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="text-xl font-semibold mt-1">{value}</div>
-      {sub && <div className="text-[11px] text-muted-foreground">{sub}</div>}
-    </Card>
   );
 }
 
@@ -156,7 +146,7 @@ function RankCard({ title, data }: { title: string; data: Record<string, number>
           <div key={k}>
             <div className="flex justify-between text-xs">
               <span className="truncate pr-2">{k}</span>
-              <span className="font-mono">R$ {fmt(v)}</span>
+              <span className="font-mono">{formatCurrency(v)}</span>
             </div>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-1">
               <div className="h-full bg-primary" style={{ width: `${(v / max) * 100}%` }} />
@@ -167,3 +157,4 @@ function RankCard({ title, data }: { title: string; data: Record<string, number>
     </Card>
   );
 }
+
