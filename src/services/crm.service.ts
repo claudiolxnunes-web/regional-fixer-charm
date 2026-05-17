@@ -14,11 +14,15 @@ export const clientsService = {
   },
 
   async save(payload: Partial<Client>, id?: string) {
+    // We cast to any here because Client type has some computed fields 
+    // from clients_view that are not in the base table
+    const { effective_status, days_since_last_purchase, last_purchase_date, ...cleanPayload } = payload as any;
+    
     if (id) {
-      const { error } = await supabase.from("clients").update(payload).eq("id", id);
+      const { error } = await supabase.from("clients").update(cleanPayload).eq("id", id);
       if (error) throw error;
     } else {
-      const { error } = await supabase.from("clients").insert(payload);
+      const { error } = await supabase.from("clients").insert(cleanPayload);
       if (error) throw error;
     }
   },
@@ -48,12 +52,15 @@ export const repsService = {
   },
 
   async save(payload: Partial<Representative>, id?: string) {
+    const { total_sales, total_clients, ...cleanPayload } = payload as any;
+    
     if (id) {
-      const { error } = await supabase.from("representatives").update(payload).eq("id", id);
+      const { error } = await supabase.from("representatives").update(cleanPayload).eq("id", id);
       if (error) throw error;
     } else {
-      const { error } = await supabase.from("representatives").insert(payload);
+      const { error } = await supabase.from("representatives").insert(cleanPayload);
       if (error) throw error;
     }
   }
 };
+
