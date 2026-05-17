@@ -156,10 +156,7 @@ function AppLayout() {
       </div>
     );
   }
-  if (!session) {
-    console.warn("[AppLayout] No session found, redirecting to login...");
-    return null;
-  }
+  if (!session) return null;
 
   return (
     <DashboardLayout>
