@@ -17,6 +17,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AppVendasRouteImport } from './routes/_app/vendas'
+import { Route as AppStatusRouteImport } from './routes/_app/status'
 import { Route as AppRepresentantesRouteImport } from './routes/_app/representantes'
 import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
 import { Route as AppRegistroCampoRouteImport } from './routes/_app/registro-campo'
@@ -82,6 +83,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
 const AppVendasRoute = AppVendasRouteImport.update({
   id: '/vendas',
   path: '/vendas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStatusRoute = AppStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRepresentantesRoute = AppRepresentantesRouteImport.update({
@@ -250,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRouteWithChildren
+  '/status': typeof AppStatusRoute
   '/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/registro-campo': typeof AppRegistroCampoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/representantes': typeof AppRepresentantesRouteWithChildren
+  '/status': typeof AppStatusRoute
   '/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/_app/registro-campo': typeof AppRegistroCampoRoute
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/representantes': typeof AppRepresentantesRouteWithChildren
+  '/_app/status': typeof AppStatusRoute
   '/_app/vendas': typeof AppVendasRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/_app/alertas/config': typeof AppAlertasConfigRoute
@@ -362,6 +371,7 @@ export interface FileRouteTypes {
     | '/registro-campo'
     | '/relatorios'
     | '/representantes'
+    | '/status'
     | '/vendas'
     | '/checkout/return'
     | '/alertas/config'
@@ -398,6 +408,7 @@ export interface FileRouteTypes {
     | '/registro-campo'
     | '/relatorios'
     | '/representantes'
+    | '/status'
     | '/vendas'
     | '/checkout/return'
     | '/alertas/config'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/_app/registro-campo'
     | '/_app/relatorios'
     | '/_app/representantes'
+    | '/_app/status'
     | '/_app/vendas'
     | '/checkout/return'
     | '/_app/alertas/config'
@@ -515,6 +527,13 @@ declare module '@tanstack/react-router' {
       path: '/vendas'
       fullPath: '/vendas'
       preLoaderRoute: typeof AppVendasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/status': {
+      id: '/_app/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof AppStatusRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/representantes': {
@@ -754,6 +773,7 @@ interface AppRouteChildren {
   AppRegistroCampoRoute: typeof AppRegistroCampoRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRepresentantesRoute: typeof AppRepresentantesRouteWithChildren
+  AppStatusRoute: typeof AppStatusRoute
   AppVendasRoute: typeof AppVendasRoute
 }
 
@@ -779,6 +799,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRegistroCampoRoute: AppRegistroCampoRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppRepresentantesRoute: AppRepresentantesRouteWithChildren,
+  AppStatusRoute: AppStatusRoute,
   AppVendasRoute: AppVendasRoute,
 }
 
