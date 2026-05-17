@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Home, Phone, FileText, ShoppingCart, Plus, Send, LogOut,
-  Users, MapPin, Calendar,
+  Users, MapPin, Calendar, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { RepTodayPanel } from "@/components/RepTodayPanel";
