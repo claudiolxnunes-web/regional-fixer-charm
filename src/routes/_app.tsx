@@ -51,6 +51,12 @@ function AppLayout() {
   const [checking, setChecking] = useState(true);
   const [banner, setBanner] = useState<{ tone: "warn" | "danger"; msg: string } | null>(null);
   const [stalled, setStalled] = useState(false);
+  const [showDiagnosticLink, setShowDiagnosticLink] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowDiagnosticLink(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (loading) return;
