@@ -139,8 +139,22 @@ function AppLayout() {
     };
   }, [loading, session, navigate]);
 
-  if (loading) return <div className="min-h-screen grid place-items-center text-muted-foreground">Autenticando...</div>;
-  if (checking) return <div className="min-h-screen grid place-items-center text-muted-foreground">Iniciando sistema...</div>;
+  if (loading || checking) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground p-4 text-center">
+        <div className="animate-pulse">{loading ? "Autenticando..." : "Iniciando sistema..."}</div>
+        {showDiagnosticLink && (
+          <Link 
+            to="/diagnostics" 
+            className="text-xs flex items-center gap-1.5 opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <Terminal className="h-3 w-3" />
+            Problemas ao iniciar? Ver diagnóstico
+          </Link>
+        )}
+      </div>
+    );
+  }
   if (!session) return null;
 
   return (
