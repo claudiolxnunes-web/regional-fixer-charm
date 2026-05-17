@@ -58,6 +58,11 @@ export class RouteErrorBoundary extends React.Component<Props, State> {
               <RefreshCw className="size-4 mr-1" /> Tentar novamente
             </Button>
             <Button size="sm" onClick={() => location.reload()}>Recarregar página</Button>
+            <Button size="sm" variant="ghost" asChild>
+              <Link to="/diagnostics" className="flex items-center gap-1.5">
+                <Terminal className="size-4" /> Diagnóstico
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
