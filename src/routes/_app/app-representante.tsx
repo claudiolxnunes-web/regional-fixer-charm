@@ -371,20 +371,32 @@ function MyHistory({ repId }: { repId: string }) {
   if (!items.length) return <p className="py-6 text-center text-sm text-muted-foreground">Nenhuma atividade registrada ainda.</p>;
 
   return (
-    <div className="space-y-2 max-h-80 overflow-auto">
+    <div className="space-y-2 max-h-[400px] overflow-auto pb-4">
       {items.map((a: any) => (
         <Card key={a.id} className="p-3">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <div className="text-sm font-medium truncate">{a.title}</div>
+              <div className="text-sm font-semibold truncate text-slate-900">{a.title}</div>
               <div className="text-[11px] text-muted-foreground">
                 {new Date(a.created_at).toLocaleString("pt-BR")}
               </div>
+              <div className="mt-1">
+                <Badge variant="outline" className="text-[9px] uppercase tracking-wider h-4">{a.type}</Badge>
+              </div>
             </div>
-            <Badge variant="outline" className="text-[10px]">{a.type}</Badge>
+            {a.status === "completed" ? (
+              <div className="size-6 rounded-full bg-emerald-100 text-emerald-600 grid place-items-center">
+                <CheckCircle2 className="size-3.5" />
+              </div>
+            ) : (
+              <Badge variant="secondary" className="text-[9px]">Pendente</Badge>
+            )}
           </div>
         </Card>
       ))}
+      {!items.length && (
+        <p className="py-6 text-center text-xs text-muted-foreground">Nenhuma atividade registrada.</p>
+      )}
     </div>
   );
 }
