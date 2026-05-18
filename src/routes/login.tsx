@@ -205,7 +205,7 @@ function LoginPage() {
             </div>
             
             <Button type="submit" disabled={loading} className="w-full h-11 text-base font-semibold">
-              {loading ? "Processando..." : mode === "signin" ? "Entrar na plataforma" : "Criar minha conta"}
+              {loading ? "Processando..." : mode === "signin" ? "Entrar no AgroGestão" : "Criar minha conta"}
             </Button>
           </form>
 
