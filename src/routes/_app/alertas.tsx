@@ -100,6 +100,17 @@ function AlertasPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const aiFn = useServerFn(generateProactiveInsights);
+  const aiInsights = useMutation({
+    mutationFn: async () => aiFn(),
+    onSuccess: (d: any) => {
+      toast.success(`${d.created ?? 0} insight(s) de IA criado(s) (${d.candidates_total ?? 0} candidatos analisados)`);
+      qc.invalidateQueries({ queryKey: ["alerts_list"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -115,6 +126,16 @@ function AlertasPage() {
           <Button asChild variant="outline" size="sm">
             <Link to="/alertas/config"><Settings2 className="size-4 mr-1" /> Configurar regras</Link>
           </Button>
+          {isStaff && (
+            <Button
+              size="sm"
+              disabled={aiInsights.isPending}
+              onClick={() => aiInsights.mutate()}
+            >
+              <Sparkles className={`size-4 mr-1 ${aiInsights.isPending ? "animate-spin" : ""}`} />
+              Insights IA
+            </Button>
+          )}
           {isStaff && (
             <Button
               variant="outline"
