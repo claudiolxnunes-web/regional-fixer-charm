@@ -35,6 +35,7 @@ import { Route as AppInteligenciaRouteImport } from './routes/_app/inteligencia'
 import { Route as AppImportacaoRouteImport } from './routes/_app/importacao'
 import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppCopilotRouteImport } from './routes/_app/copilot'
 import { Route as AppClientesRouteImport } from './routes/_app/clientes'
 import { Route as AppAutomacoesRouteImport } from './routes/_app/automacoes'
 import { Route as AppAtividadesRouteImport } from './routes/_app/atividades'
@@ -178,6 +179,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCopilotRoute = AppCopilotRouteImport.update({
+  id: '/copilot',
+  path: '/copilot',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppClientesRoute = AppClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -260,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/atividades': typeof AppAtividadesRoute
   '/automacoes': typeof AppAutomacoesRoute
   '/clientes': typeof AppClientesRoute
+  '/copilot': typeof AppCopilotRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
   '/importacao': typeof AppImportacaoRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/atividades': typeof AppAtividadesRoute
   '/automacoes': typeof AppAutomacoesRoute
   '/clientes': typeof AppClientesRoute
+  '/copilot': typeof AppCopilotRoute
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
   '/importacao': typeof AppImportacaoRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/_app/atividades': typeof AppAtividadesRoute
   '/_app/automacoes': typeof AppAutomacoesRoute
   '/_app/clientes': typeof AppClientesRoute
+  '/_app/copilot': typeof AppCopilotRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/ia-insights': typeof AppIaInsightsRoute
   '/_app/importacao': typeof AppImportacaoRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
     | '/atividades'
     | '/automacoes'
     | '/clientes'
+    | '/copilot'
     | '/dashboard'
     | '/ia-insights'
     | '/importacao'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/atividades'
     | '/automacoes'
     | '/clientes'
+    | '/copilot'
     | '/dashboard'
     | '/ia-insights'
     | '/importacao'
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/_app/atividades'
     | '/_app/automacoes'
     | '/_app/clientes'
+    | '/_app/copilot'
     | '/_app/dashboard'
     | '/_app/ia-insights'
     | '/_app/importacao'
@@ -693,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/copilot': {
+      id: '/_app/copilot'
+      path: '/copilot'
+      fullPath: '/copilot'
+      preLoaderRoute: typeof AppCopilotRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/clientes': {
       id: '/_app/clientes'
       path: '/clientes'
@@ -817,6 +836,7 @@ interface AppRouteChildren {
   AppAtividadesRoute: typeof AppAtividadesRoute
   AppAutomacoesRoute: typeof AppAutomacoesRoute
   AppClientesRoute: typeof AppClientesRoute
+  AppCopilotRoute: typeof AppCopilotRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppIaInsightsRoute: typeof AppIaInsightsRoute
   AppImportacaoRoute: typeof AppImportacaoRoute
@@ -844,6 +864,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAtividadesRoute: AppAtividadesRoute,
   AppAutomacoesRoute: AppAutomacoesRoute,
   AppClientesRoute: AppClientesRoute,
+  AppCopilotRoute: AppCopilotRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppIaInsightsRoute: AppIaInsightsRoute,
   AppImportacaoRoute: AppImportacaoRoute,
@@ -884,3 +905,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

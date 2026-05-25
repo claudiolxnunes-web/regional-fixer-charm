@@ -40,6 +40,7 @@ const groups = [
     label: "Análise & IA",
     items: [
       { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
+      { to: "/copilot", label: "Copiloto Comercial", icon: Bot },
       { to: "/ia-insights", label: "IA Insights", icon: Brain },
       { to: "/inteligencia", label: "Inteligência Avançada", icon: Sparkles },
       { to: "/analytics", label: "Analytics", icon: LineChart },
