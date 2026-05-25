@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, TrendingUp, Trophy, Newspaper, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
+
 import {
   forecastRevenue,
   benchmarkPeers,
