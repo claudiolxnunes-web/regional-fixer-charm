@@ -55,6 +55,7 @@ const groups = [
       { to: "/importacao", label: "Importar Dados", icon: Upload },
       { to: "/automacoes", label: "Automações", icon: Zap },
       { to: "/status", label: "Status do Sistema", icon: Activity },
+      { to: "/manual", label: "Manual & Tutorial", icon: BookOpen },
     ],
   },
 ] as const;
