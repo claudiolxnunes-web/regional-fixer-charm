@@ -31,6 +31,7 @@ import { Route as AppPedidosRouteImport } from './routes/_app/pedidos'
 import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidades'
 import { Route as AppMetasRouteImport } from './routes/_app/metas'
 import { Route as AppMapaRouteImport } from './routes/_app/mapa'
+import { Route as AppInteligenciaRouteImport } from './routes/_app/inteligencia'
 import { Route as AppImportacaoRouteImport } from './routes/_app/importacao'
 import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -157,6 +158,11 @@ const AppMapaRoute = AppMapaRouteImport.update({
   path: '/mapa',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInteligenciaRoute = AppInteligenciaRouteImport.update({
+  id: '/inteligencia',
+  path: '/inteligencia',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppImportacaoRoute = AppImportacaoRouteImport.update({
   id: '/importacao',
   path: '/importacao',
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
   '/importacao': typeof AppImportacaoRoute
+  '/inteligencia': typeof AppInteligenciaRoute
   '/mapa': typeof AppMapaRoute
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
@@ -296,6 +303,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/ia-insights': typeof AppIaInsightsRoute
   '/importacao': typeof AppImportacaoRoute
+  '/inteligencia': typeof AppInteligenciaRoute
   '/mapa': typeof AppMapaRoute
   '/metas': typeof AppMetasRoute
   '/oportunidades': typeof AppOportunidadesRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/ia-insights': typeof AppIaInsightsRoute
   '/_app/importacao': typeof AppImportacaoRoute
+  '/_app/inteligencia': typeof AppInteligenciaRoute
   '/_app/mapa': typeof AppMapaRoute
   '/_app/metas': typeof AppMetasRoute
   '/_app/oportunidades': typeof AppOportunidadesRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ia-insights'
     | '/importacao'
+    | '/inteligencia'
     | '/mapa'
     | '/metas'
     | '/oportunidades'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ia-insights'
     | '/importacao'
+    | '/inteligencia'
     | '/mapa'
     | '/metas'
     | '/oportunidades'
@@ -457,6 +468,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/ia-insights'
     | '/_app/importacao'
+    | '/_app/inteligencia'
     | '/_app/mapa'
     | '/_app/metas'
     | '/_app/oportunidades'
@@ -653,6 +665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMapaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/inteligencia': {
+      id: '/_app/inteligencia'
+      path: '/inteligencia'
+      fullPath: '/inteligencia'
+      preLoaderRoute: typeof AppInteligenciaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/importacao': {
       id: '/_app/importacao'
       path: '/importacao'
@@ -801,6 +820,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppIaInsightsRoute: typeof AppIaInsightsRoute
   AppImportacaoRoute: typeof AppImportacaoRoute
+  AppInteligenciaRoute: typeof AppInteligenciaRoute
   AppMapaRoute: typeof AppMapaRoute
   AppMetasRoute: typeof AppMetasRoute
   AppOportunidadesRoute: typeof AppOportunidadesRoute
@@ -827,6 +847,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppIaInsightsRoute: AppIaInsightsRoute,
   AppImportacaoRoute: AppImportacaoRoute,
+  AppInteligenciaRoute: AppInteligenciaRoute,
   AppMapaRoute: AppMapaRoute,
   AppMetasRoute: AppMetasRoute,
   AppOportunidadesRoute: AppOportunidadesRoute,
