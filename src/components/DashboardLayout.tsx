@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, Building2, Target, Briefcase, Activity,
   Map, BarChart3, Bell, Settings, Upload, Brain, LogOut, Sprout,
   TrendingUp, LineChart, Smartphone, ClipboardList, Zap, ShoppingCart, FileCheck,
-  Menu, Compass, Route as RouteIcon, Sparkles,
+  Menu, Compass, Route as RouteIcon, Sparkles, Bot,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
