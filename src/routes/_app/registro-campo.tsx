@@ -139,10 +139,33 @@ function RegistroCampo() {
               </Select>
             </div>
 
+            {form.activity_id && form.activity_id !== "none" && selectedClientId && (
+              <div className="flex flex-wrap gap-2">
+                <ClientBriefingDialog clientId={selectedClientId} clientName={selectedClientName} triggerLabel="Briefing pré-visita (IA)" />
+              </div>
+            )}
+
             {form.activity_id && form.activity_id !== "none" && (
               <div className="bg-primary/5 p-4 rounded-lg border border-primary/10 space-y-3">
-                <div className="flex items-center gap-2 text-primary font-medium text-sm">
-                  <ClipboardCheck className="size-4" /> Registro SPIN (Método Consultivo)
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 text-primary font-medium text-sm">
+                    <ClipboardCheck className="size-4" /> Registro SPIN (Método Consultivo)
+                  </div>
+                  <VoiceCapture
+                    context="visit_spin"
+                    label="Ditar visita SPIN"
+                    onResult={({ structured }) => {
+                      if (!structured) return;
+                      setForm((f) => ({
+                        ...f,
+                        spin_s: structured.spin_s ?? f.spin_s,
+                        spin_p: structured.spin_p ?? f.spin_p,
+                        spin_i: structured.spin_i ?? f.spin_i,
+                        spin_n: structured.spin_n ?? f.spin_n,
+                        observations: structured.observations ?? f.observations,
+                      }));
+                    }}
+                  />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
