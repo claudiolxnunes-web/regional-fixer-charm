@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 const groups = [
   {
