@@ -10,6 +10,9 @@ import { Bell, CheckCircle2, Eye, RefreshCw, AlertTriangle, Clock, Settings2 } f
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { KpiCard } from "@/components/crm/KpiCard";
+import { useServerFn } from "@tanstack/react-start";
+import { generateProactiveInsights } from "@/lib/proactive-insights.functions";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_app/alertas")({ component: AlertasPage });
 
@@ -19,6 +22,7 @@ const TYPE_LABEL: Record<string, string> = {
   low_stock: "Estoque baixo",
   goal_at_risk: "Meta em risco",
   quote_expiring: "Proposta vencendo",
+  ai_proactive: "IA proativa",
 };
 
 const SEV_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
