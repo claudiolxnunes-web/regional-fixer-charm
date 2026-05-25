@@ -88,8 +88,8 @@ function NarrativePanel() {
           {m.data.narrative && (
             <Card>
               <CardHeader><CardTitle className="text-base">Narrativa</CardTitle></CardHeader>
-              <CardContent className="prose prose-sm max-w-none dark:prose-invert">
-                <ReactMarkdown>{m.data.narrative}</ReactMarkdown>
+              <CardContent className="text-sm whitespace-pre-wrap leading-relaxed">
+                {m.data.narrative}
               </CardContent>
             </Card>
           )}
