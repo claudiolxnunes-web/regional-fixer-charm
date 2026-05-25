@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardCheck } from "lucide-react";
+import { VoiceCapture } from "@/components/VoiceCapture";
+import { ClientBriefingDialog } from "@/components/ClientBriefingDialog";
 
 export const Route = createFileRoute("/_app/registro-campo")({ component: RegistroCampo });
 
@@ -36,13 +38,17 @@ function RegistroCampo() {
     queryFn: async () => {
       const { data } = await supabase
         .from("activities")
-        .select("id, title, clients(name)")
+        .select("id, title, client_id, clients(name)")
         .eq("status", "pending")
         .eq("type", "visit")
         .order("scheduled_at", { ascending: true });
       return data ?? [];
     },
   });
+
+  const selectedActivity = (activities ?? []).find((a: any) => a.id === form.activity_id);
+  const selectedClientId: string | undefined = selectedActivity?.client_id;
+  const selectedClientName: string | undefined = selectedActivity?.clients?.name;
 
   const { data: list } = useQuery({
     queryKey: ["daily-reports"],
