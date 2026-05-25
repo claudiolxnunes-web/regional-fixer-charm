@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, Building2, Target, Briefcase, Activity,
   Map, BarChart3, Bell, Settings, Upload, Brain, LogOut, Sprout,
   TrendingUp, LineChart, Smartphone, ClipboardList, Zap, ShoppingCart, FileCheck,
-  Menu, Compass, Route as RouteIcon,
+  Menu, Compass, Route as RouteIcon, Sparkles,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
@@ -41,6 +41,7 @@ const groups = [
     items: [
       { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
       { to: "/ia-insights", label: "IA Insights", icon: Brain },
+      { to: "/inteligencia", label: "Inteligência Avançada", icon: Sparkles },
       { to: "/analytics", label: "Analytics", icon: LineChart },
       { to: "/mapa", label: "Mapa Geográfico", icon: Map },
     ],
