@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardCheck } from "lucide-react";
+import { enqueue } from "@/lib/offline";
 import { VoiceCapture } from "@/components/VoiceCapture";
 import { ClientBriefingDialog } from "@/components/ClientBriefingDialog";
 
@@ -58,9 +59,8 @@ function RegistroCampo() {
   async function save() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return toast.error("Não autenticado");
-    
-    // Save daily report
-    const { error: reportError } = await supabase.from("daily_reports").insert({
+
+    const reportPayload = {
       rep_user_id: user.id,
       report_date: form.report_date,
       visits_count: Number(form.visits_count || 0),
@@ -69,7 +69,31 @@ function RegistroCampo() {
       orders_count: Number(form.orders_count || 0),
       observations: form.observations || null,
       submitted_at: new Date().toISOString(),
-    });
+    };
+
+    // Se offline, enfileira para sync posterior.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await enqueue({ kind: "daily_report", payload: reportPayload });
+      if (form.activity_id && form.activity_id !== "none") {
+        await enqueue({
+          kind: "spin_note",
+          payload: {
+            activity_id: form.activity_id,
+            rep_user_id: user.id,
+            situation: form.spin_s,
+            problem: form.spin_p,
+            implication: form.spin_i,
+            need_payoff: form.spin_n,
+          },
+        });
+      }
+      toast.success("Salvo localmente. Será sincronizado quando voltar online.");
+      setForm({ report_date: today, visits_count: "0", calls_count: "0", proposals_count: "0", orders_count: "0", observations: "", activity_id: "", spin_s: "", spin_p: "", spin_i: "", spin_n: "" });
+      return;
+    }
+
+    // Save daily report
+    const { error: reportError } = await supabase.from("daily_reports").insert(reportPayload);
 
     if (reportError) return toast.error(reportError.message);
 

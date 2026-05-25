@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 const groups = [
   {
@@ -175,7 +176,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="size-8 rounded-lg bg-white grid place-items-center shrink-0 overflow-hidden">
             <img src={logo} alt="AgroGestão CRM" className="size-7 object-contain" />
           </div>
-          <div className="font-semibold text-sm truncate">AgroGestão</div>
+          <div className="font-semibold text-sm truncate flex-1">AgroGestão</div>
+          <OfflineIndicator />
         </header>
 
         <main className="flex-1 overflow-x-hidden">
