@@ -43,6 +43,7 @@ import { Route as AppAlertasRouteImport } from './routes/_app/alertas'
 import { Route as AppRepresentantesIdRouteImport } from './routes/_app/representantes.$id'
 import { Route as AppAlertasConfigRouteImport } from './routes/_app/alertas.config'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksWhatsappRouteImport } from './routes/api/public/hooks/whatsapp'
 import { Route as ApiPublicHooksSendWelcomeRouteImport } from './routes/api/public/hooks/send-welcome'
 import { Route as ApiPublicHooksRunAlertsRouteImport } from './routes/api/public/hooks/run-alerts'
 import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
@@ -217,6 +218,11 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWhatsappRoute = ApiPublicHooksWhatsappRouteImport.update({
+  id: '/api/public/hooks/whatsapp',
+  path: '/api/public/hooks/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSendWelcomeRoute =
   ApiPublicHooksSendWelcomeRouteImport.update({
     id: '/api/public/hooks/send-welcome',
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
   '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
   '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/run-alerts': typeof ApiPublicHooksRunAlertsRoute
   '/api/public/hooks/send-welcome': typeof ApiPublicHooksSendWelcomeRoute
+  '/api/public/hooks/whatsapp': typeof ApiPublicHooksWhatsappRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
     | '/api/public/hooks/send-welcome'
+    | '/api/public/hooks/whatsapp'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -427,6 +437,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
     | '/api/public/hooks/send-welcome'
+    | '/api/public/hooks/whatsapp'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -466,6 +477,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/run-alerts'
     | '/api/public/hooks/send-welcome'
+    | '/api/public/hooks/whatsapp'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -481,6 +493,7 @@ export interface RootRouteChildren {
   ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
   ApiPublicHooksRunAlertsRoute: typeof ApiPublicHooksRunAlertsRoute
   ApiPublicHooksSendWelcomeRoute: typeof ApiPublicHooksSendWelcomeRoute
+  ApiPublicHooksWhatsappRoute: typeof ApiPublicHooksWhatsappRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/whatsapp': {
+      id: '/api/public/hooks/whatsapp'
+      path: '/api/public/hooks/whatsapp'
+      fullPath: '/api/public/hooks/whatsapp'
+      preLoaderRoute: typeof ApiPublicHooksWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-welcome': {
       id: '/api/public/hooks/send-welcome'
       path: '/api/public/hooks/send-welcome'
@@ -837,8 +857,19 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
   ApiPublicHooksRunAlertsRoute: ApiPublicHooksRunAlertsRoute,
   ApiPublicHooksSendWelcomeRoute: ApiPublicHooksSendWelcomeRoute,
+  ApiPublicHooksWhatsappRoute: ApiPublicHooksWhatsappRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
