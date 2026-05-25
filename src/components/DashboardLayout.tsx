@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, Building2, Target, Briefcase, Activity,
   Map, BarChart3, Bell, Settings, Upload, Brain, LogOut, Sprout,
   TrendingUp, LineChart, Smartphone, ClipboardList, Zap, ShoppingCart, FileCheck,
-  Menu, Compass, Route as RouteIcon, Sparkles, Bot,
+  Menu, Compass, Route as RouteIcon, Sparkles, Bot, BookOpen,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
@@ -55,6 +55,7 @@ const groups = [
       { to: "/importacao", label: "Importar Dados", icon: Upload },
       { to: "/automacoes", label: "Automações", icon: Zap },
       { to: "/status", label: "Status do Sistema", icon: Activity },
+      { to: "/manual", label: "Manual & Tutorial", icon: BookOpen },
     ],
   },
 ] as const;
