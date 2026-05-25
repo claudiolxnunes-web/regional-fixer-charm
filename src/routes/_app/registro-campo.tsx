@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardCheck } from "lucide-react";
+import { VoiceCapture } from "@/components/VoiceCapture";
+import { ClientBriefingDialog } from "@/components/ClientBriefingDialog";
 
 export const Route = createFileRoute("/_app/registro-campo")({ component: RegistroCampo });
 
@@ -36,13 +38,17 @@ function RegistroCampo() {
     queryFn: async () => {
       const { data } = await supabase
         .from("activities")
-        .select("id, title, clients(name)")
+        .select("id, title, client_id, clients(name)")
         .eq("status", "pending")
         .eq("type", "visit")
         .order("scheduled_at", { ascending: true });
       return data ?? [];
     },
   });
+
+  const selectedActivity = (activities ?? []).find((a: any) => a.id === form.activity_id);
+  const selectedClientId: string | undefined = (selectedActivity as any)?.client_id ?? undefined;
+  const selectedClientName: string | undefined = (selectedActivity as any)?.clients?.name ?? undefined;
 
   const { data: list } = useQuery({
     queryKey: ["daily-reports"],
@@ -133,10 +139,33 @@ function RegistroCampo() {
               </Select>
             </div>
 
+            {form.activity_id && form.activity_id !== "none" && selectedClientId && (
+              <div className="flex flex-wrap gap-2">
+                <ClientBriefingDialog clientId={selectedClientId} clientName={selectedClientName} triggerLabel="Briefing pré-visita (IA)" />
+              </div>
+            )}
+
             {form.activity_id && form.activity_id !== "none" && (
               <div className="bg-primary/5 p-4 rounded-lg border border-primary/10 space-y-3">
-                <div className="flex items-center gap-2 text-primary font-medium text-sm">
-                  <ClipboardCheck className="size-4" /> Registro SPIN (Método Consultivo)
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 text-primary font-medium text-sm">
+                    <ClipboardCheck className="size-4" /> Registro SPIN (Método Consultivo)
+                  </div>
+                  <VoiceCapture
+                    context="visit_spin"
+                    label="Ditar visita SPIN"
+                    onResult={({ structured }) => {
+                      if (!structured) return;
+                      setForm((f) => ({
+                        ...f,
+                        spin_s: structured.spin_s ?? f.spin_s,
+                        spin_p: structured.spin_p ?? f.spin_p,
+                        spin_i: structured.spin_i ?? f.spin_i,
+                        spin_n: structured.spin_n ?? f.spin_n,
+                        observations: structured.observations ?? f.observations,
+                      }));
+                    }}
+                  />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
@@ -187,7 +216,24 @@ function RegistroCampo() {
               <div><Label className="text-xs">Pedidos</Label><Input type="number" inputMode="numeric" value={form.orders_count} onChange={(e) => setForm({ ...form, orders_count: e.target.value })} /></div>
             </div>
             <div><Label className="text-xs">Observações Gerais</Label><Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} placeholder="Resumo do dia..." /></div>
-            <Button onClick={save} className="w-full sm:w-auto">Enviar Registro Diário</Button>
+            <div className="flex flex-wrap gap-2 items-center">
+              <Button onClick={save} className="w-full sm:w-auto">Enviar Registro Diário</Button>
+              <VoiceCapture
+                context="daily_report"
+                label="Ditar relato do dia"
+                onResult={({ structured, transcript }) => {
+                  if (!structured) return;
+                  setForm((f) => ({
+                    ...f,
+                    visits_count: structured.visits_count != null ? String(structured.visits_count) : f.visits_count,
+                    calls_count: structured.calls_count != null ? String(structured.calls_count) : f.calls_count,
+                    proposals_count: structured.proposals_count != null ? String(structured.proposals_count) : f.proposals_count,
+                    orders_count: structured.orders_count != null ? String(structured.orders_count) : f.orders_count,
+                    observations: structured.observations ?? transcript ?? f.observations,
+                  }));
+                }}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
