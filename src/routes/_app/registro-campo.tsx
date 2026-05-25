@@ -47,8 +47,8 @@ function RegistroCampo() {
   });
 
   const selectedActivity = (activities ?? []).find((a: any) => a.id === form.activity_id);
-  const selectedClientId: string | undefined = selectedActivity?.client_id;
-  const selectedClientName: string | undefined = selectedActivity?.clients?.name;
+  const selectedClientId: string | undefined = (selectedActivity as any)?.client_id ?? undefined;
+  const selectedClientName: string | undefined = (selectedActivity as any)?.clients?.name ?? undefined;
 
   const { data: list } = useQuery({
     queryKey: ["daily-reports"],
