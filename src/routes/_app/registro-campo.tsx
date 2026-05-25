@@ -216,7 +216,24 @@ function RegistroCampo() {
               <div><Label className="text-xs">Pedidos</Label><Input type="number" inputMode="numeric" value={form.orders_count} onChange={(e) => setForm({ ...form, orders_count: e.target.value })} /></div>
             </div>
             <div><Label className="text-xs">Observações Gerais</Label><Textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} placeholder="Resumo do dia..." /></div>
-            <Button onClick={save} className="w-full sm:w-auto">Enviar Registro Diário</Button>
+            <div className="flex flex-wrap gap-2 items-center">
+              <Button onClick={save} className="w-full sm:w-auto">Enviar Registro Diário</Button>
+              <VoiceCapture
+                context="daily_report"
+                label="Ditar relato do dia"
+                onResult={({ structured, transcript }) => {
+                  if (!structured) return;
+                  setForm((f) => ({
+                    ...f,
+                    visits_count: structured.visits_count != null ? String(structured.visits_count) : f.visits_count,
+                    calls_count: structured.calls_count != null ? String(structured.calls_count) : f.calls_count,
+                    proposals_count: structured.proposals_count != null ? String(structured.proposals_count) : f.proposals_count,
+                    orders_count: structured.orders_count != null ? String(structured.orders_count) : f.orders_count,
+                    observations: structured.observations ?? transcript ?? f.observations,
+                  }));
+                }}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
