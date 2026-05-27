@@ -46,6 +46,8 @@ const sections: Section[] = [
         how: ["Importe metas via planilha", "Acompanhe % atingido em tempo real"] },
       { to: "/atividades", title: "Atividades", icon: Activity, desc: "Registro de visitas, ligações e tarefas.",
         how: ["Filtre por rep e tipo", "Use junto com Agenda SMART"] },
+      { to: "/produtos", title: "Produtos", icon: Package, desc: "Catálogo de produtos e linhas comerciais.",
+        how: ["Consulte SKUs ativos", "Use como referência para propostas e pedidos"] },
     ],
   },
   {
