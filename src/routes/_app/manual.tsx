@@ -6,6 +6,7 @@ import {
   BookOpen, LayoutDashboard, Smartphone, Route as RouteIcon, ClipboardList,
   Users, Building2, TrendingUp, ShoppingCart, Briefcase, FileCheck, Target, Activity,
   BarChart3, Bot, Brain, Sparkles, LineChart, Map, Bell, Settings, Upload, Zap,
+  Package, HeartPulse, Stethoscope, CreditCard, Mic, FileText, CalendarDays,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/manual")({ component: Manual });
