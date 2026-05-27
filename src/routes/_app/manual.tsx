@@ -61,6 +61,8 @@ const sections: Section[] = [
         how: ["A IA sugere a melhor sequência de visitas", "Considera distância e prioridade do cliente"] },
       { to: "/app-representante", title: "App de Registro (Campo)", icon: Smartphone, desc: "Interface mobile para o rep usar em campo.",
         how: ["Instale como app pelo botão Instalar", "Funciona offline — sincroniza ao reconectar"] },
+      { to: "/planejamento", title: "Planejamento", icon: CalendarDays, desc: "Planejamento tático da semana e do mês.",
+        how: ["Visão consolidada de metas e visitas", "Complementa a Agenda SMART"] },
     ],
   },
   {
