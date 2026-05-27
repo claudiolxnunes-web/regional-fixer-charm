@@ -119,6 +119,12 @@ const sections: Section[] = [
         how: ["Ative o digest diário por email", "Configure webhooks externos"] },
       { to: "/preferencias", title: "Preferências", icon: Settings, desc: "Configurações da conta e da equipe.",
         how: ["Ajuste fuso, notificações e integrações"] },
+      { to: "/status", title: "Status do Sistema", icon: HeartPulse, desc: "Saúde geral dos serviços e integrações.",
+        how: ["Veja status de banco, IA e webhooks", "Use para checar antes de reportar problemas"] },
+      { to: "/diagnostics", title: "Diagnóstico Técnico", icon: Stethoscope, desc: "Detalhes técnicos para suporte avançado.",
+        how: ["Compartilhe a tela com o suporte se necessário"] },
+      { to: "/planos", title: "Planos & Assinatura", icon: CreditCard, desc: "Gestão do plano e do pagamento.",
+        how: ["Veja planos disponíveis", "Atualize ou troque seu plano a qualquer momento"] },
     ],
   },
 ];
