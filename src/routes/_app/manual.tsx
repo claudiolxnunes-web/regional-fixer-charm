@@ -6,6 +6,7 @@ import {
   BookOpen, LayoutDashboard, Smartphone, Route as RouteIcon, ClipboardList,
   Users, Building2, TrendingUp, ShoppingCart, Briefcase, FileCheck, Target, Activity,
   BarChart3, Bot, Brain, Sparkles, LineChart, Map, Bell, Settings, Upload, Zap,
+  Package, HeartPulse, Stethoscope, CreditCard, Mic, FileText, CalendarDays,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/manual")({ component: Manual });
@@ -45,6 +46,8 @@ const sections: Section[] = [
         how: ["Importe metas via planilha", "Acompanhe % atingido em tempo real"] },
       { to: "/atividades", title: "Atividades", icon: Activity, desc: "Registro de visitas, ligações e tarefas.",
         how: ["Filtre por rep e tipo", "Use junto com Agenda SMART"] },
+      { to: "/produtos", title: "Produtos", icon: Package, desc: "Catálogo de produtos e linhas comerciais.",
+        how: ["Consulte SKUs ativos", "Use como referência para propostas e pedidos"] },
     ],
   },
   {
@@ -58,6 +61,8 @@ const sections: Section[] = [
         how: ["A IA sugere a melhor sequência de visitas", "Considera distância e prioridade do cliente"] },
       { to: "/app-representante", title: "App de Registro (Campo)", icon: Smartphone, desc: "Interface mobile para o rep usar em campo.",
         how: ["Instale como app pelo botão Instalar", "Funciona offline — sincroniza ao reconectar"] },
+      { to: "/planejamento", title: "Planejamento", icon: CalendarDays, desc: "Planejamento tático da semana e do mês.",
+        how: ["Visão consolidada de metas e visitas", "Complementa a Agenda SMART"] },
     ],
   },
   {
@@ -71,6 +76,10 @@ const sections: Section[] = [
         how: ["Crie a partir de uma visita ou WhatsApp", "Acompanhe estágios até fechamento"] },
       { to: "/propostas", title: "Propostas", icon: FileCheck, desc: "Cotações e propostas formais.",
         how: ["Gere PDF e envie ao cliente", "Status muda conforme aceite/recusa"] },
+      { to: "/clientes", title: "Briefing IA (no Cliente)", icon: FileText, desc: "Resumo pré-visita gerado por IA dentro da ficha do cliente.",
+        how: ["Abra um cliente em /clientes", "Clique em Briefing IA para gerar contexto, riscos e próximos passos"] },
+      { to: "/registro-campo", title: "Captura por Voz (no Registro)", icon: Mic, desc: "Transcrição de voz para gerar registros em campo.",
+        how: ["Use o botão de microfone no Registro de Campo", "A IA transcreve e estrutura o conteúdo automaticamente"] },
     ],
   },
   {
@@ -110,6 +119,12 @@ const sections: Section[] = [
         how: ["Ative o digest diário por email", "Configure webhooks externos"] },
       { to: "/preferencias", title: "Preferências", icon: Settings, desc: "Configurações da conta e da equipe.",
         how: ["Ajuste fuso, notificações e integrações"] },
+      { to: "/status", title: "Status do Sistema", icon: HeartPulse, desc: "Saúde geral dos serviços e integrações.",
+        how: ["Veja status de banco, IA e webhooks", "Use para checar antes de reportar problemas"] },
+      { to: "/diagnostics", title: "Diagnóstico Técnico", icon: Stethoscope, desc: "Detalhes técnicos para suporte avançado.",
+        how: ["Compartilhe a tela com o suporte se necessário"] },
+      { to: "/planos", title: "Planos & Assinatura", icon: CreditCard, desc: "Gestão do plano e do pagamento.",
+        how: ["Veja planos disponíveis", "Atualize ou troque seu plano a qualquer momento"] },
     ],
   },
 ];
