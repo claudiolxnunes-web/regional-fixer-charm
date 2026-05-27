@@ -76,6 +76,10 @@ const sections: Section[] = [
         how: ["Crie a partir de uma visita ou WhatsApp", "Acompanhe estágios até fechamento"] },
       { to: "/propostas", title: "Propostas", icon: FileCheck, desc: "Cotações e propostas formais.",
         how: ["Gere PDF e envie ao cliente", "Status muda conforme aceite/recusa"] },
+      { to: "/clientes", title: "Briefing IA (no Cliente)", icon: FileText, desc: "Resumo pré-visita gerado por IA dentro da ficha do cliente.",
+        how: ["Abra um cliente em /clientes", "Clique em Briefing IA para gerar contexto, riscos e próximos passos"] },
+      { to: "/registro-campo", title: "Captura por Voz (no Registro)", icon: Mic, desc: "Transcrição de voz para gerar registros em campo.",
+        how: ["Use o botão de microfone no Registro de Campo", "A IA transcreve e estrutura o conteúdo automaticamente"] },
     ],
   },
   {
