@@ -45,6 +45,18 @@ function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotBusy, setForgotBusy] = useState(false);
+  const quickLogin = useServerFn(devQuickLogin);
+
+  async function onQuickLogin(email: string) {
+    setLoading(true);
+    try {
+      const { url } = await quickLogin({ data: { email } });
+      window.location.href = url;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha no acesso rápido");
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (search.invite) {
