@@ -179,16 +179,18 @@ function NewPlanDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpe
   async function save() {
     if (!form.title || !form.start_date || !form.end_date) return toast.error("Preencha título e datas");
     const { data: u } = await supabase.auth.getUser();
+    if (!u.user?.id) return toast.error("Sessão expirada. Faça login novamente.");
     const { data, error } = await supabase.from("strategic_plans").insert({
       title: form.title, description: form.description || null,
       period_type: form.period_type, start_date: form.start_date, end_date: form.end_date,
-      owner_id: u.user?.id!,
+      owner_id: u.user.id,
     }).select("id").single();
     if (error) return toast.error(error.message);
+    if (!data?.id) return toast.error("Falha ao criar plano");
     toast.success("Plano criado");
     onOpenChange(false);
     setForm({ title: "", description: "", period_type: "monthly", start_date: "", end_date: "" });
-    onCreated(data!.id);
+    onCreated(data.id);
   }
 
   return (
