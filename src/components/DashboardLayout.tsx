@@ -122,6 +122,7 @@ function SidebarContent({
           <div className="text-xs font-medium truncate">{user?.user_metadata?.name || user?.email?.split("@")[0]}</div>
           <div className="text-[10px] text-sidebar-foreground/60 truncate">{user?.email}</div>
         </div>
+        <ThemeToggle compact />
         <Button
           variant="ghost"
           size="icon"
