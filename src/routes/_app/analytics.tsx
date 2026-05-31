@@ -8,7 +8,7 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianG
 export const Route = createFileRoute("/_app/analytics")({ component: Analytics });
 
 function Analytics() {
-  const { data: sales } = useQuery({
+  const { data: sales, isLoading } = useQuery({
     queryKey: ["analytics-sales"],
     queryFn: async () => {
       const since = new Date();
