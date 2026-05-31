@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
@@ -64,10 +65,15 @@ export const devQuickLogin = createServerFn({ method: "POST" })
       }
     }
 
-    // Magic link → ao abrir, faz login automático
+    // Origem para redirecionar após o magic link
+    const req = getRequest();
+    const origin = new URL(req.url).origin;
+
+    // Magic link → ao abrir, faz login automático e volta para /dashboard
     const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email,
+      options: { redirectTo: `${origin}/dashboard` },
     });
     if (error) throw new Error(error.message);
     const actionLink = link?.properties?.action_link;
