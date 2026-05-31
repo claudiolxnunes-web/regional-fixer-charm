@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { UserCheck, UserPlus } from "lucide-react";
+import { UserCheck, UserPlus, Zap } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { devQuickLogin } from "@/lib/dev-login.functions";
 import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/login")({
