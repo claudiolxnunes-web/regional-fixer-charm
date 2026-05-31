@@ -162,6 +162,8 @@ function Relatorios() {
           </CardContent>
         </Card>
       </div>
+      </>)}
     </div>
+
   );
 }
