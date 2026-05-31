@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const InputSchema = z.object({
   audio_base64: z.string().min(100).max(20_000_000),
@@ -8,6 +9,7 @@ const InputSchema = z.object({
 });
 
 export const transcribeAndStructure = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data) => InputSchema.parse(data))
   .handler(async ({ data }) => {
     const elKey = process.env.ELEVENLABS_API_KEY;

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 function adminClient() {
   return createClient(
@@ -31,7 +32,9 @@ function monthKey(d: Date) {
 }
 
 // ============= FORECAST =============
-export const forecastRevenue = createServerFn({ method: "POST" }).handler(async () => {
+export const forecastRevenue = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
   const supabase = adminClient();
   const since = new Date();
   since.setMonth(since.getMonth() - 12);
@@ -94,10 +97,12 @@ export const forecastRevenue = createServerFn({ method: "POST" }).handler(async 
     forecast,
     reps: repSeries,
   };
-});
+  });
 
 // ============= BENCHMARK =============
-export const benchmarkPeers = createServerFn({ method: "POST" }).handler(async () => {
+export const benchmarkPeers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
   const supabase = adminClient();
   const since = new Date();
   since.setMonth(since.getMonth() - 3);
@@ -156,10 +161,12 @@ export const benchmarkPeers = createServerFn({ method: "POST" }).handler(async (
     },
     rows: enriched,
   };
-});
+  });
 
 // ============= DAILY NARRATIVE =============
-export const generateNarrative = createServerFn({ method: "POST" }).handler(async () => {
+export const generateNarrative = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
   const supabase = adminClient();
@@ -244,4 +251,4 @@ Responda em JSON estrito:
   try { parsed = JSON.parse(content); } catch { parsed = {}; }
 
   return { context: ctx, ...parsed };
-});
+  });

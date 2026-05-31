@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const generateInsights = createServerFn({ method: "POST" }).handler(async () => {
+export const generateInsights = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
 
@@ -73,4 +76,4 @@ Responda em formato JSON válido:
   let parsed: any = {};
   try { parsed = JSON.parse(content); } catch { parsed = { insights: [] }; }
   return { summary, insights: parsed.insights ?? [] };
-});
+  });

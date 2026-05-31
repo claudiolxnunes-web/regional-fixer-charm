@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { sendResendEmail, wrap } from "./email.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+
 
 function svc() {
   const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -14,6 +17,7 @@ function svc() {
 
 /** Notifica gestores quando um representante envia uma nova proposta. */
 export const notifyQuoteCreated = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z
       .object({
@@ -84,6 +88,7 @@ export const notifyQuoteCreated = createServerFn({ method: "POST" })
 
 /** Cria invite (RLS via service role) e envia email com link de cadastro. */
 export const sendInviteWithTeam = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z
       .object({
