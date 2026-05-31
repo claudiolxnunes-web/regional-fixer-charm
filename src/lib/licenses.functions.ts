@@ -124,7 +124,7 @@ export const updateLicense = createServerFn({ method: "POST" })
       .single();
     if (tErr) throw new Error(tErr.message);
 
-    const patch: Record<string, any> = {};
+    const patch: { current_period_end?: string; subscription_status?: string } = {};
     if (data.action === "extend") {
       const base = team.current_period_end ? new Date(team.current_period_end) : new Date();
       const start = base.getTime() > Date.now() ? base : new Date();
