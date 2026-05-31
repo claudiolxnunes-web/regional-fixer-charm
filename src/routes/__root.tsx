@@ -3,8 +3,10 @@ import {
   Outlet, Link, createRootRouteWithContext, useRouter,
   HeadContent, Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { initTheme } from "@/components/ThemeToggle";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -108,6 +110,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  useEffect(() => {
+    initTheme();
+    // Cmd/Ctrl+K → Copiloto
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        e.preventDefault();
+        router.navigate({ to: "/copilot" });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [router]);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
