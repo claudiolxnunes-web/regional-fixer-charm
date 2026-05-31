@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_app/relatorios")({ component: Relatorios
 function Relatorios() {
   const [period, setPeriod] = useState("12");
 
-  const { data: sales } = useQuery({
+  const { data: sales, isLoading } = useQuery({
     queryKey: ["sales-report", period],
     queryFn: async () => {
       const months = Number(period);
