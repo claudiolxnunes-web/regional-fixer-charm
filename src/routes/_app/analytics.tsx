@@ -132,6 +132,8 @@ function Analytics() {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+      </>}
     </div>
+
   );
 }
