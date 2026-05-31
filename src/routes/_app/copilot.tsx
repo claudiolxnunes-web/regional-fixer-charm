@@ -139,7 +139,7 @@ function Copilot() {
               className="resize-none flex-1"
               disabled={m.isPending}
             />
-            <Button type="submit" disabled={m.isPending || !input.trim()} size="icon" className="size-10">
+            <Button type="submit" disabled={m.isPending || !input.trim()} size="icon" aria-label="Enviar pergunta" className="size-11">
               {m.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             </Button>
           </form>

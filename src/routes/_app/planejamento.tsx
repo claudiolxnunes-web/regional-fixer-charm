@@ -334,7 +334,7 @@ function ObjectiveCard({ objective, actions, reps, onChange }: { objective: any;
               </Select>
             </div>
           </div>
-          <Button size="icon" variant="ghost" onClick={delObjective}><Trash2 className="size-4" /></Button>
+          <Button size="icon" variant="ghost" aria-label="Excluir objetivo" onClick={delObjective}><Trash2 className="size-4" /></Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
