@@ -52,7 +52,7 @@ function LicencasPage() {
   });
 
   const mut = useMutation({
-    mutationFn: (vars: Parameters<typeof updateLicense>[0]["data"]) =>
+    mutationFn: (vars: { team_id: string; action: "extend" | "revoke" | "reactivate" | "set_end"; days?: number; end_date?: string }) =>
       update({ data: vars }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["licenses"] });
