@@ -53,6 +53,7 @@ const groups = [
     items: [
       { to: "/alertas", label: "Alertas", icon: Bell },
       { to: "/preferencias", label: "Preferências", icon: Settings },
+      { to: "/licencas", label: "Licenças", icon: Shield },
       { to: "/importacao", label: "Importar Dados", icon: Upload },
       { to: "/automacoes", label: "Automações", icon: Zap },
       { to: "/status", label: "Status do Sistema", icon: Activity },
