@@ -12,6 +12,7 @@ import {
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const groups = [
   {
@@ -181,11 +182,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <img src={logo} alt="AgroGestão CRM" className="size-7 object-contain" />
           </div>
           <div className="font-semibold text-sm truncate flex-1">AgroGestão</div>
+          <ThemeToggle compact />
           <OfflineIndicator />
         </header>
 
         <main className="flex-1 overflow-x-hidden">
-          <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 max-w-[1400px] mx-auto w-full">{children}</div>
+          <div key={loc.pathname} className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 max-w-[1400px] mx-auto w-full animate-fade-in">{children}</div>
         </main>
 
         {/* Mobile Bottom Nav */}
