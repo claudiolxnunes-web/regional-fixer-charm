@@ -54,6 +54,23 @@ function Analytics() {
         <p className="text-sm text-muted-foreground">Tendências, mix de produtos e distribuição geográfica.</p>
       </div>
 
+      {isLoading && (
+        <div className="space-y-4">
+          <div className="h-72 rounded-lg bg-muted/40 animate-pulse" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="h-80 rounded-lg bg-muted/40 animate-pulse" />
+            <div className="h-80 rounded-lg bg-muted/40 animate-pulse" />
+          </div>
+        </div>
+      )}
+
+      {!isLoading && (sales ?? []).length === 0 && (
+        <Card><CardContent className="p-8 text-center text-sm text-muted-foreground">Sem dados de vendas no período.</CardContent></Card>
+      )}
+
+      {!isLoading && (sales ?? []).length > 0 && <>
+
+
       <Card>
         <CardHeader><CardTitle>Tendência semanal (últimas 26 semanas)</CardTitle></CardHeader>
         <CardContent className="h-72">
