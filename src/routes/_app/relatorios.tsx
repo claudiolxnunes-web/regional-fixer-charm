@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_app/relatorios")({ component: Relatorios
 function Relatorios() {
   const [period, setPeriod] = useState("12");
 
-  const { data: sales } = useQuery({
+  const { data: sales, isLoading } = useQuery({
     queryKey: ["sales-report", period],
     queryFn: async () => {
       const months = Number(period);
@@ -98,11 +98,26 @@ function Relatorios() {
         </div>
       </div>
 
+      {isLoading ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[0,1,2].map(i => <div key={i} className="h-20 rounded-lg bg-muted/40 animate-pulse" />)}
+          </div>
+          <div className="h-72 rounded-lg bg-muted/40 animate-pulse" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="h-80 rounded-lg bg-muted/40 animate-pulse" />
+            <div className="h-80 rounded-lg bg-muted/40 animate-pulse" />
+          </div>
+        </div>
+      ) : (sales ?? []).length === 0 ? (
+        <Card><CardContent className="p-8 text-center text-sm text-muted-foreground">Sem dados no período selecionado.</CardContent></Card>
+      ) : (<>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Faturamento total" value={`R$ ${formatCurrencyCompact(total)}`} />
         <KpiCard label="Notas" value={(sales ?? []).length.toString()} />
         <KpiCard label="Volume total" value={formatCurrencyCompact(monthly.reduce((s, m) => s + m.volume, 0))} />
       </div>
+
 
       <Card>
         <CardHeader><CardTitle>Faturamento mensal</CardTitle></CardHeader>
@@ -147,6 +162,8 @@ function Relatorios() {
           </CardContent>
         </Card>
       </div>
+      </>)}
     </div>
+
   );
 }

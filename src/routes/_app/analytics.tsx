@@ -8,7 +8,7 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianG
 export const Route = createFileRoute("/_app/analytics")({ component: Analytics });
 
 function Analytics() {
-  const { data: sales } = useQuery({
+  const { data: sales, isLoading } = useQuery({
     queryKey: ["analytics-sales"],
     queryFn: async () => {
       const since = new Date();
@@ -53,6 +53,23 @@ function Analytics() {
         <h1 className="text-2xl font-semibold tracking-tight">Analytics Avançada</h1>
         <p className="text-sm text-muted-foreground">Tendências, mix de produtos e distribuição geográfica.</p>
       </div>
+
+      {isLoading && (
+        <div className="space-y-4">
+          <div className="h-72 rounded-lg bg-muted/40 animate-pulse" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="h-80 rounded-lg bg-muted/40 animate-pulse" />
+            <div className="h-80 rounded-lg bg-muted/40 animate-pulse" />
+          </div>
+        </div>
+      )}
+
+      {!isLoading && (sales ?? []).length === 0 && (
+        <Card><CardContent className="p-8 text-center text-sm text-muted-foreground">Sem dados de vendas no período.</CardContent></Card>
+      )}
+
+      {!isLoading && (sales ?? []).length > 0 && <>
+
 
       <Card>
         <CardHeader><CardTitle>Tendência semanal (últimas 26 semanas)</CardTitle></CardHeader>
@@ -115,6 +132,8 @@ function Analytics() {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+      </>}
     </div>
+
   );
 }
