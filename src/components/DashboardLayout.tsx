@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, Building2, Target, Briefcase, Activity,
   Map, BarChart3, Bell, Settings, Upload, Brain, LogOut, Sprout,
   TrendingUp, LineChart, Smartphone, ClipboardList, Zap, ShoppingCart, FileCheck,
-  Menu, Compass, Route as RouteIcon, Sparkles, Bot, BookOpen,
+  Menu, Compass, Route as RouteIcon, Sparkles, Bot, BookOpen, Shield,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
@@ -53,6 +53,7 @@ const groups = [
     items: [
       { to: "/alertas", label: "Alertas", icon: Bell },
       { to: "/preferencias", label: "Preferências", icon: Settings },
+      { to: "/licencas", label: "Licenças", icon: Shield },
       { to: "/importacao", label: "Importar Dados", icon: Upload },
       { to: "/automacoes", label: "Automações", icon: Zap },
       { to: "/status", label: "Status do Sistema", icon: Activity },
