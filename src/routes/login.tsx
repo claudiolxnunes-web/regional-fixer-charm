@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { UserCheck, UserPlus } from "lucide-react";
+import { UserCheck, UserPlus, Zap } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { devQuickLogin } from "@/lib/dev-login.functions";
 import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/login")({
@@ -43,6 +45,18 @@ function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotBusy, setForgotBusy] = useState(false);
+  const quickLogin = useServerFn(devQuickLogin);
+
+  async function onQuickLogin(email: string) {
+    setLoading(true);
+    try {
+      const { url } = await quickLogin({ data: { email } });
+      window.location.href = url;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha no acesso rápido");
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (search.invite) {
@@ -135,6 +149,18 @@ function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 space-y-2 rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 p-3">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-200">
+              <Zap className="size-3.5" /> Acesso rápido (owner)
+            </div>
+            <Button type="button" size="sm" variant="outline" className="w-full justify-start text-xs" onClick={() => onQuickLogin("claudiolx.nunes@gmail.com")} disabled={loading}>
+              Entrar como Superadmin (claudiolx.nunes@gmail.com)
+            </Button>
+            <Button type="button" size="sm" variant="outline" className="w-full justify-start text-xs" onClick={() => onQuickLogin("clxn2000@hotmail.com")} disabled={loading}>
+              Entrar como Admin (clxn2000@hotmail.com)
+            </Button>
+          </div>
+
           <Button type="button" variant="outline" className="w-full h-11" onClick={onGoogle} disabled={loading}>
             <GoogleIcon />
             Continuar com Google
