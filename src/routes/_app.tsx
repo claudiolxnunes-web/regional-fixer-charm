@@ -142,7 +142,7 @@ function AppLayout() {
 
   if (loading || checking) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-muted-foreground p-4 text-center">
+      <div className="min-h-dvh flex flex-col items-center justify-center gap-4 text-muted-foreground p-4 text-center">
         <div className="animate-pulse">{loading ? "Autenticando..." : "Iniciando sistema..."}</div>
         {showDiagnosticLink && (
           <Link 

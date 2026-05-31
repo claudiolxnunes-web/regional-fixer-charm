@@ -174,7 +174,7 @@ function RepDashboard({ rep, signOut }: { rep: any; signOut: () => Promise<void>
           <div className="opacity-80">Hoje</div>
           <div className="font-semibold">{fmtDate(new Date())}</div>
         </div>
-        <Button size="icon" variant="ghost" className="text-emerald-50 hover:bg-emerald-800/60" onClick={signOut}>
+        <Button size="icon" variant="ghost" aria-label="Sair" className="text-emerald-50 hover:bg-emerald-800/60" onClick={signOut}>
           <LogOut className="size-4" />
         </Button>
       </div>
@@ -337,7 +337,7 @@ function MyClients({ repId }: { repId: string }) {
                 </div>
               )}
             </div>
-            <Button size="icon" variant="ghost" className="size-8" asChild>
+            <Button size="icon" variant="ghost" aria-label={`Abrir cliente ${c.name}`} className="size-10" asChild>
               <Link to="/clientes" search={{ search: c.name }}>
                 <ChevronRight className="size-4" />
               </Link>

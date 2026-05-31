@@ -105,7 +105,7 @@ export function InviteButton() {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                 />
-                <Button onClick={sendEmail} disabled={loading || !email} size="icon">
+                <Button onClick={sendEmail} disabled={loading || !email} size="icon" aria-label="Enviar convite por e-mail">
                   <Mail className="size-4" />
                 </Button>
               </div>

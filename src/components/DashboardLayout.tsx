@@ -124,7 +124,8 @@ function SidebarContent({
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          aria-label="Sair"
+          className="size-9 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           onClick={onSignOut}
           title="Sair"
         >
@@ -145,7 +146,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const handleSignOut = async () => { await signOut(); navigate({ to: "/login", search: { invite: undefined } }); };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-dvh bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-64 shrink-0">
         <SidebarContent
@@ -161,7 +162,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <header className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 h-14 bg-sidebar text-sidebar-foreground border-b border-sidebar-border">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-9 text-sidebar-foreground hover:bg-sidebar-accent">
+              <Button variant="ghost" size="icon" aria-label="Abrir menu de navegação" className="size-11 text-sidebar-foreground hover:bg-sidebar-accent">
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>

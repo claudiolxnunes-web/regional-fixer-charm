@@ -35,8 +35,8 @@ function Inteligencia() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="narrative"><Newspaper className="size-4 mr-1.5" />Resumo da Manhã</TabsTrigger>
+        <TabsList className="w-full max-w-full overflow-x-auto justify-start">
+          <TabsTrigger value="narrative"><Newspaper className="size-4 mr-1.5" />Resumo</TabsTrigger>
           <TabsTrigger value="forecast"><TrendingUp className="size-4 mr-1.5" />Previsão</TabsTrigger>
           <TabsTrigger value="benchmark"><Trophy className="size-4 mr-1.5" />Benchmark</TabsTrigger>
         </TabsList>

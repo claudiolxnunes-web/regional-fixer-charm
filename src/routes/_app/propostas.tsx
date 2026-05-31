@@ -67,7 +67,7 @@ function PropostasPage() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-        <TabsList>
+        <TabsList className="w-full max-w-full overflow-x-auto justify-start">
           <TabsTrigger value="pending">Pendentes</TabsTrigger>
           <TabsTrigger value="approved">Aprovadas</TabsTrigger>
           <TabsTrigger value="rejected">Rejeitadas</TabsTrigger>
