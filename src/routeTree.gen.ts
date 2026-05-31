@@ -32,6 +32,7 @@ import { Route as AppOportunidadesRouteImport } from './routes/_app/oportunidade
 import { Route as AppMetasRouteImport } from './routes/_app/metas'
 import { Route as AppMapaRouteImport } from './routes/_app/mapa'
 import { Route as AppManualRouteImport } from './routes/_app/manual'
+import { Route as AppLicencasRouteImport } from './routes/_app/licencas'
 import { Route as AppInteligenciaRouteImport } from './routes/_app/inteligencia'
 import { Route as AppImportacaoRouteImport } from './routes/_app/importacao'
 import { Route as AppIaInsightsRouteImport } from './routes/_app/ia-insights'
@@ -165,6 +166,11 @@ const AppManualRoute = AppManualRouteImport.update({
   path: '/manual',
   getParentRoute: () => AppRoute,
 } as any)
+const AppLicencasRoute = AppLicencasRouteImport.update({
+  id: '/licencas',
+  path: '/licencas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInteligenciaRoute = AppInteligenciaRouteImport.update({
   id: '/inteligencia',
   path: '/inteligencia',
@@ -277,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/ia-insights': typeof AppIaInsightsRoute
   '/importacao': typeof AppImportacaoRoute
   '/inteligencia': typeof AppInteligenciaRoute
+  '/licencas': typeof AppLicencasRoute
   '/manual': typeof AppManualRoute
   '/mapa': typeof AppMapaRoute
   '/metas': typeof AppMetasRoute
@@ -319,6 +326,7 @@ export interface FileRoutesByTo {
   '/ia-insights': typeof AppIaInsightsRoute
   '/importacao': typeof AppImportacaoRoute
   '/inteligencia': typeof AppInteligenciaRoute
+  '/licencas': typeof AppLicencasRoute
   '/manual': typeof AppManualRoute
   '/mapa': typeof AppMapaRoute
   '/metas': typeof AppMetasRoute
@@ -363,6 +371,7 @@ export interface FileRoutesById {
   '/_app/ia-insights': typeof AppIaInsightsRoute
   '/_app/importacao': typeof AppImportacaoRoute
   '/_app/inteligencia': typeof AppInteligenciaRoute
+  '/_app/licencas': typeof AppLicencasRoute
   '/_app/manual': typeof AppManualRoute
   '/_app/mapa': typeof AppMapaRoute
   '/_app/metas': typeof AppMetasRoute
@@ -407,6 +416,7 @@ export interface FileRouteTypes {
     | '/ia-insights'
     | '/importacao'
     | '/inteligencia'
+    | '/licencas'
     | '/manual'
     | '/mapa'
     | '/metas'
@@ -449,6 +459,7 @@ export interface FileRouteTypes {
     | '/ia-insights'
     | '/importacao'
     | '/inteligencia'
+    | '/licencas'
     | '/manual'
     | '/mapa'
     | '/metas'
@@ -492,6 +503,7 @@ export interface FileRouteTypes {
     | '/_app/ia-insights'
     | '/_app/importacao'
     | '/_app/inteligencia'
+    | '/_app/licencas'
     | '/_app/manual'
     | '/_app/mapa'
     | '/_app/metas'
@@ -696,6 +708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppManualRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/licencas': {
+      id: '/_app/licencas'
+      path: '/licencas'
+      fullPath: '/licencas'
+      preLoaderRoute: typeof AppLicencasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/inteligencia': {
       id: '/_app/inteligencia'
       path: '/inteligencia'
@@ -860,6 +879,7 @@ interface AppRouteChildren {
   AppIaInsightsRoute: typeof AppIaInsightsRoute
   AppImportacaoRoute: typeof AppImportacaoRoute
   AppInteligenciaRoute: typeof AppInteligenciaRoute
+  AppLicencasRoute: typeof AppLicencasRoute
   AppManualRoute: typeof AppManualRoute
   AppMapaRoute: typeof AppMapaRoute
   AppMetasRoute: typeof AppMetasRoute
@@ -889,6 +909,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIaInsightsRoute: AppIaInsightsRoute,
   AppImportacaoRoute: AppImportacaoRoute,
   AppInteligenciaRoute: AppInteligenciaRoute,
+  AppLicencasRoute: AppLicencasRoute,
   AppManualRoute: AppManualRoute,
   AppMapaRoute: AppMapaRoute,
   AppMetasRoute: AppMetasRoute,

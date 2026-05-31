@@ -48,7 +48,7 @@ function LicencasPage() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["licenses"],
-    queryFn: () => fetch({ data: undefined as any }),
+    queryFn: () => fetch(),
   });
 
   const mut = useMutation({
