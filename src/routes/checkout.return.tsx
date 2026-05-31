@@ -52,7 +52,7 @@ function CheckoutReturn() {
   }, [session_id]);
 
   return (
-    <div className="min-h-screen grid place-items-center bg-background px-4">
+    <div className="min-h-dvh grid place-items-center bg-background px-4">
       <Card className="max-w-md w-full">
         <CardContent className="pt-8 pb-6 text-center space-y-4">
           {!session_id ? (
