@@ -157,7 +157,7 @@ function AlertasPage() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-        <TabsList>
+        <TabsList className="w-full max-w-full overflow-x-auto justify-start">
           <TabsTrigger value="new">Novos</TabsTrigger>
           <TabsTrigger value="read">Lidos</TabsTrigger>
           <TabsTrigger value="resolved">Resolvidos</TabsTrigger>
