@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const generateProactiveInsights = createServerFn({ method: "POST" }).handler(async () => {
+export const generateProactiveInsights = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
   const aiKey = process.env.LOVABLE_API_KEY;
   if (!aiKey) throw new Error("LOVABLE_API_KEY não configurada");
   const supabase = createClient(
@@ -133,4 +136,4 @@ export const generateProactiveInsights = createServerFn({ method: "POST" }).hand
   }
 
   return { created, insights, candidates_total: candidates.length };
-});
+  });
