@@ -13,29 +13,31 @@ export const Route = createFileRoute("/planos")({
   head: () => ({
     meta: [
       { title: "Planos e preços — AgroGestão CRM" },
-      { name: "description", content: "Conheça os planos do AgroGestão CRM e escolha a assinatura ideal para sua equipe comercial do agronegócio." },
+      { name: "description", content: "Conheça os planos do AgroGestão CRM: Empresa, Gestor Comercial e Consultor Comercial, com opções mensal, semestral e anual." },
       { property: "og:title", content: "Planos e preços — AgroGestão CRM" },
       { property: "og:description", content: "Escolha o plano ideal do AgroGestão CRM para sua equipe comercial do agronegócio." },
       { property: "og:url", content: "https://regional-fixer-charm.lovable.app/planos" },
     ],
     links: [{ rel: "canonical", href: "https://regional-fixer-charm.lovable.app/planos" }],
-    scripts: PLANS.map((plan) => ({
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Product",
-        name: `AgroGestão CRM — Plano ${plan.name}`,
-        description: plan.description,
-        brand: { "@type": "Brand", name: "AgroGestão CRM" },
-        offers: {
-          "@type": "Offer",
-          price: plan.price.replace(/[^\d,]/g, "").replace(",", "."),
-          priceCurrency: "BRL",
-          url: "https://regional-fixer-charm.lovable.app/planos",
-          availability: "https://schema.org/InStock",
-        },
-      }),
-    })),
+    scripts: PLANS.flatMap((plan) =>
+      plan.billing.map((b) => ({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: `AgroGestão CRM — ${plan.name} (${b.label})`,
+          description: plan.description,
+          brand: { "@type": "Brand", name: "AgroGestão CRM" },
+          offers: {
+            "@type": "Offer",
+            price: b.price.replace(/[^\d,]/g, "").replace(".", "").replace(",", "."),
+            priceCurrency: "BRL",
+            url: "https://regional-fixer-charm.lovable.app/planos",
+            availability: "https://schema.org/InStock",
+          },
+        }),
+      })),
+    ),
   }),
 });
 
@@ -60,25 +62,25 @@ function PlanosPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight mb-3">Escolha seu plano</h1>
           <p className="text-muted-foreground text-lg">
-            Acesso completo à plataforma BPF Consult com até 20 representantes
+            Três opções de assinatura com descontos de até 25% no pagamento anual
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
           {PLANS.map((plan) => (
-            <Card key={plan.id} className={plan.badge === 'MAIS ECONÔMICO' ? 'border-primary shadow-lg relative' : 'relative'}>
+            <Card
+              key={plan.id}
+              className={plan.badge ? "border-primary shadow-lg relative" : "relative"}
+            >
               {plan.badge && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">{plan.badge}</Badge>
               )}
               <CardHeader>
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <p className="text-sm font-medium text-primary">{plan.tagline}</p>
                 <CardDescription>{plan.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground ml-1">{plan.period}</span>
-                </div>
                 <ul className="space-y-2">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm">
@@ -87,6 +89,32 @@ function PlanosPage() {
                     </li>
                   ))}
                 </ul>
+
+                <div className="space-y-3 pt-2 border-t">
+                  {plan.billing.map((b) => (
+                    <div
+                      key={b.id}
+                      className="flex items-baseline justify-between gap-2 rounded-md border bg-muted/30 px-3 py-2"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{b.label}</span>
+                          {b.badge && (
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {b.badge}
+                            </Badge>
+                          )}
+                        </div>
+                        {b.note && <p className="text-xs text-muted-foreground">{b.note}</p>}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold leading-tight">{b.price}</div>
+                        <div className="text-[11px] text-muted-foreground">{b.period}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 <Button className="w-full" size="lg" onClick={handleSelect} disabled={loading}>
                   Assinar {plan.name}
                   <ExternalLink className="w-4 h-4 ml-2" />
