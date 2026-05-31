@@ -1,14 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PLANS } from "@/lib/stripe";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { StripeEmbeddedCheckoutForm } from "@/components/StripeEmbeddedCheckout";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
+const CHECKOUT_URL = "https://www.bpfconsult.com.br/agrogestao";
 
 export const Route = createFileRoute("/planos")({
   component: PlanosPage,
