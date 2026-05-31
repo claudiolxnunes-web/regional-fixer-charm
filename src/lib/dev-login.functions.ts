@@ -48,6 +48,7 @@ export const devQuickLogin = createServerFn({ method: "POST" })
           .from("teams")
           .insert({
             name: "Minha Empresa",
+            owner_id: user.id,
             plan: "anual",
             subscription_status: "active",
             current_period_end: new Date(Date.now() + 365 * 86400000).toISOString(),
