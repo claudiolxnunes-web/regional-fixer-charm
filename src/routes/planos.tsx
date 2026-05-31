@@ -1,14 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PLANS } from "@/lib/stripe";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { StripeEmbeddedCheckoutForm } from "@/components/StripeEmbeddedCheckout";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
+const CHECKOUT_URL = "https://www.bpfconsult.com.br/agrogestao";
 
 export const Route = createFileRoute("/planos")({
   component: PlanosPage,
@@ -44,19 +42,13 @@ export const Route = createFileRoute("/planos")({
 function PlanosPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
 
-  const handleSelect = (priceId: string) => {
-    if (!session) {
-      navigate({ to: "/login", search: { redirect: "/planos" } as any });
-      return;
-    }
-    setSelectedPrice(priceId);
+  const handleSelect = () => {
+    window.open(CHECKOUT_URL, "_blank", "noopener,noreferrer");
   };
 
   return (
     <div className="min-h-dvh bg-background">
-      <PaymentTestModeBanner />
       <main className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="mb-8">
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: session ? "/dashboard" : "/login" })}>
@@ -95,8 +87,9 @@ function PlanosPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full" size="lg" onClick={() => handleSelect(plan.id)} disabled={loading}>
+                <Button className="w-full" size="lg" onClick={handleSelect} disabled={loading}>
                   Assinar {plan.name}
+                  <ExternalLink className="w-4 h-4 ml-2" />
                 </Button>
               </CardContent>
             </Card>
@@ -104,18 +97,9 @@ function PlanosPage() {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-12">
-          Pagamento seguro processado pelo Stripe. Cancele quando quiser pelo portal do cliente.
+          Os pagamentos são processados de forma segura pela BPF Consult via Paddle. Você será redirecionado para www.bpfconsult.com.br para concluir a assinatura.
         </p>
       </main>
-
-      <Dialog open={!!selectedPrice} onOpenChange={(o) => !o && setSelectedPrice(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Finalizar assinatura</DialogTitle>
-          </DialogHeader>
-          {selectedPrice && <StripeEmbeddedCheckoutForm priceId={selectedPrice} />}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
