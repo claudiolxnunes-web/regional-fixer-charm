@@ -103,6 +103,7 @@ export function ImportDialog({
   async function commitImport() {
     if (!parsed.length) return;
     setBusy(true);
+    setProgress({ current: 0, total: parsed.length, pct: 0 });
     try {
       // Obter o team_id do usuário atual para garantir o isolamento
       const { data: { user } } = await supabase.auth.getUser();
@@ -130,6 +131,7 @@ export function ImportDialog({
       let successCount = 0;
 
       if (snapshot) {
+        setProgress({ current: 0, total: dataWithTeam.length, pct: 0 });
         const { error: delErr } = await (supabase.from(table as any) as any)
           .delete()
           .eq("team_id", tm.team_id); 
@@ -139,6 +141,7 @@ export function ImportDialog({
         const { error } = await tbl.insert(dataWithTeam);
         if (error) throw error;
         successCount = dataWithTeam.length;
+        setProgress({ current: successCount, total: dataWithTeam.length, pct: 100 });
       } else {
         // Para upsert ou insert normal, processamos em lotes
         for (let i = 0; i < dataWithTeam.length; i += batchSize) {
@@ -152,6 +155,8 @@ export function ImportDialog({
             throw new Error(`Erro ao importar lote de registros (iniciando em ${i}): ${error.message}`);
           }
           successCount += batch.length;
+          const pct = Math.round((successCount / dataWithTeam.length) * 100);
+          setProgress({ current: successCount, total: dataWithTeam.length, pct });
         }
       }
       
@@ -166,6 +171,7 @@ export function ImportDialog({
       toast.error(e.message);
     } finally {
       setBusy(false);
+      setProgress({ current: 0, total: 0, pct: 0 });
     }
   }
 
