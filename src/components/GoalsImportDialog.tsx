@@ -130,10 +130,11 @@ export function GoalsImportDialog() {
       const rep = cDesc >= 0 ? String(r[cDesc] ?? "").trim() : "";
       if (!codigo || !rep) continue;
       const linha = r[cEsp] ? String(r[cEsp]).trim() : null;
-      const subso = r[cSubso] ? String(r[cSubso]).trim() : null;
-      const sol = r[cSol] ? String(r[cSol]).trim() : null;
-      // Skip summary lines without breakdown
-      if (!linha || !subso || !sol) continue;
+      const sol = r[cSubso] ? String(r[cSubso]).trim() : null;
+      const subso = r[cSol] ? String(r[cSol]).trim() : null;
+      
+      // Skip summary lines without breakdown (must have at least line and subsolução)
+      if (!linha || !subso) continue;
 
       for (const mc of monthCols) {
         const rev = num(r[mc.revIdx]);
@@ -145,8 +146,8 @@ export function GoalsImportDialog() {
           year,
           month: mc.month,
           line: linha,
-          solution: subso, // SUBSOLUCAO no Excel = solução agrupadora (CORTE/LEITE)
-          subsolution: sol, // SOLUCAO no Excel = subsolução final (PREMIX, SAL MINERAL)
+          solution: sol, // No Excel: ESPECIE (Linha) -> SUBSOLUCAO (Solução) -> SOLUCAO (Subsolução)
+          subsolution: subso,
           line_code: r[cCodEsp] ? String(r[cCodEsp]) : null,
           solution_code: r[cCodSubso] ? String(r[cCodSubso]) : null,
           subsolution_code: r[cCodSol] ? String(r[cCodSol]) : null,
