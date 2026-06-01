@@ -117,23 +117,41 @@ export function ImportDialog({
       }));
 
       const tbl: any = supabase.from(table as any);
+      
+      // Se não for snapshot, vamos processar em lotes menores para evitar limites do payload
+      // e melhorar o tratamento de erro por lote
+      const batchSize = 100;
+      let successCount = 0;
+
       if (snapshot) {
         const { error: delErr } = await (supabase.from(table as any) as any)
           .delete()
-          .eq("team_id", tm.team_id); // Deleta apenas do próprio time
+          .eq("team_id", tm.team_id); 
         if (delErr) throw delErr;
+
+        // Para snapshot, inserimos tudo de uma vez após deletar
+        const { error } = await tbl.insert(dataWithTeam);
+        if (error) throw error;
+        successCount = dataWithTeam.length;
+      } else {
+        // Para upsert ou insert normal, processamos em lotes
+        for (let i = 0; i < dataWithTeam.length; i += batchSize) {
+          const batch = dataWithTeam.slice(i, i + batchSize);
+          const { error } = await (matchBy
+            ? tbl.upsert(batch, { onConflict: matchBy, ignoreDuplicates: false })
+            : tbl.insert(batch));
+          
+          if (error) {
+            console.error(`Erro no lote ${i / batchSize}:`, error);
+            throw new Error(`Erro ao importar lote de registros (iniciando em ${i}): ${error.message}`);
+          }
+          successCount += batch.length;
+        }
       }
       
-      const { error } = await (snapshot
-        ? tbl.insert(dataWithTeam)
-        : matchBy
-        ? tbl.upsert(dataWithTeam, { onConflict: matchBy, ignoreDuplicates: false })
-        : tbl.insert(dataWithTeam));
-      
-      if (error) throw error;
       toast.success(snapshot
-        ? `Snapshot atualizado: ${dataWithTeam.length} registro(s)`
-        : `${dataWithTeam.length} registro(s) importado(s)`);
+        ? `Snapshot atualizado: ${successCount} registro(s)`
+        : `${successCount} registro(s) importado(s)`);
       qc.invalidateQueries({ queryKey: [invalidateKey] });
       setParsed([]);
       setErrors([]);
