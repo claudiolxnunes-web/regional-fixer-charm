@@ -164,9 +164,11 @@ export function GoalsImportDialog() {
     for (let i = headerIdx + 1; i < grid.length; i++) {
       const r = grid[i];
       if (!r) continue;
+      
       const codigo = String(r[cCodigo] ?? "").trim();
       const rep = cDesc >= 0 ? String(r[cDesc] ?? "").trim() : "";
       if (!codigo || !rep) continue;
+      
       const linha = r[cEsp] ? String(r[cEsp]).trim() : null;
       const sol = r[cSubso] ? String(r[cSubso]).trim() : null;
       const subso = r[cSol] ? String(r[cSol]).trim() : null;
@@ -174,9 +176,20 @@ export function GoalsImportDialog() {
       // Skip summary lines without breakdown (must have at least line and subsolução)
       if (!linha || !subso) continue;
 
+      // Find matching row in volume grid if exists
+      let volRow: any[] | null = null;
+      if (volumeGrid && vHeaderIdx >= 0) {
+        // Find row by matching ID, Line, and Solution codes
+        const cSolCode = r[cCodSol];
+        volRow = volumeGrid.find(vr => vr[cCodigo] === codigo && vr[cCodSol] === cSolCode) || null;
+      }
+
       for (const mc of monthCols) {
         const rev = num(r[mc.revIdx]);
-        const vol = mc.volIdx >= 0 ? num(r[mc.volIdx]) : 0;
+        let vol = 0;
+        if (mc.volIdx >= 0) {
+          vol = volRow ? num(volRow[mc.volIdx]) : num(r[mc.volIdx]);
+        }
         if (rev === 0 && vol === 0) continue;
         rows.push({
           representative_code: codigo.padStart(6, "0"),
