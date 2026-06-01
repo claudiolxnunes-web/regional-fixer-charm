@@ -61,7 +61,7 @@ Responda em formato JSON válido:
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: "google/gemini-1.5-pro-latest",
+      model: "google/gemini-2.5-pro",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     }),
