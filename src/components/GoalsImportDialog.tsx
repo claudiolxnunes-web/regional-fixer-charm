@@ -70,7 +70,7 @@ export function GoalsImportDialog() {
     const col = (name: string) => headers.findIndex((h) => h === norm(name));
 
     const cCodigo = col("codigo");
-    const cRep = col("representante");
+    const cDesc = col("descricao");
     const cCodEsp = col("codesp");
     const cEsp = col("especie");
     const cCodSubso = col("codsubso");
