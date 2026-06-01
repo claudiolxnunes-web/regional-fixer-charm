@@ -1,13 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-function adminClient() {
-  return createClient(
-    process.env.VITE_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // Regressão linear simples y = a + b*x
 function linreg(ys: number[]): { a: number; b: number } {
@@ -35,7 +28,7 @@ function monthKey(d: Date) {
 export const forecastRevenue = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-  const supabase = adminClient();
+  const supabase = supabaseAdmin;
   const since = new Date();
   since.setMonth(since.getMonth() - 12);
 
@@ -103,7 +96,7 @@ export const forecastRevenue = createServerFn({ method: "POST" })
 export const benchmarkPeers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-  const supabase = adminClient();
+  const supabase = supabaseAdmin;
   const since = new Date();
   since.setMonth(since.getMonth() - 3);
 
@@ -169,7 +162,7 @@ export const generateNarrative = createServerFn({ method: "POST" })
   .handler(async () => {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
-  const supabase = adminClient();
+  const supabase = supabaseAdmin;
 
   const today = new Date();
   const mtdStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
@@ -239,7 +232,7 @@ Responda em JSON estrito:
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-pro",
+      model: "google/gemini-1.5-pro-latest",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     }),

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const generateInsights = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -8,7 +8,7 @@ export const generateInsights = createServerFn({ method: "POST" })
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
 
-  const supabase = createClient(process.env.VITE_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const supabase = supabaseAdmin;
 
   const since = new Date();
   since.setMonth(since.getMonth() - 6);
@@ -61,7 +61,7 @@ Responda em formato JSON válido:
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: "google/gemini-2.5-pro",
+      model: "google/gemini-1.5-pro-latest",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     }),
