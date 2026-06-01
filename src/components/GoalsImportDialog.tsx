@@ -50,22 +50,43 @@ export function GoalsImportDialog() {
     setFileName(file.name);
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf);
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const grid: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
-
-    // header is row index 1 (second row), categories on row 0 indicate month groupings
-    let headerIdx = -1;
-    for (let i = 0; i < Math.min(grid.length, 10); i++) {
-      const cells = grid[i].map(norm);
-      // Try to find a row that looks like a header (contains at least 3 expected columns)
-      const matches = ["codigo", "descricao", "especie", "subsolucao", "solucao", "total"].filter(h => cells.includes(h));
-      if (matches.length >= 3) { headerIdx = i; break; }
-    }
     
+    // Look for a sheet that contains volume/kg or similar
+    // Based on user feedback, we might need to check multiple sheets
+    let ws = wb.Sheets[wb.SheetNames[0]];
+    let grid: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+    
+    const findHeader = (data: any[][]) => {
+      for (let i = 0; i < Math.min(data.length, 15); i++) {
+        const cells = (data[i] || []).map(norm);
+        const matches = ["codigo", "descricao", "especie", "subsolucao", "solucao", "total"].filter(h => cells.includes(h));
+        if (matches.length >= 3) return i;
+      }
+      return -1;
+    };
+
+    let headerIdx = findHeader(grid);
+    
+    // If first sheet doesn't have the expected headers, try others
+    if (headerIdx < 0 && wb.SheetNames.length > 1) {
+      for (let i = 1; i < wb.SheetNames.length; i++) {
+        const tempWs = wb.Sheets[wb.SheetNames[i]];
+        const tempGrid: any[][] = XLSX.utils.sheet_to_json(tempWs, { header: 1, defval: null });
+        const idx = findHeader(tempGrid);
+        if (idx >= 0) {
+          ws = tempWs;
+          grid = tempGrid;
+          headerIdx = idx;
+          break;
+        }
+      }
+    }
+
     if (headerIdx < 0) {
       setErrors(["Não foi possível encontrar o cabeçalho. Verifique se a planilha contém as colunas: CODIGO, DESCRICAO, ESPECIE, etc."]);
       return;
     }
+
     const headers = grid[headerIdx].map(norm);
     const col = (name: string) => headers.findIndex((h) => h === norm(name));
 
@@ -80,15 +101,26 @@ export function GoalsImportDialog() {
     const cPct = col("%");
     const cTotal = col("total");
 
-    // Find month columns: row above (categoryRow) labels each pair
-    const categoryRow = headerIdx > 0 ? grid[headerIdx - 1].map((c) => norm(c)) : [];
     const monthCols: { month: number; revIdx: number; volIdx: number }[] = [];
     
-    // Check if we have the "Faturamento / Volume" pair per month or just values
+    // Check if we have volume columns in THIS sheet
     const hasPairHeaders = headers.includes("faturamento") && headers.includes("volume/kg");
+    
+    // Check if there is another sheet for volumes (e.g., sheet with 'volume' or 'kg' in name)
+    let volumeWs: XLSX.WorkSheet | null = null;
+    let volumeGrid: any[][] | null = null;
+    let vHeaderIdx = -1;
+
+    if (!hasPairHeaders) {
+      const volSheetName = wb.SheetNames.find(n => norm(n).includes("volume") || norm(n).includes("kg") || norm(n).includes("planilha1"));
+      if (volSheetName && volSheetName !== wb.SheetNames[wb.SheetNames.indexOf(wb.SheetNames.find(n => wb.Sheets[n] === ws)!)]) {
+        volumeWs = wb.Sheets[volSheetName];
+        volumeGrid = XLSX.utils.sheet_to_json(volumeWs, { header: 1, defval: null });
+        vHeaderIdx = findHeader(volumeGrid);
+      }
+    }
 
     if (hasPairHeaders) {
-      // Find month columns: row above (categoryRow) labels each pair
       const categoryRow = headerIdx > 0 ? grid[headerIdx - 1].map((c) => norm(c)) : [];
       let currentMonth = -1;
       let currentRev = -1;
@@ -106,12 +138,18 @@ export function GoalsImportDialog() {
         }
       }
     } else {
-      // Layout simpler: Monthly columns are the values directly
+      // Find months in primary sheet
       for (let m = 1; m <= 12; m++) {
         const mName = norm(MONTHS[m - 1]);
         const mIdx = col(mName);
         if (mIdx >= 0) {
-          monthCols.push({ month: m, revIdx: mIdx, volIdx: -1 });
+          // If we have a separate volume grid, find corresponding column there
+          let volIdx = -1;
+          if (volumeGrid && vHeaderIdx >= 0) {
+            const vHeaders = volumeGrid[vHeaderIdx].map(norm);
+            volIdx = vHeaders.findIndex(h => h === mName);
+          }
+          monthCols.push({ month: m, revIdx: mIdx, volIdx });
         }
       }
     }
@@ -126,9 +164,11 @@ export function GoalsImportDialog() {
     for (let i = headerIdx + 1; i < grid.length; i++) {
       const r = grid[i];
       if (!r) continue;
+      
       const codigo = String(r[cCodigo] ?? "").trim();
       const rep = cDesc >= 0 ? String(r[cDesc] ?? "").trim() : "";
       if (!codigo || !rep) continue;
+      
       const linha = r[cEsp] ? String(r[cEsp]).trim() : null;
       const sol = r[cSubso] ? String(r[cSubso]).trim() : null;
       const subso = r[cSol] ? String(r[cSol]).trim() : null;
@@ -136,9 +176,20 @@ export function GoalsImportDialog() {
       // Skip summary lines without breakdown (must have at least line and subsolução)
       if (!linha || !subso) continue;
 
+      // Find matching row in volume grid if exists
+      let volRow: any[] | null = null;
+      if (volumeGrid && vHeaderIdx >= 0) {
+        // Find row by matching ID, Line, and Solution codes
+        const cSolCode = r[cCodSol];
+        volRow = volumeGrid.find(vr => vr[cCodigo] === codigo && vr[cCodSol] === cSolCode) || null;
+      }
+
       for (const mc of monthCols) {
         const rev = num(r[mc.revIdx]);
-        const vol = mc.volIdx >= 0 ? num(r[mc.volIdx]) : 0;
+        let vol = 0;
+        if (mc.volIdx >= 0) {
+          vol = volRow ? num(volRow[mc.volIdx]) : num(r[mc.volIdx]);
+        }
         if (rev === 0 && vol === 0) continue;
         rows.push({
           representative_code: codigo.padStart(6, "0"),
