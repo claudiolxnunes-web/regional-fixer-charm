@@ -1,14 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-function adminClient() {
-  return createClient(
-    process.env.VITE_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -28,7 +21,7 @@ export const askCopilot = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
-    const supabase = adminClient();
+    const supabase = supabaseAdmin;
 
     // Contexto factual compacto — últimos 90 dias
     const since = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
@@ -170,7 +163,7 @@ export const askCopilot = createServerFn({ method: "POST" })
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-2.5-pro", messages }),
+      body: JSON.stringify({ model: "google/gemini-1.5-pro-latest", messages }),
     });
 
     if (res.status === 429) throw new Error("Limite de uso da IA atingido. Tente novamente em alguns instantes.");
