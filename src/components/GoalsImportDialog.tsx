@@ -55,19 +55,22 @@ export function GoalsImportDialog() {
 
     // header is row index 1 (second row), categories on row 0 indicate month groupings
     let headerIdx = -1;
-    for (let i = 0; i < Math.min(grid.length, 6); i++) {
+    for (let i = 0; i < Math.min(grid.length, 10); i++) {
       const cells = grid[i].map(norm);
-      if (cells.includes("representante") && cells.includes("especie")) { headerIdx = i; break; }
+      // Try to find a row that looks like a header (contains at least 3 expected columns)
+      const matches = ["codigo", "descricao", "especie", "subsolucao", "solucao", "total"].filter(h => cells.includes(h));
+      if (matches.length >= 3) { headerIdx = i; break; }
     }
+    
     if (headerIdx < 0) {
-      setErrors(["Não foi possível encontrar o cabeçalho (esperado: REPRESENTANTE, ESPECIE)"]);
+      setErrors(["Não foi possível encontrar o cabeçalho. Verifique se a planilha contém as colunas: CODIGO, DESCRICAO, ESPECIE, etc."]);
       return;
     }
     const headers = grid[headerIdx].map(norm);
     const col = (name: string) => headers.findIndex((h) => h === norm(name));
 
     const cCodigo = col("codigo");
-    const cRep = col("representante");
+    const cDesc = col("descricao");
     const cCodEsp = col("codesp");
     const cEsp = col("especie");
     const cCodSubso = col("codsubso");
@@ -124,7 +127,7 @@ export function GoalsImportDialog() {
       const r = grid[i];
       if (!r) continue;
       const codigo = String(r[cCodigo] ?? "").trim();
-      const rep = String(r[cRep] ?? "").trim();
+      const rep = cDesc >= 0 ? String(r[cDesc] ?? "").trim() : "";
       if (!codigo || !rep) continue;
       const linha = r[cEsp] ? String(r[cEsp]).trim() : null;
       const subso = r[cSubso] ? String(r[cSubso]).trim() : null;
