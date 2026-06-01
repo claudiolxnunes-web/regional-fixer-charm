@@ -43,7 +43,7 @@ export const askCopilot = createServerFn({ method: "POST" })
         .limit(500),
       supabase
         .from("clients")
-        .select("name, client_code, abc_class, segment, state, effective_status")
+        .select("name, client_code, abc_class, segment, state, status")
         .limit(2000),
       supabase
         .from("quotes")
@@ -105,7 +105,7 @@ export const askCopilot = createServerFn({ method: "POST" })
 
     const clients = clientsRes.data ?? [];
     const abcDist: Record<string, number> = {};
-    clients.forEach((c) => {
+    clients.forEach((c: any) => {
       if (c.abc_class) abcDist[c.abc_class] = (abcDist[c.abc_class] ?? 0) + 1;
     });
 
@@ -131,7 +131,7 @@ export const askCopilot = createServerFn({ method: "POST" })
         .sort((a, b) => b.revenue - a.revenue),
       base_clientes: {
         total: clients.length,
-        ativos: clients.filter((c) => c.effective_status === "active" || c.effective_status === "ativo").length,
+        ativos: clients.filter((c: any) => c.status === "active" || c.status === "ativo").length,
         distribuicao_abc: abcDist,
       },
       alertas: {
