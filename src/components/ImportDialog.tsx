@@ -57,6 +57,7 @@ export function ImportDialog({
   const [parsed, setParsed] = useState<Record<string, any>[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0, pct: 0 });
   const [autoRows, setAutoRows] = useState<Record<string, any>[] | null>(null);
 
   function downloadTemplate() {
