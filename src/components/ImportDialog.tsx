@@ -25,7 +25,8 @@ export type ColumnMap = {
 type Props = {
   triggerLabel?: string;
   table: string;
-  invalidateKey: string;
+  invalidateKey?: string;
+  invalidateKeys?: string[];
   title: string;
   columns: ColumnMap[];
   /** Sample row for the template download */
@@ -45,6 +46,7 @@ export function ImportDialog({
   triggerLabel = "Importar",
   table,
   invalidateKey,
+  invalidateKeys,
   title,
   columns,
   templateSample,
@@ -163,7 +165,10 @@ export function ImportDialog({
       toast.success(snapshot
         ? `Snapshot atualizado: ${successCount} registro(s)`
         : `${successCount} registro(s) importado(s)`);
-      qc.invalidateQueries({ queryKey: [invalidateKey] });
+      if (invalidateKey) qc.invalidateQueries({ queryKey: [invalidateKey] });
+      if (invalidateKeys) {
+        invalidateKeys.forEach(key => qc.invalidateQueries({ queryKey: [key] }));
+      }
       setParsed([]);
       setErrors([]);
       setOpen(false);
@@ -199,7 +204,10 @@ export function ImportDialog({
         : tbl.insert(autoRows));
       if (error) throw error;
       toast.success(`${autoRows.length} registro(s) criado(s)`);
-      qc.invalidateQueries({ queryKey: [invalidateKey] });
+      if (invalidateKey) qc.invalidateQueries({ queryKey: [invalidateKey] });
+      if (invalidateKeys) {
+        invalidateKeys.forEach(key => qc.invalidateQueries({ queryKey: [key] }));
+      }
       setAutoRows(null);
       setOpen(false);
     } catch (e: any) {
