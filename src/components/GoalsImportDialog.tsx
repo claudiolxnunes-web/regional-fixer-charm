@@ -127,7 +127,7 @@ export function GoalsImportDialog() {
       const r = grid[i];
       if (!r) continue;
       const codigo = String(r[cCodigo] ?? "").trim();
-      const rep = String(r[cRep] ?? "").trim();
+      const rep = cDesc >= 0 ? String(r[cDesc] ?? "").trim() : "";
       if (!codigo || !rep) continue;
       const linha = r[cEsp] ? String(r[cEsp]).trim() : null;
       const subso = r[cSubso] ? String(r[cSubso]).trim() : null;
