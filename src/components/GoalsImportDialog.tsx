@@ -80,24 +80,41 @@ export function GoalsImportDialog() {
     // Find month columns: row above (categoryRow) labels each pair
     const categoryRow = headerIdx > 0 ? grid[headerIdx - 1].map((c) => norm(c)) : [];
     const monthCols: { month: number; revIdx: number; volIdx: number }[] = [];
-    let currentMonth = -1;
-    let currentRev = -1;
-    for (let i = 0; i < headers.length; i++) {
-      const cat = categoryRow[i];
-      if (cat) {
-        const mi = MONTHS.findIndex((m) => norm(m) === cat || norm(m).startsWith(cat) || cat.startsWith(norm(m)));
-        if (mi >= 0) currentMonth = mi + 1;
+    
+    // Check if we have the "Faturamento / Volume" pair per month or just values
+    const hasPairHeaders = headers.includes("faturamento") && headers.includes("volume/kg");
+
+    if (hasPairHeaders) {
+      // Find month columns: row above (categoryRow) labels each pair
+      const categoryRow = headerIdx > 0 ? grid[headerIdx - 1].map((c) => norm(c)) : [];
+      let currentMonth = -1;
+      let currentRev = -1;
+      for (let i = 0; i < headers.length; i++) {
+        const cat = categoryRow[i];
+        if (cat) {
+          const mi = MONTHS.findIndex((m) => norm(m) === cat || norm(m).startsWith(cat) || cat.startsWith(norm(m)));
+          if (mi >= 0) currentMonth = mi + 1;
+        }
+        if (headers[i] === "faturamento" && currentMonth > 0) {
+          currentRev = i;
+        } else if (headers[i] === "volume/kg" && currentMonth > 0 && currentRev >= 0) {
+          monthCols.push({ month: currentMonth, revIdx: currentRev, volIdx: i });
+          currentRev = -1;
+        }
       }
-      if (headers[i] === "faturamento" && currentMonth > 0) {
-        currentRev = i;
-      } else if (headers[i] === "volume/kg" && currentMonth > 0 && currentRev >= 0) {
-        monthCols.push({ month: currentMonth, revIdx: currentRev, volIdx: i });
-        currentRev = -1;
+    } else {
+      // Layout simpler: Monthly columns are the values directly
+      for (let m = 1; m <= 12; m++) {
+        const mName = norm(MONTHS[m - 1]);
+        const mIdx = col(mName);
+        if (mIdx >= 0) {
+          monthCols.push({ month: m, revIdx: mIdx, volIdx: -1 });
+        }
       }
     }
 
-    if (monthCols.length !== 12) {
-      setErrors([`Esperado 12 meses, encontrado ${monthCols.length}. Verifique o cabeçalho da planilha.`]);
+    if (monthCols.length === 0) {
+      setErrors([`Nenhum mês detectado. Verifique os nomes das colunas (JANEIRO, FEVEREIRO, etc.).`]);
       return;
     }
 
@@ -117,7 +134,7 @@ export function GoalsImportDialog() {
 
       for (const mc of monthCols) {
         const rev = num(r[mc.revIdx]);
-        const vol = num(r[mc.volIdx]);
+        const vol = mc.volIdx >= 0 ? num(r[mc.volIdx]) : 0;
         if (rev === 0 && vol === 0) continue;
         rows.push({
           representative_code: codigo.padStart(6, "0"),
