@@ -83,9 +83,13 @@ export function ImportDialog({
         if (!col) continue;
         obj[col.field] = col.transform ? col.transform(v) : v;
       }
-      const missing = columns.filter((c) => c.required && (obj[c.field] == null || obj[c.field] === ""));
+      const missing = columns.filter((c) => c.required && (obj[c.field] == null || String(obj[c.field]).trim() === ""));
       if (missing.length) {
-        errs.push(`Linha ${i + 2}: faltando ${missing.map((m) => m.header).join(", ")}`);
+        // Se todas as colunas obrigatórias estiverem vazias, provavelmente é uma linha em branco no final do Excel
+        const allRequiredMissing = missing.length === columns.filter(c => c.required).length;
+        if (!allRequiredMissing) {
+          errs.push(`Linha ${i + 2}: faltando ${missing.map((m) => m.header).join(", ")}`);
+        }
       } else {
         out.push(obj);
       }
