@@ -12,7 +12,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Shield, Clock, Ban, RotateCw, Plus } from "lucide-react";
+import { Shield, Clock, Ban, RotateCw, Plus, TrendingUp, Users, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/_app/licencas")({ component: LicencasPage });
 
@@ -66,18 +66,38 @@ function LicencasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="size-10 rounded-lg bg-primary/10 grid place-items-center">
-          <Shield className="size-5 text-primary" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-primary/10 grid place-items-center">
+            <Shield className="size-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold">Licenças</h1>
+            <p className="text-sm text-muted-foreground">
+              {isSA
+                ? "Painel de controle de todas as empresas e licenças."
+                : "Licença da sua empresa e equipe de vendas."}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-semibold">Licenças</h1>
-          <p className="text-sm text-muted-foreground">
-            {isSA
-              ? "Você vê todas as licenças do sistema. Estenda, ajuste ou revogue."
-              : "Licença da sua empresa e equipe de vendas."}
-          </p>
-        </div>
+        {isSA && data && (
+          <div className="flex gap-2">
+            <Card className="flex items-center gap-3 px-4 py-2 bg-muted/50 border-none shadow-none">
+              <Users className="size-4 text-muted-foreground" />
+              <div>
+                <div className="text-[10px] uppercase font-bold text-muted-foreground leading-none">Total Licenças</div>
+                <div className="text-lg font-bold">{data.length}</div>
+              </div>
+            </Card>
+            <Card className="flex items-center gap-3 px-4 py-2 bg-muted/50 border-none shadow-none">
+              <TrendingUp className="size-4 text-emerald-500" />
+              <div>
+                <div className="text-[10px] uppercase font-bold text-muted-foreground leading-none">Ativas</div>
+                <div className="text-lg font-bold">{data.filter(l => l.subscription_status === 'active').length}</div>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
 
       {isLoading && <p className="text-muted-foreground">Carregando...</p>}
@@ -109,12 +129,16 @@ function LicencasPage() {
                     <div className="font-medium capitalize">{lic.plan ?? "—"}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground text-xs">Validade</div>
-                    <div className="font-medium">{fmtDate(lic.current_period_end)}</div>
+                    <div className="text-muted-foreground text-xs flex items-center gap-1 mb-1">
+                      <Calendar className="size-3" /> Validade
+                    </div>
+                    <div className="font-semibold">{fmtDate(lic.current_period_end)}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground text-xs">Dias restantes</div>
-                    <div className="font-medium">{dl ?? "—"}</div>
+                    <div className="text-muted-foreground text-xs mb-1">Dias restantes</div>
+                    <div className={`font-semibold ${(dl !== null && dl <= 7) ? 'text-destructive' : ''}`}>
+                      {dl ?? "—"}
+                    </div>
                   </div>
                   <div>
                     <div className="text-muted-foreground text-xs">Membros / Reps</div>

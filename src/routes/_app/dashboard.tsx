@@ -1,13 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard } from "lucide-react";
+import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard, Sparkles, Loader2, Trophy, Newspaper } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
 import { RepRanking } from "@/components/RepRanking";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatCurrencyCompact } from "@/utils/formatters";
 import type { DashboardStats } from "@/types/crm";
+import { generateNarrative } from "@/lib/intelligence.functions";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
@@ -60,16 +65,92 @@ function Dashboard() {
 
   const colors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"];
 
+  const { isStaff } = useAuth();
+  const generate = useServerFn(generateNarrative);
+  const narrativeMut = useMutation({
+    mutationFn: () => generate({}),
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao gerar narrativa"),
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+        <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
             <LayoutDashboard className="size-6 text-primary" /> Dashboard
           </h1>
-          <p className="text-sm text-muted-foreground">Visão geral do seu CRM</p>
+          <p className="text-sm text-muted-foreground truncate">Visão geral do seu CRM</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {isStaff && (
+            <Button 
+              size="sm" 
+              className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20"
+              variant="outline"
+              onClick={() => narrativeMut.mutate()}
+              disabled={narrativeMut.isPending}
+            >
+              {narrativeMut.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Sparkles className="size-4 mr-1.5" />
+              )}
+              Resumo IA
+            </Button>
+          )}
+          <Button size="sm" asChild variant="outline">
+            <Link to="/inteligencia">
+              <TrendingUp className="size-4 mr-1.5" /> Inteligência
+            </Link>
+          </Button>
         </div>
       </div>
+
+      {narrativeMut.data && (
+        <Card className="border-primary/30 bg-primary/5 animate-in fade-in slide-in-from-top-2">
+          <CardHeader className="pb-3 border-b border-primary/10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-primary/10 rounded-md">
+                  <Newspaper className="size-4 text-primary" />
+                </div>
+                <CardTitle className="text-sm font-semibold">Resumo Executivo Gerado pela IA</CardTitle>
+              </div>
+              <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary">
+                {narrativeMut.data.headline}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-4">
+            <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
+              {narrativeMut.data.narrative}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <div className="flex items-center gap-2 text-emerald-600 mb-1">
+                  <Trophy className="size-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Vitória</span>
+                </div>
+                <p className="text-xs font-medium">{narrativeMut.data.win}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div className="flex items-center gap-2 text-amber-600 mb-1">
+                  <Target className="size-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Risco</span>
+                </div>
+                <p className="text-xs font-medium">{narrativeMut.data.risk}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <div className="flex items-center gap-2 text-primary mb-1">
+                  <Sparkles className="size-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Ação</span>
+                </div>
+                <p className="text-xs font-medium">{narrativeMut.data.action}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPI title="Clientes" value={stats?.clientsCount ?? 0} icon={Building2} />
