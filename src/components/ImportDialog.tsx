@@ -255,6 +255,16 @@ export function ImportDialog({
                   {busy ? "Processando..." : `FINALIZAR IMPORTAÇÃO (${parsed.length} linhas)`}
                 </Button>
               )}
+              
+              {busy && progress.total > 0 && (
+                <div className="space-y-2 animate-in fade-in">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Enviando para o banco de dados...</span>
+                    <span className="font-medium">{progress.current} / {progress.total} ({progress.pct}%)</span>
+                  </div>
+                  <Progress value={progress.pct} className="h-3" />
+                </div>
+              )}
             </div>
             {errors.length > 0 && (
               <Card className="p-3 bg-destructive/10 border-destructive/30 max-h-40 overflow-auto">
