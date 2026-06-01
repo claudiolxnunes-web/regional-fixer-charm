@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileSpreadsheet, Wand2, Download } from "lucide-react";
+import { Upload, FileSpreadsheet, Wand2, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -224,12 +224,30 @@ export function ImportDialog({
                 <Download className="size-4 mr-1.5" />Modelo
               </Button>
             </div>
-            <input
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-              className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-primary/90"
-            />
+            <div className="flex flex-col gap-4 p-4 border-2 border-dashed rounded-xl bg-muted/20">
+              <input
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:px-4 file:py-2.5 file:text-sm file:font-semibold hover:file:bg-primary/90 cursor-pointer"
+              />
+              
+              {parsed.length > 0 && (
+                <Button 
+                  onClick={commitImport} 
+                  disabled={busy} 
+                  size="lg"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 shadow-lg animate-in zoom-in-95"
+                >
+                  {busy ? (
+                    <Loader2 className="size-5 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="size-5 mr-2" />
+                  )}
+                  {busy ? "Processando..." : `FINALIZAR IMPORTAÇÃO (${parsed.length} linhas)`}
+                </Button>
+              )}
+            </div>
             {errors.length > 0 && (
               <Card className="p-3 bg-destructive/10 border-destructive/30 max-h-40 overflow-auto">
                 <p className="text-xs font-medium mb-1">Avisos:</p>
@@ -257,11 +275,8 @@ export function ImportDialog({
                 </div>
               </Card>
             )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button onClick={commitImport} disabled={busy || !parsed.length}>
-                Importar {parsed.length || ""}
-              </Button>
+            <DialogFooter className="mt-4 border-t pt-4">
+              <Button variant="ghost" onClick={() => { setParsed([]); setOpen(false); }}>Cancelar</Button>
             </DialogFooter>
           </TabsContent>
 
