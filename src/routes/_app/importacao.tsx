@@ -172,7 +172,7 @@ function ImportacaoPage() {
             <ImportDialog
               triggerLabel="Importar Excel"
               table="sales"
-              invalidateKey="sales_all"
+              invalidateKeys={["sales_all", "representatives", "clients", "products", "reps"]}
               title="Importar vendas / faturamento"
               matchBy="invoice_number,product_code,order_number"
               templateSample={{
@@ -253,7 +253,7 @@ function ImportacaoPage() {
             <ImportDialog
               triggerLabel="Importar Snapshot"
               table="open_orders"
-              invalidateKey="open_orders"
+              invalidateKeys={["open_orders", "representatives", "clients", "products", "reps"]}
               title="Importar pedidos em aberto (snapshot)"
               snapshot
               templateSample={{
