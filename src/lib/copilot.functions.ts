@@ -163,7 +163,7 @@ export const askCopilot = createServerFn({ method: "POST" })
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-1.5-pro-latest", messages }),
+      body: JSON.stringify({ model: "google/gemini-2.5-pro", messages }),
     });
 
     if (res.status === 429) throw new Error("Limite de uso da IA atingido. Tente novamente em alguns instantes.");
