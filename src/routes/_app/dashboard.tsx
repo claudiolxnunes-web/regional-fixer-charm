@@ -24,7 +24,7 @@ function Dashboard() {
         supabase.from("clients").select("id, total_purchases, type, status, abc_class"),
         supabase.from("representatives").select("id, status, total_sales"),
         supabase.from("opportunities").select("id, value, stage, probability"),
-        supabase.from("goals").select("id, target_value, current_value"),
+        supabase.from("goal_targets").select("revenue_target, volume_target").limit(2000),
       ]);
 
       const clients = c.data ?? [];
@@ -40,8 +40,9 @@ function Dashboard() {
         count: opps.filter((o) => o.stage === st).length,
       }));
       const abc = ["A","B","C"].map((k) => ({ name: `Classe ${k}`, value: clients.filter((c) => c.abc_class === k).length }));
-      const totalTarget = goals.reduce((s, x) => s + Number(x.target_value ?? 0), 0);
-      const totalCurrent = goals.reduce((s, x) => s + Number(x.current_value ?? 0), 0);
+      const totalTarget = goals.reduce((s, x: any) => s + Number(x.revenue_target ?? 0), 0);
+      const { data: salesSum } = await supabase.from("sales").select("revenue");
+      const totalCurrent = (salesSum ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
       
       const weightedForecast = opps.reduce((s, x) => s + (Number(x.value ?? 0) * (Number(x.probability ?? 0) / 100)), 0);
       const wonOpps = opps.filter(o => o.stage === 'won');
