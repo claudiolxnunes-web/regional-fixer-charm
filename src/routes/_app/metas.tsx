@@ -54,7 +54,7 @@ function MetasPage() {
   const { data: years = [] } = useQuery({
     queryKey: ["goal_target_years"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("goal_targets").select("year");
+      const { data, error } = await supabase.from("goal_targets").select("year").limit(10000);
       if (error) throw error;
       const arr = Array.from(new Set((data ?? []).map((d: any) => d.year))).sort((a, b) => b - a);
       return arr.length ? arr : [new Date().getFullYear()];
