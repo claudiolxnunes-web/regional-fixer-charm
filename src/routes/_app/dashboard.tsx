@@ -126,6 +126,19 @@ function Dashboard() {
 
   const colors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"];
 
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const date = subMonths(now, i);
+      options.push({
+        label: format(date, "MMMM yyyy", { locale: ptBR }),
+        value: `month-${i}`
+      });
+    }
+    return options;
+  }, []);
+
   const { isStaff } = useAuth();
   const generate = useServerFn(generateNarrative);
   const narrativeMut = useMutation({
@@ -142,7 +155,23 @@ function Dashboard() {
           </h1>
           <p className="text-sm text-muted-foreground truncate">Visão geral do seu CRM</p>
         </div>
-        <div className="flex items-center gap-2">
+        
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-[180px] bg-background">
+              <Calendar className="mr-2 h-4 w-4 opacity-50" />
+              <SelectValue placeholder="Selecione o período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todo o período</SelectItem>
+              <SelectItem value="month">Mês Atual</SelectItem>
+              <SelectItem value="quarter">Último Trimestre</SelectItem>
+              <SelectItem value="semester">Último Semestre</SelectItem>
+              {monthOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {isStaff && (
             <Button 
               size="sm" 
