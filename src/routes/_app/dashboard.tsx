@@ -46,7 +46,11 @@ function Dashboard() {
       const clients = c.data ?? [];
       const reps = r.data ?? [];
       const opps = o.data ?? [];
-      const goals = g ?? [];
+      const goals = (g ?? []).filter((x: any) => {
+        const n = String(x.representative_name || "").toLowerCase();
+        return !n.includes("total") && !n.includes("distribuido") && !n.includes("orcado");
+      });
+
       
       const totalSales = clients.reduce((s, x) => s + Number(x.total_purchases ?? 0), 0);
       const stages = ["prospecting","qualification","proposal","negotiation","won"];

@@ -92,7 +92,13 @@ function MetasPage() {
       const totalRev = monthly.reduce((a, m) => a + m.revenue, 0);
       const totalVol = monthly.reduce((a, m) => a + m.volume, 0);
       return { ...r, monthly, totalRev, totalVol };
-    }).sort((a, b) => b.totalRev - a.totalRev);
+    })
+    .filter(r => {
+      const n = r.name.toLowerCase();
+      return !n.includes("total") && !n.includes("distribuido") && !n.includes("orcado");
+    })
+    .sort((a, b) => b.totalRev - a.totalRev);
+
   }, [goals]);
 
   const totalRev = grouped.reduce((a, g) => a + g.totalRev, 0);
