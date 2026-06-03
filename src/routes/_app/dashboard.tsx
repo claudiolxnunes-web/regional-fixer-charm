@@ -175,7 +175,7 @@ function Dashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPI title="Clientes" value={stats?.clientsCount ?? 0} icon={Building2} />
-        <KPI title="Vendas Totais" value={`R$ ${formatCurrencyCompact(stats?.totalSales)}`} icon={TrendingUp} />
+        <KPI title="Faturamento Acumulado" value={`R$ ${formatCurrencyCompact(stats?.totalSales)}`} icon={TrendingUp} />
         <KPI title="Previsão (Ponderada)" value={`R$ ${formatCurrencyCompact(stats?.weightedForecast)}`} icon={Target} />
         <KPI title="Conversão" value={`${(stats?.conversionRate ?? 0).toFixed(1)}%`} icon={PieChartIcon} />
       </div>
