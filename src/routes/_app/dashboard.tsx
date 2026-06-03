@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard, Sparkles, Loader2, Trophy, Newspaper } from "lucide-react";
+import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard, Sparkles, Loader2, Trophy, Newspaper, Calendar } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
 import { RepRanking } from "@/components/RepRanking";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,10 @@ import type { DashboardStats } from "@/types/crm";
 import { generateNarrative } from "@/lib/intelligence.functions";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { useState, useMemo } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { subMonths, startOfMonth, endOfMonth, format, isWithinInterval, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
