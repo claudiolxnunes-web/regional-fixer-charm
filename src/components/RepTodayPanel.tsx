@@ -7,6 +7,24 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Target, AlertTriangle, ChevronRight, Calendar, FileText } from "lucide-react";
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+const PAGE_SIZE = 1000;
+
+async function fetchMonthlyTargets(repId: string, year: number, month: number) {
+  const all: { revenue_target: number | null }[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("goal_targets")
+      .select("revenue_target")
+      .eq("representative_id", repId)
+      .eq("year", year)
+      .eq("month", month)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    all.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) break;
+  }
+  return all;
+}
 
 /**
  * Painel "Hoje" — orientação rápida no app do rep.
@@ -34,10 +52,10 @@ export function RepTodayPanel({ repId }: { repId: string }) {
     queryFn: async () => {
       const y = today.getFullYear(), m = today.getMonth() + 1;
       const [tRes, sRes] = await Promise.all([
-        supabase.from("goal_targets").select("revenue_target").eq("representative_id", repId).eq("year", y).eq("month", m),
+        fetchMonthlyTargets(repId, y, m),
         supabase.from("sales_secure_view").select("revenue").eq("representative_id", repId).gte("invoice_date", monthStart),
       ]);
-      const target = (tRes.data ?? []).reduce((s, x) => s + Number(x.revenue_target || 0), 0);
+      const target = tRes.reduce((s, x) => s + Number(x.revenue_target || 0), 0);
       const achieved = (sRes.data ?? []).reduce((s, x) => s + Number(x.revenue || 0), 0);
       return { target, achieved, pct: target ? achieved / target : 0 };
     },
