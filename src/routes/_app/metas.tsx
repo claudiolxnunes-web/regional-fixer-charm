@@ -44,7 +44,7 @@ function MetasPage() {
         .select("id, representative_code, representative_name, year, month, line, solution, subsolution, revenue_target, volume_target")
         .eq("year", year)
         .order("representative_name")
-        .limit(2000);
+        .limit(10000);
       if (error) throw error;
       return (data ?? []) as Goal[];
     },

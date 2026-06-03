@@ -242,7 +242,7 @@ export function GoalsImportDialog() {
       }));
 
       // Insert in chunks
-      const chunkSize = 500;
+      const chunkSize = 1000;
       for (let i = 0; i < payload.length; i += chunkSize) {
         const { error } = await supabase.from("goal_targets").insert(payload.slice(i, i + chunkSize));
         if (error) throw error;

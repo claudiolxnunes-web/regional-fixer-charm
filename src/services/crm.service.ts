@@ -33,7 +33,7 @@ export const clientsService = {
       .select("*")
       .eq("client_id", clientId)
       .order("invoice_date", { ascending: false, nullsFirst: false })
-      .limit(500);
+      .limit(5000);
     if (error) throw error;
     return data ?? [];
   }
