@@ -34,13 +34,13 @@ function Oportunidades() {
   const { data: opps } = useQuery({
     queryKey: ["opps"],
     queryFn: async () => {
-      const { data } = await supabase.from("opportunities").select("*").order("created_at", { ascending: false }).limit(500);
+      const { data } = await supabase.from("opportunities").select("*").order("created_at", { ascending: false }).limit(2000);
       return data ?? [];
     },
   });
   const { data: clients } = useQuery({
     queryKey: ["clients-min"],
-    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(500)).data ?? [],
+    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(2000)).data ?? [],
   });
 
   const totalValue = (opps ?? []).reduce((s, o) => s + Number(o.value ?? 0), 0);

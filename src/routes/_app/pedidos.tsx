@@ -34,7 +34,7 @@ function PedidosPage() {
         .from("open_orders")
         .select("*")
         .order("forecast_billing_requested", { ascending: true, nullsFirst: false })
-        .limit(2000);
+        .limit(5000);
       if (error) throw error;
       return data ?? [];
     },

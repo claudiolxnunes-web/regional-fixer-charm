@@ -46,7 +46,7 @@ function SpinPage() {
 
   const { data: clients } = useQuery({
     queryKey: ["clients-min"],
-    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(500)).data ?? [],
+    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(2000)).data ?? [],
   });
 
   const weekEnd = useMemo(() => {
@@ -69,7 +69,7 @@ function SpinPage() {
 
   const { data: spinNotes } = useQuery({
     queryKey: ["spin-notes"],
-    queryFn: async () => (await supabase.from("spin_notes").select("*").limit(500)).data ?? [],
+    queryFn: async () => (await supabase.from("spin_notes").select("*").limit(2000)).data ?? [],
   });
 
   // Prioridades: clientes a visitar por necessidade
