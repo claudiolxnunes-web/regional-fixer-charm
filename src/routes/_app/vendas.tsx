@@ -5,28 +5,65 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Search, Calendar, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { KpiCard } from "@/components/crm/KpiCard";
 import { formatCurrency, formatPercent } from "@/utils/formatters";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { subMonths, startOfMonth, format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_app/vendas")({ component: VendasPage });
 
 function VendasPage() {
   const { isStaff } = useAuth();
   const [q, setQ] = useState("");
+  const [period, setPeriod] = useState("all");
+
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const date = subMonths(now, i);
+      options.push({
+        label: format(date, "MMMM yyyy", { locale: ptBR }),
+        value: `month-${i}`
+      });
+    }
+    return options;
+  }, []);
+
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["sales_all", isStaff],
+    queryKey: ["sales_all", isStaff, period],
     queryFn: async () => {
+      let startDate: Date | null = null;
+      const now = new Date();
+      
+      if (period === "month") startDate = startOfMonth(now);
+      else if (period === "quarter") startDate = subMonths(now, 3);
+      else if (period === "semester") startDate = subMonths(now, 6);
+      else if (period.startsWith("month-")) {
+        const monthOffset = parseInt(period.split("-")[1]);
+        startDate = startOfMonth(subMonths(now, monthOffset));
+      }
+
       const table = isStaff ? "sales" : "sales_rep_view";
       const cols = isStaff
         ? "invoice_date, invoice_number, client_code, client_name, product_name, line, solution, subsolution, qty_bags, revenue, mb_cb_total, mb_cb_pct, ml_cb_total, commission_value, representative, branch, region, state, month_year"
         : "invoice_date, invoice_number, client_code, client_name, product_name, line, solution, subsolution, qty_bags, revenue, representative, branch, region, state, month_year";
-      const { data, error } = await (supabase as any)
+      
+      let query = (supabase as any)
         .from(table)
         .select(cols)
         .order("invoice_date", { ascending: false, nullsFirst: false })
         .limit(10000);
+
+      if (startDate) {
+        query = query.gte("invoice_date", startDate.toISOString().split('T')[0]);
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
       return data ?? [];
     },
@@ -72,6 +109,25 @@ function VendasPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Vendas & Faturamento</h1>
           <p className="text-sm text-muted-foreground">{rows.length.toLocaleString("pt-BR")} notas no período</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />}
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-[180px] bg-background">
+              <Calendar className="mr-2 h-4 w-4 opacity-50" />
+              <SelectValue placeholder="Selecione o período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todo o período</SelectItem>
+              <SelectItem value="month">Mês Atual</SelectItem>
+              <SelectItem value="quarter">Último Trimestre</SelectItem>
+              <SelectItem value="semester">Último Semestre</SelectItem>
+              {monthOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
