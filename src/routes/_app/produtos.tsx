@@ -5,10 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, TrendingUp, DollarSign, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { Search, Package, TrendingUp, DollarSign, BarChart3, PieChart as PieChartIcon, Calendar, Loader2 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
 import { formatCurrencyCompact } from "@/utils/formatters";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { subMonths, startOfMonth, format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_app/produtos")({ component: ProdutosPage });
 
@@ -16,19 +19,51 @@ const COLORS = ["#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6", "#ec4899"
 
 function ProdutosPage() {
   const [q, setQ] = useState("");
+  const [period, setPeriod] = useState("all");
+
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const date = subMonths(now, i);
+      options.push({
+        label: format(date, "MMMM yyyy", { locale: ptBR }),
+        value: `month-${i}`
+      });
+    }
+    return options;
+  }, []);
 
   const { data: stats, isLoading } = useQuery({
-    queryKey: ["products-analytics"],
+    queryKey: ["products-analytics", period],
     queryFn: async () => {
+      let startDate: Date | null = null;
+      const now = new Date();
+      
+      if (period === "month") startDate = startOfMonth(now);
+      else if (period === "quarter") startDate = subMonths(now, 3);
+      else if (period === "semester") startDate = subMonths(now, 6);
+      else if (period.startsWith("month-")) {
+        const monthOffset = parseInt(period.split("-")[1]);
+        startDate = startOfMonth(subMonths(now, monthOffset));
+      }
+
       const [pRes, sRes] = await Promise.all([
         supabase.from("products").select("*"),
-        supabase.from("sales").select("product_code, product_name, revenue, volume_sales, qty_bags")
+        supabase.from("sales").select("product_code, product_name, revenue, volume_sales, qty_bags, invoice_date")
       ]);
+
 
       if (pRes.error) throw pRes.error;
       if (sRes.error) throw sRes.error;
 
-      const sales = sRes.data || [];
+      const allSales = sRes.data || [];
+      
+      // Filter sales by period
+      const sales = startDate 
+        ? allSales.filter(s => s.invoice_date && parseISO(s.invoice_date) >= startDate!)
+        : allSales;
+
       const productMap: Record<string, any> = {};
 
       sales.forEach(sale => {
@@ -94,10 +129,31 @@ function ProdutosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Análise de Produtos</h1>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <Package className="size-6 text-primary" /> Análise de Produtos
+          </h1>
           <p className="text-sm text-muted-foreground">Performance e Classificação ABC</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />}
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-[180px] bg-background">
+              <Calendar className="mr-2 h-4 w-4 opacity-50" />
+              <SelectValue placeholder="Selecione o período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todo o período</SelectItem>
+              <SelectItem value="month">Mês Atual</SelectItem>
+              <SelectItem value="quarter">Último Trimestre</SelectItem>
+              <SelectItem value="semester">Último Semestre</SelectItem>
+              {monthOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
