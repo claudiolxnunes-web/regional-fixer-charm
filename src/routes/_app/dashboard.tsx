@@ -158,6 +158,7 @@ function Dashboard() {
         </div>
         
         <div className="flex flex-wrap items-center gap-2">
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />}
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-[180px] bg-background">
               <Calendar className="mr-2 h-4 w-4 opacity-50" />
