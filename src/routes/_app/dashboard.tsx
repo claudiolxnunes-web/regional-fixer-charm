@@ -16,6 +16,22 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
+const PAGE_SIZE = 1000;
+
+async function fetchAllGoalTargets() {
+  const all: { revenue_target: number | null; volume_target: number | null }[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("goal_targets")
+      .select("revenue_target, volume_target")
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    all.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) break;
+  }
+  return all;
+}
+
 function Dashboard() {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
@@ -24,13 +40,13 @@ function Dashboard() {
         supabase.from("clients").select("id, total_purchases, type, status, abc_class"),
         supabase.from("representatives").select("id, status, total_sales"),
         supabase.from("opportunities").select("id, value, stage, probability"),
-        supabase.from("goal_targets").select("revenue_target, volume_target").limit(10000),
+        fetchAllGoalTargets(),
       ]);
 
       const clients = c.data ?? [];
       const reps = r.data ?? [];
       const opps = o.data ?? [];
-      const goals = g.data ?? [];
+      const goals = g ?? [];
       
       const totalSales = clients.reduce((s, x) => s + Number(x.total_purchases ?? 0), 0);
       const stages = ["prospecting","qualification","proposal","negotiation","won"];
