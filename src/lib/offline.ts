@@ -61,8 +61,8 @@ export async function flushQueue(): Promise<{ ok: number; fail: number }> {
 export async function warmCache(userId: string) {
   try {
     const [clients, activities] = await Promise.all([
-      supabase.from("clients").select("id, name, city, state, phone, abc_class, total_purchases").limit(500),
-      supabase.from("activities").select("id, title, client_id, scheduled_at, status, type, clients(name)").eq("status", "pending").limit(200),
+      supabase.from("clients").select("id, name, city, state, phone, abc_class, total_purchases").limit(2000),
+      supabase.from("activities").select("id, title, client_id, scheduled_at, status, type, clients(name)").eq("status", "pending").limit(1000),
     ]);
     if (clients.data) await cacheSet(`clients:${userId}`, clients.data);
     if (activities.data) await cacheSet(`activities:${userId}`, activities.data);

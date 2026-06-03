@@ -24,7 +24,7 @@ function Dashboard() {
         supabase.from("clients").select("id, total_purchases, type, status, abc_class"),
         supabase.from("representatives").select("id, status, total_sales"),
         supabase.from("opportunities").select("id, value, stage, probability"),
-        supabase.from("goal_targets").select("revenue_target, volume_target").limit(2000),
+        supabase.from("goal_targets").select("revenue_target, volume_target").limit(10000),
       ]);
 
       const clients = c.data ?? [];

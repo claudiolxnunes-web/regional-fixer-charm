@@ -41,11 +41,11 @@ function Atividades() {
 
   const { data: items } = useQuery({
     queryKey: ["activities"],
-    queryFn: async () => (await supabase.from("activities").select("*").order("scheduled_at", { ascending: false }).limit(300)).data ?? [],
+    queryFn: async () => (await supabase.from("activities").select("*").order("scheduled_at", { ascending: false }).limit(1000)).data ?? [],
   });
   const { data: clients } = useQuery({
     queryKey: ["clients-min"],
-    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(500)).data ?? [],
+    queryFn: async () => (await supabase.from("clients").select("id, name").order("name").limit(2000)).data ?? [],
   });
 
   const filtered = (items ?? []).filter((a) =>

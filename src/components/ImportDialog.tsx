@@ -129,7 +129,7 @@ export function ImportDialog({
       
       // Se não for snapshot, vamos processar em lotes menores para evitar limites do payload
       // e melhorar o tratamento de erro por lote
-      const batchSize = 100;
+      const batchSize = 500;
       let successCount = 0;
 
       if (snapshot) {

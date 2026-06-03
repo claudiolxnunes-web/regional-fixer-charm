@@ -42,7 +42,7 @@ function PlanejamentoPage() {
   });
   const { data: reps } = useQuery({
     queryKey: ["reps-min"],
-    queryFn: async () => (await supabase.from("representatives").select("id, name").order("name").limit(500)).data ?? [],
+    queryFn: async () => (await supabase.from("representatives").select("id, name").order("name").limit(2000)).data ?? [],
   });
 
   const currentPlan = useMemo(
