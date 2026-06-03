@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_app/metas")({ component: MetasPage });
 const fmt = (v: any) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const fmtV = (v: any) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const MONTH_NAMES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const PAGE_SIZE = 1000;
+const GOAL_COLUMNS = "id, representative_code, representative_name, year, month, line, solution, subsolution, revenue_target, volume_target";
 
 type Goal = {
   id: string;
@@ -39,14 +41,19 @@ function MetasPage() {
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ["goal_targets", year],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("goal_targets")
-        .select("id, representative_code, representative_name, year, month, line, solution, subsolution, revenue_target, volume_target")
-        .eq("year", year)
-        .order("representative_name")
-        .limit(10000);
-      if (error) throw error;
-      return (data ?? []) as Goal[];
+      const all: Goal[] = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const { data, error } = await supabase
+          .from("goal_targets")
+          .select(GOAL_COLUMNS)
+          .eq("year", year)
+          .order("representative_name")
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        all.push(...((data ?? []) as Goal[]));
+        if (!data || data.length < PAGE_SIZE) break;
+      }
+      return all;
     },
   });
 
@@ -54,9 +61,17 @@ function MetasPage() {
   const { data: years = [] } = useQuery({
     queryKey: ["goal_target_years"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("goal_targets").select("year").limit(10000);
-      if (error) throw error;
-      const arr = Array.from(new Set((data ?? []).map((d: any) => d.year))).sort((a, b) => b - a);
+      const rows: { year: number }[] = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const { data, error } = await supabase
+          .from("goal_targets")
+          .select("year")
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        rows.push(...((data ?? []) as { year: number }[]));
+        if (!data || data.length < PAGE_SIZE) break;
+      }
+      const arr = Array.from(new Set(rows.map((d) => d.year))).sort((a, b) => b - a);
       return arr.length ? arr : [new Date().getFullYear()];
     },
   });
