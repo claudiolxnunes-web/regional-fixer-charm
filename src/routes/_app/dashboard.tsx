@@ -122,6 +122,7 @@ function Dashboard() {
         totalCurrent
       };
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const colors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"];
