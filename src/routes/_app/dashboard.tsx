@@ -59,7 +59,7 @@ function Dashboard() {
         supabase.from("representatives").select("id, status, total_sales"),
         supabase.from("opportunities").select("id, value, stage, probability, created_at"),
         fetchAllGoalTargets(),
-        supabase.from("sales").select("revenue, invoice_date, client_id, representative_id")
+        supabase.from("sales").select("id, revenue, invoice_date, client_id, representative_id")
       ]);
 
       const sales = sSum.data ?? [];
