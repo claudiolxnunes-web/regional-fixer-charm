@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard, Sparkles, Loader2, Trophy, Newspaper } from "lucide-react";
+import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard, Sparkles, Loader2, Trophy, Newspaper, Calendar } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
 import { RepRanking } from "@/components/RepRanking";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,10 @@ import type { DashboardStats } from "@/types/crm";
 import { generateNarrative } from "@/lib/intelligence.functions";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { useState, useMemo } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { subMonths, startOfMonth, endOfMonth, format, isWithinInterval, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
@@ -33,16 +37,32 @@ async function fetchAllGoalTargets() {
 }
 
 function Dashboard() {
-  const { data: stats } = useQuery({
-    queryKey: ["dashboard-stats"],
+  const [period, setPeriod] = useState("all");
+
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["dashboard-stats", period],
     queryFn: async (): Promise<DashboardStats> => {
-      const [c, r, o, g] = await Promise.all([
-        supabase.from("clients").select("id, total_purchases, type, status, abc_class"),
+      // Get date range based on period
+      let startDate: Date | null = null;
+      const now = new Date();
+      
+      if (period === "month") startDate = startOfMonth(now);
+      else if (period === "quarter") startDate = subMonths(now, 3);
+      else if (period === "semester") startDate = subMonths(now, 6);
+      else if (period.startsWith("month-")) {
+        const monthOffset = parseInt(period.split("-")[1]);
+        startDate = startOfMonth(subMonths(now, monthOffset));
+      }
+
+      const [c, r, o, g, sSum] = await Promise.all([
+        supabase.from("clients").select("id, total_purchases, type, status, abc_class, created_at"),
         supabase.from("representatives").select("id, status, total_sales"),
-        supabase.from("opportunities").select("id, value, stage, probability"),
+        supabase.from("opportunities").select("id, value, stage, probability, created_at"),
         fetchAllGoalTargets(),
+        supabase.from("sales").select("id, revenue, invoice_date, client_id, representative_id")
       ]);
 
+      const sales = sSum.data ?? [];
       const clients = c.data ?? [];
       const reps = r.data ?? [];
       const opps = o.data ?? [];
@@ -51,27 +71,47 @@ function Dashboard() {
         return !n.includes("total") && !n.includes("distribuido") && !n.includes("orcado");
       });
 
+      // Filter sales by period
+      const filteredSales = startDate 
+        ? sales.filter(s => s.invoice_date && parseISO(s.invoice_date) >= startDate!)
+        : sales;
+
+      const totalSales = filteredSales.reduce((s, x) => s + Number(x.revenue ?? 0), 0);
       
-      const totalSales = clients.reduce((s, x) => s + Number(x.total_purchases ?? 0), 0);
+      // For goals, we might need a more complex logic if they are monthly, 
+      // but for now let's scale the totalTarget if period is shorter than 'all'
+      // Or better, if 'all', show total. If specific month, show that month.
+      const totalTarget = goals.reduce((s, x: any) => s + Number(x.revenue_target ?? 0), 0);
+      
       const stages = ["prospecting","qualification","proposal","negotiation","won"];
+      const filteredOpps = startDate 
+        ? opps.filter(op => op.created_at && parseISO(op.created_at) >= startDate!)
+        : opps;
+
       const oppsByStage = stages.map((st) => ({
         stage: st,
-        value: opps.filter((o) => o.stage === st).reduce((s, x) => s + Number(x.value ?? 0), 0),
-        count: opps.filter((o) => o.stage === st).length,
+        value: filteredOpps.filter((o) => o.stage === st).reduce((s, x) => s + Number(x.value ?? 0), 0),
+        count: filteredOpps.filter((o) => o.stage === st).length,
       }));
-      const abc = ["A","B","C"].map((k) => ({ name: `Classe ${k}`, value: clients.filter((c) => c.abc_class === k).length }));
-      const totalTarget = goals.reduce((s, x: any) => s + Number(x.revenue_target ?? 0), 0);
-      const { data: salesSum } = await supabase.from("sales").select("revenue");
-      const totalCurrent = (salesSum ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
-      
-      const weightedForecast = opps.reduce((s, x) => s + (Number(x.value ?? 0) * (Number(x.probability ?? 0) / 100)), 0);
-      const wonOpps = opps.filter(o => o.stage === 'won');
-      const conversionRate = opps.length > 0 ? (wonOpps.length / opps.length) * 100 : 0;
+
+      const filteredClients = startDate 
+        ? clients.filter(cl => cl.created_at && parseISO(cl.created_at) >= startDate!)
+        : clients;
+
+      const abc = ["A","B","C"].map((k) => ({ 
+        name: `Classe ${k}`, 
+        value: clients.filter((c) => c.abc_class === k).length 
+      }));
+
+      const totalCurrent = totalSales;
+      const weightedForecast = filteredOpps.reduce((s, x) => s + (Number(x.value ?? 0) * (Number(x.probability ?? 0) / 100)), 0);
+      const wonOpps = filteredOpps.filter(o => o.stage === 'won');
+      const conversionRate = filteredOpps.length > 0 ? (wonOpps.length / filteredOpps.length) * 100 : 0;
 
       return {
         clientsCount: clients.length,
         repsCount: reps.length,
-        oppsCount: opps.length,
+        oppsCount: filteredOpps.length,
         totalSales,
         weightedForecast,
         conversionRate,
@@ -82,9 +122,23 @@ function Dashboard() {
         totalCurrent
       };
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const colors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"];
+
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const date = subMonths(now, i);
+      options.push({
+        label: format(date, "MMMM yyyy", { locale: ptBR }),
+        value: `month-${i}`
+      });
+    }
+    return options;
+  }, []);
 
   const { isStaff } = useAuth();
   const generate = useServerFn(generateNarrative);
@@ -102,7 +156,24 @@ function Dashboard() {
           </h1>
           <p className="text-sm text-muted-foreground truncate">Visão geral do seu CRM</p>
         </div>
-        <div className="flex items-center gap-2">
+        
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />}
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-[180px] bg-background">
+              <Calendar className="mr-2 h-4 w-4 opacity-50" />
+              <SelectValue placeholder="Selecione o período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todo o período</SelectItem>
+              <SelectItem value="month">Mês Atual</SelectItem>
+              <SelectItem value="quarter">Último Trimestre</SelectItem>
+              <SelectItem value="semester">Último Semestre</SelectItem>
+              {monthOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {isStaff && (
             <Button 
               size="sm" 
