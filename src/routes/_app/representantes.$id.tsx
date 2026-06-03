@@ -15,6 +15,23 @@ export const Route = createFileRoute("/_app/representantes/$id")({ component: Re
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 const pct = (v: number) => `${Math.round(v * 100)}%`;
+const PAGE_SIZE = 1000;
+
+async function fetchRepMonthlyGoalTargets(representativeId: string, year: number, month: number) {
+  const all: { revenue_target: number | null; volume_target: number | null }[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await supabase.from("goal_targets")
+      .select("revenue_target, volume_target")
+      .eq("representative_id", representativeId)
+      .eq("year", year)
+      .eq("month", month)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    all.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) break;
+  }
+  return all;
+}
 
 function RepDetailPage() {
   const { id } = Route.useParams();
@@ -82,10 +99,9 @@ function RepDetailPage() {
     queryKey: ["rep-goals", id],
     queryFn: async () => {
       const y = now.getFullYear(), m = now.getMonth() + 1;
-      const { data: targets } = await supabase.from("goal_targets")
-        .select("revenue_target, volume_target").eq("representative_id", id).eq("year", y).eq("month", m);
-      const tRev = (targets ?? []).reduce((s, t) => s + Number(t.revenue_target || 0), 0);
-      const tVol = (targets ?? []).reduce((s, t) => s + Number(t.volume_target || 0), 0);
+      const targets = await fetchRepMonthlyGoalTargets(id, y, m);
+      const tRev = targets.reduce((s, t) => s + Number(t.revenue_target || 0), 0);
+      const tVol = targets.reduce((s, t) => s + Number(t.volume_target || 0), 0);
       const { data: sales } = await supabase.from("sales").select("revenue, volume_sales")
         .eq("representative_id", id).gte("invoice_date", monthStart);
       const aRev = (sales ?? []).reduce((s, x) => s + Number(x.revenue || 0), 0);
