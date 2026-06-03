@@ -10,6 +10,7 @@ import { useState } from "react";
 
 const fmt = (v: any) => Number(v ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const MONTH_NAMES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const PAGE_SIZE = 1000;
 
 type Props = {
   repCode: string | null;
@@ -58,12 +59,18 @@ function Body({ repCode, showMargins }: { repCode: string | null; showMargins?: 
     enabled: !!repCode,
     queryFn: async () => {
       const code = (repCode || "").padStart(6, "0");
-      const { data, error } = await supabase
-        .from("goal_targets")
-        .select("year, month, line, solution, subsolution, revenue_target, volume_target")
-        .eq("representative_code", code);
-      if (error) throw error;
-      return data ?? [];
+      const all: any[] = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const { data, error } = await supabase
+          .from("goal_targets")
+          .select("year, month, line, solution, subsolution, revenue_target, volume_target")
+          .eq("representative_code", code)
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        all.push(...(data ?? []));
+        if (!data || data.length < PAGE_SIZE) break;
+      }
+      return all;
     },
   });
 
