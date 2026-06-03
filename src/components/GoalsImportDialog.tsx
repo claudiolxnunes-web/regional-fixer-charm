@@ -169,6 +169,13 @@ export function GoalsImportDialog() {
       const rep = cDesc >= 0 ? String(r[cDesc] ?? "").trim() : "";
       if (!codigo || !rep) continue;
       
+      // Skip summary rows that often appear in Excel exports (TOTAL ORCADO, TOTAL DISTRIBUIDO, etc.)
+      const repNorm = norm(rep);
+      if (repNorm.includes("total") || repNorm.includes("distribuido") || repNorm.includes("orcado")) {
+        continue;
+      }
+
+      
       const linha = r[cEsp] ? String(r[cEsp]).trim() : null;
       const sol = r[cSubso] ? String(r[cSubso]).trim() : null;
       const subso = r[cSol] ? String(r[cSol]).trim() : null;
