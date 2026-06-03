@@ -55,7 +55,7 @@ function Dashboard() {
       }
 
       const [c, r, o, g, sSum] = await Promise.all([
-        supabase.from("clients").select("id, total_purchases, type, status, abc_class, created_at"),
+        supabase.from("clients_view").select("id, total_purchases, type, status, effective_status, abc_class, created_at"),
         supabase.from("representatives").select("id, status, total_sales"),
         supabase.from("opportunities").select("id, value, stage, probability, created_at"),
         fetchAllGoalTargets(),
@@ -110,6 +110,7 @@ function Dashboard() {
 
       return {
         clientsCount: clients.length,
+        activeClientsCount: clients.filter(c => c.effective_status === 'active').length,
         repsCount: reps.length,
         oppsCount: filteredOpps.length,
         totalSales,
@@ -245,7 +246,12 @@ function Dashboard() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPI title="Clientes" value={stats?.clientsCount ?? 0} icon={Building2} />
+        <KPI 
+          title="Clientes Ativos" 
+          value={stats?.activeClientsCount ?? 0} 
+          subtitle={`${stats?.clientsCount ?? 0} totais`}
+          icon={Building2} 
+        />
         <KPI title="Faturamento Acumulado" value={`R$ ${formatCurrencyCompact(stats?.totalSales)}`} icon={TrendingUp} />
         <KPI title="Previsão (Ponderada)" value={`R$ ${formatCurrencyCompact(stats?.weightedForecast)}`} icon={Target} />
         <KPI title="Conversão" value={`${(stats?.conversionRate ?? 0).toFixed(1)}%`} icon={PieChartIcon} />
@@ -314,7 +320,7 @@ function Dashboard() {
   );
 }
 
-function KPI({ title, value, icon: Icon }: { title: string; value: any; icon: any }) {
+function KPI({ title, value, subtitle, icon: Icon }: { title: string; value: any; subtitle?: string; icon: any }) {
   return (
     <Card>
       <CardContent className="pt-6">
@@ -322,6 +328,7 @@ function KPI({ title, value, icon: Icon }: { title: string; value: any; icon: an
           <div>
             <div className="text-sm text-muted-foreground">{title}</div>
             <div className="text-2xl font-semibold mt-1">{value}</div>
+            {subtitle && <div className="text-[10px] text-muted-foreground mt-0.5">{subtitle}</div>}
           </div>
           <div className="size-10 rounded-lg bg-primary/10 grid place-items-center">
             <Icon className="size-5 text-primary" />

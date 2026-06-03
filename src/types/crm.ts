@@ -39,6 +39,7 @@ export interface Representative {
 
 export interface DashboardStats {
   clientsCount: number;
+  activeClientsCount: number;
   repsCount: number;
   oppsCount: number;
   totalSales: number;
