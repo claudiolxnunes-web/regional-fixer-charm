@@ -141,13 +141,15 @@ function Mapa() {
 
       const maxRev = Math.max(1, ...withCoords.map((c) => Number(c.total_purchases ?? 0)));
       const heatPoints = withCoords.map((c) => {
-        const intensity = mode === "density" ? 0.5 : Math.min(1, Number(c.total_purchases ?? 0) / maxRev);
+        const intensity = mode === "density" ? 0.8 : Math.min(1, (Number(c.total_purchases ?? 0) / maxRev) * 1.5);
         return [Number(c.lat), Number(c.lng), intensity];
       }) as any;
 
       heatRef.current = (L as any).heatLayer(heatPoints, {
-        radius: 25, blur: 18, maxZoom: 12,
-        gradient: { 0.2: "#3b82f6", 0.4: "#22c55e", 0.6: "#eab308", 0.8: "#f97316", 1.0: "#ef4444" },
+        radius: 35, blur: 12, maxZoom: 8, minOpacity: 0.5,
+        gradient: { 0.1: "#3b82f6", 0.3: "#22c55e", 0.5: "#eab308", 0.7: "#f97316", 1.0: "#ef4444" },
+
+
       }).addTo(map);
 
       // Marcadores (até 500). Em selectMode, clicar adiciona/remove da rota.
