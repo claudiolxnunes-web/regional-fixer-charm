@@ -75,8 +75,14 @@ export function PageTransition({
   easing = "easeInOut"
 }: PageTransitionProps) {
   const location = useLocation();
+  const prefersReducedMotion = useReducedMotion();
   
-  const selectedVariant = useMemo(() => variants[type] || variants.fade, [type]);
+  const selectedVariant = useMemo(() => {
+    if (prefersReducedMotion) return variants.fade;
+    return variants[type] || variants.fade;
+  }, [type, prefersReducedMotion]);
+
+  const effectiveDuration = prefersReducedMotion ? 0.1 : duration;
 
   return (
     <AnimatePresence mode="wait">
@@ -87,9 +93,8 @@ export function PageTransition({
         exit="exit"
         variants={selectedVariant}
         transition={{ 
-          duration, 
+          duration: effectiveDuration, 
           ease: easing,
-          // Use hardware acceleration
           type: "tween"
         }}
         className="w-full h-full flex flex-col"
