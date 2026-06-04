@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin, Route as RouteIcon, CloudSun, X } from "lucide-react";
 import { toast } from "sonner";
+import { CITY_COORDS } from "@/utils/cityCoords";
 
 export const Route = createFileRoute("/_app/mapa")({ component: Mapa });
 
@@ -19,59 +20,7 @@ type ClientPt = {
   abc_class: string | null; total_purchases: number | string | null;
 };
 
-// Coordenadas aproximadas dos principais municípios (MG/GO) para agilização
-const CITY_COORDS: Record<string, [number, number]> = {
-  "COROMANDEL-MG": [-18.4731, -47.2003],
-  "CATALAO-GO": [-18.1691, -47.9458],
-  "PATOS DE MINAS-MG": [-18.5789, -46.5181],
-  "JOAO PINHEIRO-MG": [-17.7428, -46.1722],
-  "CRUZEIRO DA FORTALEZA-MG": [-18.9431, -46.7703],
-  "DOURADOQUARA-MG": [-18.4419, -47.6078],
-  "PATROCINIO-MG": [-18.9439, -46.9922],
-  "ABADIA DOS DOURADOS-MG": [-18.4864, -47.4003],
-  "PARACATU-MG": [-17.2217, -46.8744],
-  "SERRA DO SALITRE-MG": [-19.1122, -46.6853],
-  "RIO VERDE-GO": [-17.7911, -50.9203],
-  "JOAIMA-MG": [-16.6536, -41.0319],
-  "CRISTALINA-GO": [-16.7658, -47.6133],
-  "GUIMARANIA-MG": [-18.8475, -46.7936],
-  "VAZANTE-MG": [-17.9869, -46.9075],
-  "LAGAMAR-MG": [-18.1722, -46.8094],
-  "LAGOA FORMOSA-MG": [-18.7781, -46.4078],
-  "SACRAMENTO-MG": [-19.8597, -47.4394],
-  "ALEXANIA-GO": [-16.0806, -48.5075],
-  "MONTE CARMELO-MG": [-18.7247, -47.4983],
-  "CARMO DO PARANAIBA-MG": [-18.995, -46.3189],
-  "GUARDA-MOR-MG": [-17.7725, -47.0989],
-  "IBIA-MG": [-19.4789, -46.6917],
-  "BRASILIA-DF": [-15.7801, -47.9292],
-  "UNAI-MG": [-16.3575, -46.9061],
-  "TIROS-MG": [-18.9842, -45.9753],
-  "CORUMBA DE GOIAS-GO": [-15.9231, -48.8089],
-  "SANTA ROSA DE GOIAS-GO": [-16.0828, -49.495],
-  "ESTRELA DO SUL-MG": [-18.7431, -47.695],
-  "LAGOA GRANDE-MG": [-17.8425, -46.5139],
-  "CAMPINA VERDE-MG": [-19.5356, -49.4864],
-  "ITAPURANGA-GO": [-15.5617, -49.9486],
-  "GOVERNADOR VALADARES-MG": [-18.8501, -41.9482],
-  "PERDIZES-MG": [-19.3528, -47.2889],
-  "JARAGUA-GO": [-15.7564, -49.3364],
-  "MONTE FORMOSO-MG": [-16.8833, -40.3833],
-  "JATAI-GO": [-17.8814, -51.7144],
-  "UBERABA-MG": [-19.7436, -47.9392],
-  "MINEIROS-GO": [-17.5622, -52.5514],
-  "SAO PATRICIO-GO": [-15.3506, -49.4186],
-  "GOIANESIA-GO": [-15.3183, -49.1172],
-  "SAO FRANCISCO-MG": [-15.9431, -44.8644],
-  "BRASILANDIA DE MINAS-MG": [-17.0011, -46.0003],
-  "QUIRINOPOLIS-GO": [-18.4481, -50.4514],
-  "ANAPOLIS-GO": [-16.3267, -48.9528],
-  "CHAPADA GAUCHA-MG": [-15.2906, -45.6178],
-  "MORRO AGUDO DE GOIAS-GO": [-15.3158, -49.9142],
-  "IPORA-GO": [-16.4419, -51.1175],
-  "GAMELEIRA DE GOIAS-GO": [-16.4636, -48.6703],
-  "CUMARI-GO": [-18.2661, -48.1508],
-};
+
 
 // Nearest-neighbor TSP (suficiente p/ ~20 pontos por dia)
 function optimizeRoute(points: { id: string; lat: number; lng: number }[], startIdx = 0) {
