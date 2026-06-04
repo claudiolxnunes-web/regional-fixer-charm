@@ -112,30 +112,20 @@ function Mapa() {
     );
   }, [clients, q, uf]);
 
-  const byCity = useMemo(() => {
-    const m = new Map<string, { city: string; state: string; count: number; revenue: number; lat: number | null; lng: number | null }>();
-    filtered.forEach((c) => {
-      if (!c.city) return;
-      const k = `${c.city}-${c.state}`.toUpperCase();
-      const cur = m.get(k) ?? { city: c.city, state: c.state || "", count: 0, revenue: 0, lat: null, lng: null };
-      cur.count++;
-      cur.revenue += Number(c.total_purchases ?? 0);
+  const withCoords = useMemo(() => {
+    return (filtered as ClientPt[]).map(c => {
+      let lat = c.lat ? Number(c.lat) : null;
+      let lng = c.lng ? Number(c.lng) : null;
       
-      if (!cur.lat && c.lat && c.lng) {
-        cur.lat = Number(c.lat);
-        cur.lng = Number(c.lng);
+      if (!lat && c.city) {
+        const k = `${c.city}-${c.state}`.toUpperCase();
+        if (CITY_COORDS[k]) {
+          [lat, lng] = CITY_COORDS[k];
+        }
       }
-      
-      if (!cur.lat && CITY_COORDS[k]) {
-        [cur.lat, cur.lng] = CITY_COORDS[k];
-      }
-      
-      m.set(k, cur);
-    });
-    return Array.from(m.values());
+      return { ...c, lat, lng };
+    }).filter(c => c.lat && c.lng) as (ClientPt & { lat: number, lng: number })[];
   }, [filtered]);
-
-  const withCoords = byCity.filter((c) => c.lat && c.lng);
 
   // Init Leaflet
   useEffect(() => {
