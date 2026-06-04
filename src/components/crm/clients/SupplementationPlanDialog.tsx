@@ -135,7 +135,7 @@ export function SupplementationPlanDialog({ linkId, cycleName, rebanhoName, trig
   const generateAIPrescription = () => {
     toast.info("A IA está analisando a sazonalidade e as recomendações do ciclo...");
     
-    const cycle = plan?.link?.cycle || linkInfo?.cycle;
+    const cycle = (plan as any)?.link?.cycle || (linkInfo as any)?.cycle;
     const isSafra = cycle?.name?.toLowerCase().includes("safra");
     const recProducts = (cycle?.recommended_products as string[]) || [];
 
