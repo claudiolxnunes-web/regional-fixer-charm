@@ -7,10 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Trash2, Beef, AlertCircle, Info, ClipboardList } from "lucide-react";
+import { Calendar, Plus, Trash2, Beef, AlertCircle, Info, ClipboardList, ClipboardCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { SupplementationPlanDialog } from "./SupplementationPlanDialog";
+import { PlanExecutionDialog } from "./PlanExecutionDialog";
 
 interface ClientNutritionTabProps {
   clientId: string;
@@ -39,7 +40,8 @@ export function ClientNutritionTab({ clientId }: ClientNutritionTabProps) {
         .select(`
           *,
           cycle:crop_cycles(*),
-          rebanho:rebanhos(name)
+          rebanho:rebanhos(name),
+          plans:supplementation_plans(*)
         `)
         .eq("client_id", clientId)
         .order("created_at", { ascending: false });
@@ -158,9 +160,9 @@ export function ClientNutritionTab({ clientId }: ClientNutritionTabProps) {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="py-3"><CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ciclos Ativos</CardTitle></CardHeader>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-2">
+          <CardHeader className="py-3"><CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ciclos e Planos Ativos</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {activeLinks.map((link: any) => (
               <div key={link.id} className="p-3 rounded-lg border bg-muted/30 relative group">
@@ -180,16 +182,30 @@ export function ClientNutritionTab({ clientId }: ClientNutritionTabProps) {
                     <Badge variant="outline" className="text-[9px] h-4 py-0">{link.cycle.culture}</Badge>
                     {link.rebanho && <Badge variant="secondary" className="text-[9px] h-4 py-0">{link.rebanho.name}</Badge>}
                   </div>
-                  <SupplementationPlanDialog 
-                    linkId={link.id} 
-                    cycleName={link.cycle.name}
-                    rebanhoName={link.rebanho?.name}
-                    trigger={
-                      <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 text-primary hover:text-primary-foreground hover:bg-primary">
-                        <ClipboardList className="size-3 mr-1" /> Plano de Suplementação
-                      </Button>
-                    }
-                  />
+                  <div className="flex gap-1">
+                    <SupplementationPlanDialog 
+                      linkId={link.id} 
+                      cycleName={link.cycle.name}
+                      rebanhoName={link.rebanho?.name}
+                      trigger={
+                        <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 text-primary hover:text-primary-foreground hover:bg-primary">
+                          <ClipboardList className="size-3 mr-1" /> Plano
+                        </Button>
+                      }
+                    />
+                    {link.plans && link.plans.length > 0 && (
+                      <PlanExecutionDialog
+                        planId={link.plans[0].id}
+                        cycleName={link.cycle.name}
+                        rebanhoName={link.rebanho?.name}
+                        trigger={
+                          <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 text-green-600 hover:text-white hover:bg-green-600">
+                            <ClipboardCheck className="size-3 mr-1" /> Execução
+                          </Button>
+                        }
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="text-[10px] text-muted-foreground">
                   Período: {new Date(link.cycle.start_date).toLocaleDateString("pt-BR")} a {new Date(link.cycle.end_date).toLocaleDateString("pt-BR")}

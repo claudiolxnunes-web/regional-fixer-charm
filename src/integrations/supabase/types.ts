@@ -1084,6 +1084,50 @@ export type Database = {
           },
         ]
       }
+      plan_executions: {
+        Row: {
+          actual_metrics: Json | null
+          application_notes: string | null
+          consumption: Json | null
+          created_at: string | null
+          execution_date: string
+          id: string
+          observations: string | null
+          plan_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          actual_metrics?: Json | null
+          application_notes?: string | null
+          consumption?: Json | null
+          created_at?: string | null
+          execution_date?: string
+          id?: string
+          observations?: string | null
+          plan_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          actual_metrics?: Json | null
+          application_notes?: string | null
+          consumption?: Json | null
+          created_at?: string | null
+          execution_date?: string
+          id?: string
+          observations?: string | null
+          plan_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_executions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "supplementation_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean | null
