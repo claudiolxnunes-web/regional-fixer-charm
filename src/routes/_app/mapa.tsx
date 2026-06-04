@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin, Route as RouteIcon, CloudSun, X } from "lucide-react";
 import { toast } from "sonner";
+import { CITY_COORDS } from "@/utils/cityCoords";
 
 export const Route = createFileRoute("/_app/mapa")({ component: Mapa });
 
@@ -19,7 +20,6 @@ type ClientPt = {
   abc_class: string | null; total_purchases: number | string | null;
 };
 
-import { CITY_COORDS } from "@/utils/cityCoords";
 
 
 // Nearest-neighbor TSP (suficiente p/ ~20 pontos por dia)
