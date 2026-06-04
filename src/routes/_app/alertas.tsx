@@ -34,17 +34,46 @@ const SEV_VARIANT: Record<string, "default" | "secondary" | "destructive" | "out
 function AlertasPage() {
   const { isStaff } = useAuth();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"new" | "read" | "resolved" | "all">("new");
+  const [tab, setTab] = useState<"new" | "read" | "resolved" | "nutri" | "all">("new");
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["alerts_list", tab],
     queryFn: async () => {
+      if (tab === "nutri") {
+        const { data, error } = await supabase
+          .from("nutrition_alerts")
+          .select("*, clients(name, client_code)")
+          .order("alert_date", { ascending: true })
+          .limit(200);
+        if (error) throw error;
+        return (data ?? []).map(d => ({
+          ...d,
+          status: d.is_read ? 'read' : 'new',
+          message: d.description,
+          client_name: (d.clients as any)?.name,
+          client_code: (d.clients as any)?.client_code,
+          severity: 'medium',
+          type: 'nutri'
+        }));
+      }
       let q = supabase.from("alerts").select("*").order("created_at", { ascending: false }).limit(500);
       if (tab !== "all") q = q.eq("status", tab);
       const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
+  });
+
+  const { data: nutritionAlertsCount = 0 } = useQuery({
+    queryKey: ["nutrition-alerts-count"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("nutrition_alerts")
+        .select("*", { count: 'exact', head: true })
+        .gte("alert_date", new Date().toISOString().split('T')[0])
+        .lte("alert_date", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+      return count ?? 0;
+    }
   });
 
   const counts = {
@@ -150,10 +179,11 @@ function AlertasPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard label="Novos" value={counts.new.toString()} />
         <KpiCard label="Alta severidade" value={counts.high.toString()} />
-        <KpiCard label="Total" value={counts.total.toString()} />
+        <KpiCard label="Ciclos Nutricionais" value={nutritionAlertsCount.toString()} sub="Próximos 7 dias" />
+        <KpiCard label="Total Geral" value={counts.total.toString()} />
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
@@ -161,6 +191,7 @@ function AlertasPage() {
           <TabsTrigger value="new">Novos</TabsTrigger>
           <TabsTrigger value="read">Lidos</TabsTrigger>
           <TabsTrigger value="resolved">Resolvidos</TabsTrigger>
+          <TabsTrigger value="nutri">Nutrição Animal</TabsTrigger>
           <TabsTrigger value="all">Todos</TabsTrigger>
         </TabsList>
       </Tabs>
