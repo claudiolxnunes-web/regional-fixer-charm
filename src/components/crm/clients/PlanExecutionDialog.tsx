@@ -129,6 +129,14 @@ export function PlanExecutionDialog({ planId, cycleName, rebanhoName, trigger }:
         <ScrollArea className="flex-1 pr-4">
           {activeTab === "new" ? (
             <div className="space-y-6 py-4">
+              <div className="bg-green-50 p-4 rounded-lg border border-green-100 flex items-start gap-3">
+                <ClipboardCheck className="size-5 text-green-600 shrink-0 mt-0.5" />
+                <div>
+                  <h5 className="text-sm font-semibold text-green-900">Novo Registro de Manejo</h5>
+                  <p className="text-xs text-green-700">Compare os resultados reais com as metas planejadas para este ciclo.</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Data da Execução</Label>
