@@ -13,6 +13,8 @@ import type { ReactNode } from "react";
 import logo from "@/assets/logo.png";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PageTransition } from "@/components/PageTransition";
+import { useTransitionSettings } from "@/hooks/use-transition-settings";
 
 const groups = [
   {
@@ -145,6 +147,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const initial = (user?.email ?? "?").charAt(0).toUpperCase();
   const [open, setOpen] = useState(false);
+  const { type, duration } = useTransitionSettings();
 
   const handleSignOut = async () => { await signOut(); navigate({ to: "/login", search: { invite: undefined } }); };
 
@@ -189,7 +192,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         <main className="flex-1 overflow-x-hidden">
-          <div key={loc.pathname} className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 max-w-[1400px] mx-auto w-full animate-fade-in">{children}</div>
+          <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 max-w-[1400px] mx-auto w-full">
+            <PageTransition type={type} duration={duration}>
+              {children}
+            </PageTransition>
+          </div>
         </main>
 
         {/* Mobile Bottom Nav */}
