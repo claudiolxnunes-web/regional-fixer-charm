@@ -338,12 +338,20 @@ function Mapa() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Mapa de Calor — Clientes</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Mapa de Calor por Município</h1>
         <p className="text-sm text-muted-foreground">
-          {filtered.length} clientes filtrados · {withCoords.length} com geolocalização.
+          {filtered.length} clientes filtrados · {withCoords.length} mapeados por município.
         </p>
       </div>
+
+      {withCoords.length === 0 && filtered.length > 0 && (
+        <Card className="bg-yellow-50 border-yellow-200">
+          <CardContent className="py-3 text-center text-sm text-yellow-700 flex items-center justify-center gap-2">
+            <MapPin className="size-4" />
+            Nenhum município dos clientes filtrados possui coordenadas cadastradas no sistema.
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Input placeholder="Buscar nome ou cidade..." value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
