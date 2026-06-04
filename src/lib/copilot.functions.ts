@@ -43,7 +43,7 @@ export const askCopilot = createServerFn({ method: "POST" })
         .limit(500),
       supabase
         .from("clients")
-        .select("name, client_code, abc_class, segment, state, status")
+        .select("name, client_code, abc_class, segment, state, status, health_score, health_status")
         .limit(2000),
       supabase
         .from("quotes")
@@ -153,7 +153,7 @@ export const askCopilot = createServerFn({ method: "POST" })
       {
         role: "system",
         content:
-          'Você é o Copiloto Comercial Agro — assistente executivo de uma distribuidora agro brasileira. Responda em português do Brasil, direto, factual, usando APENAS os dados fornecidos no CONTEXTO JSON. Quando citar números, use formato R$ X.XXX e percentuais. Quando faltar dado, diga claramente "não consta nos últimos 90 dias". Use markdown com listas e negrito quando ajudar. No final, sugira 1 ação prática quando fizer sentido. Nunca invente nomes, valores ou datas.\n\nCONTEXTO (JSON):\n' +
+          'Você é o Copiloto Comercial Agro — assistente executivo de uma distribuidora agro brasileira. Responda em português do Brasil, direto, factual, usando APENAS os dados fornecidos no CONTEXTO JSON. Quando citar números, use formato R$ X.XXX e percentuais. Quando faltar dado, diga claramente "não consta nos últimos 90 dias". Use markdown com listas e negrito quando ajudar. \n\nVocê também ajuda com follow-ups: se o usuário pedir sugestão de mensagem de WhatsApp para um cliente, redija uma mensagem cordial, mencionando a última compra (se houver) e perguntando se precisa de reposição ou consultoria para a fase atual da safra.\n\nPara perguntas de busca semântica (ex: "quem não compra há X dias"), use os campos de health_score (baixo é ruim) e health_status.\n\nNo final, sugira 1 ação prática quando fizer sentido. Nunca invente nomes, valores ou datas.\n\nCONTEXTO (JSON):\n' +
           JSON.stringify(ctx),
       },
       ...history.map((h) => ({ role: h.role, content: h.content })),
