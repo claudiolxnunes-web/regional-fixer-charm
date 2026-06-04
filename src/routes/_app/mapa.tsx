@@ -167,9 +167,9 @@ function Mapa() {
       }));
 
       const heatPoints = withCoords.map((c) => {
-        let val = 0.8;
-        if (mode === "revenue") val = (Number(c.total_purchases ?? 0) / maxVal) * 3.5;
-        if (mode === "volume") val = (Number(c.total_volume ?? 0) / maxVal) * 3.5;
+        let val = 0.7;
+        if (mode === "revenue") val = (Number(c.total_purchases ?? 0) / maxVal) * 2.5;
+        if (mode === "volume") val = (Number(c.total_volume ?? 0) / maxVal) * 2.5;
         return [Number(c.lat), Number(c.lng), Math.min(1, val)];
       }) as any;
 
