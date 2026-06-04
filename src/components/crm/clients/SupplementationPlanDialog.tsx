@@ -37,12 +37,17 @@ export function SupplementationPlanDialog({ linkId, cycleName, rebanhoName, trig
   const [inputs, setInputs] = useState<PlanInput[]>([]);
   const [status, setStatus] = useState("draft");
 
-  const { data: plan, isLoading } = useQuery({
+  const { data: plan, isLoading: loadingPlan } = useQuery({
     queryKey: ["supplementation-plan", linkId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("supplementation_plans")
-        .select("*")
+        .select(`
+          *,
+          link:crop_cycle_client_links(
+            cycle:crop_cycles(*)
+          )
+        `)
         .eq("link_id", linkId)
         .maybeSingle();
       
@@ -50,6 +55,23 @@ export function SupplementationPlanDialog({ linkId, cycleName, rebanhoName, trig
       return data;
     },
     enabled: open
+  });
+
+  const { data: linkInfo } = useQuery({
+    queryKey: ["cycle-link-info", linkId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("crop_cycle_client_links")
+        .select(`
+          *,
+          cycle:crop_cycles(*)
+        `)
+        .eq("id", linkId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && !plan
   });
 
   useEffect(() => {
@@ -111,30 +133,42 @@ export function SupplementationPlanDialog({ linkId, cycleName, rebanhoName, trig
   };
 
   const generateAIPrescription = () => {
-    toast.info("A IA está analisando a sazonalidade e o histórico...");
-    // Mocking AI suggestions based on common seasonality logic
-    const isSafra = cycleName.toLowerCase().includes("safra");
+    toast.info("A IA está analisando a sazonalidade e as recomendações do ciclo...");
     
+    const cycle = plan?.link?.cycle || linkInfo?.cycle;
+    const isSafra = cycle?.name?.toLowerCase().includes("safra");
+    const recProducts = (cycle?.recommended_products as string[]) || [];
+
     if (isSafra) {
       setGoals([
         { title: "Ganho de Peso Médio", target: "1.0 - 1.2 kg/dia" },
-        { title: "Aproveitamento de Pasto", target: "Máximo" }
+        { title: "Aproveitamento de Pasto", target: "Máximo" },
+        { title: "Eficiência Alimentar", target: "Alta" }
       ]);
-      setInputs([
-        { product: "Sal Mineral Aditivado", dosage: "100g/cab", period: "Diário" },
-        { product: "Proteinada Águas", dosage: "200g/cab", period: "Diário" }
-      ]);
+      
+      const suggestedInputs = recProducts.length > 0 
+        ? recProducts.map(p => ({ product: p, dosage: "150g/cab", period: "Diário" }))
+        : [
+            { product: "Sal Mineral Aditivado", dosage: "100g/cab", period: "Diário" },
+            { product: "Proteinada Águas", dosage: "200g/cab", period: "Diário" }
+          ];
+      setInputs(suggestedInputs);
     } else {
       setGoals([
         { title: "Manutenção de Peso", target: "Evitar perda" },
-        { title: "Score Corporal", target: "3.5 - 4.0" }
+        { title: "Escore Corporal", target: "3.5 - 4.0" },
+        { title: "Transição para Confinamento", target: "Início" }
       ]);
-      setInputs([
-        { product: "Sal Proteinado Secas", dosage: "400g/cab", period: "Diário" },
-        { product: "Núcleo Confinamento", dosage: "500g/cab", period: "Transição" }
-      ]);
+
+      const suggestedInputs = recProducts.length > 0 
+        ? recProducts.map(p => ({ product: p, dosage: "400g/cab", period: "Diário" }))
+        : [
+            { product: "Sal Proteinado Secas", dosage: "400g/cab", period: "Diário" },
+            { product: "Fosbovi Proteico Energético", dosage: "500g/cab", period: "Diário" }
+          ];
+      setInputs(suggestedInputs);
     }
-    toast.success("Sugestões aplicadas!");
+    toast.success("Sugestões aplicadas com base na sazonalidade!");
   };
 
   return (
