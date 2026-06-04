@@ -11,6 +11,8 @@ import { askCopilot } from "@/lib/copilot.functions";
 
 export const Route = createFileRoute("/_app/copilot")({ component: Copilot });
 
+import { VoiceCapture } from "@/components/VoiceCapture";
+
 type Msg = { role: "user" | "assistant"; content: string };
 
 const SUGGESTIONS = [
@@ -118,6 +120,13 @@ function Copilot() {
         </div>
 
         <CardContent className="border-t pt-3 pb-3">
+          <div className="flex items-center gap-2 mb-2">
+            <VoiceCapture 
+              context="semantic_search" 
+              label="Falar com Copiloto" 
+              onResult={({ transcript }) => send(transcript)} 
+            />
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();

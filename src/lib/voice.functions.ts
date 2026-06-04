@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const InputSchema = z.object({
   audio_base64: z.string().min(100).max(20_000_000),
   mime_type: z.string().min(3).max(100).default("audio/webm"),
-  context: z.enum(["daily_report", "visit_spin"]).default("daily_report"),
+  context: z.enum(["daily_report", "visit_spin", "field_checkin", "semantic_search"]).default("daily_report"),
 });
 
 export const transcribeAndStructure = createServerFn({ method: "POST" })
@@ -53,6 +53,12 @@ export const transcribeAndStructure = createServerFn({ method: "POST" })
  "spin_n": "Necessidade/solução discutida",
  "observations": "Resumo geral",
  "visits_count": 1, "calls_count": 0, "proposals_count": 0, "orders_count": 0
+}`
+        : data.context === "field_checkin"
+        ? `Extraia as notas de check-in de campo. Retorne JSON estrito:
+{
+ "observations": "Resumo da visita e condições da lavoura",
+ "visits_count": 1
 }`
         : `Extraia do relato do representante os números do dia e observações. Retorne JSON estrito:
 {
