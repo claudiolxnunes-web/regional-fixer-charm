@@ -52,11 +52,11 @@ export function CustomerHealthScore({ clientId }: Props) {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">{client.health_score}</span>
+              <span className="text-2xl font-bold">{client.health_score ?? 0}</span>
               <span className="text-xs text-muted-foreground">/ 100</span>
             </div>
             <Badge className={getStatusColor(client.health_status ?? "")}>
-              {client.health_status}
+              {client.health_status ?? "Indefinido"}
             </Badge>
           </div>
           
@@ -64,7 +64,7 @@ export function CustomerHealthScore({ clientId }: Props) {
             <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
               <div 
                 className={`h-full transition-all duration-500 ${getScoreColor(client.health_score ?? 0)}`}
-                style={{ width: `${client.health_score}%` }}
+                style={{ width: `${client.health_score ?? 0}%` }}
               />
             </div>
           </div>
@@ -74,7 +74,7 @@ export function CustomerHealthScore({ clientId }: Props) {
               <Calendar className="size-3" />
               Última compra: {client.last_purchase_date ? new Date(client.last_purchase_date).toLocaleDateString("pt-BR") : "Nunca"}
             </div>
-            {client.health_score < 60 && (
+            {client.health_score !== null && client.health_score < 60 && (
               <div className="flex items-start gap-2 p-2 rounded bg-destructive/5 text-[10px] text-destructive border border-destructive/10">
                 <AlertCircle className="size-3 mt-0.5 shrink-0" />
                 <span>Risco de Churn: Cliente sem compras recentes. Recomendado contato imediato.</span>
