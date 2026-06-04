@@ -15,15 +15,18 @@ import { CITY_COORDS } from "@/utils/cityCoords";
 export const Route = createFileRoute("/_app/mapa")({ component: Mapa });
 
 type ClientPt = {
-  id: string; name: string; city: string | null; state: string | null;
-  lat: number | string | null; lng: number | string | null;
-  abc_class: string | null; total_purchases: number | string | null;
+  id: string; 
+  name: string; 
+  city: string | null; 
+  state: string | null;
+  lat: number | string | null; 
+  lng: number | string | null;
+  abc_class: string | null; 
+  total_purchases: number | string | null;
   total_volume?: number | null;
 };
 
-
-
-// Nearest-neighbor TSP (suficiente p/ ~20 pontos por dia)
+// Nearest-neighbor TSP
 function optimizeRoute(points: { id: string; lat: number; lng: number }[], startIdx = 0) {
   if (points.length <= 2) return points.map((_, i) => i);
   const visited = new Set<number>([startIdx]);
@@ -72,16 +75,16 @@ function Mapa() {
   const routeLayerRef = useRef<any>(null);
   const weatherLayerRef = useRef<any>(null);
 
-  const { data: clients } = useQuery({
+  const { data: clients, isLoading } = useQuery({
     queryKey: ["map-clients"],
     queryFn: async () => {
-      const { data: clients } = await supabase.from("clients")
+      const { data: clientsData } = await supabase.from("clients")
         .select("id, name, city, state, lat, lng, abc_class, total_purchases, representative_id")
         .limit(5000);
       
-      const { data: salesAgg } = await supabase.rpc('get_client_sales_totals');
+      const { data: salesAgg } = await (supabase.rpc as any)('get_client_sales_totals');
       
-      const clientsList = (clients ?? []) as ClientPt[];
+      const clientsList = (clientsData ?? []) as ClientPt[];
       if (!salesAgg) return clientsList;
 
       return clientsList.map(c => {
@@ -89,7 +92,6 @@ function Mapa() {
         return {
           ...c,
           total_volume: sales?.total_volume || 0,
-          // Use the RPC revenue if it's more accurate, otherwise stick to total_purchases
           total_purchases: sales?.total_revenue || Number(c.total_purchases || 0)
         };
       });
@@ -166,42 +168,43 @@ function Mapa() {
 
       const heatPoints = withCoords.map((c) => {
         let val = 0.8;
-        if (mode === "revenue") val = (Number(c.total_purchases ?? 0) / maxVal) * 2.5;
-        if (mode === "volume") val = (Number(c.total_volume ?? 0) / maxVal) * 2.5;
+        if (mode === "revenue") val = (Number(c.total_purchases ?? 0) / maxVal) * 3.5;
+        if (mode === "volume") val = (Number(c.total_volume ?? 0) / maxVal) * 3.5;
         return [Number(c.lat), Number(c.lng), Math.min(1, val)];
       }) as any;
 
       heatRef.current = (L as any).heatLayer(heatPoints, {
-        radius: 40, blur: 10, maxZoom: 6, minOpacity: 0.5,
+        radius: 45, 
+        blur: 8, 
+        maxZoom: 5, 
+        minOpacity: 0.5,
         gradient: { 0.1: "#3b82f6", 0.3: "#22c55e", 0.5: "#eab308", 0.7: "#f97316", 1.0: "#ef4444" },
       }).addTo(map);
 
-      // Marcadores (até 500). Em selectMode, clicar adiciona/remove da rota.
       if (showMarkers || selectMode) {
         withCoords.slice(0, 500).forEach((c) => {
-        const isSel = selected.includes(c.id);
-        const pos: [number, number] = c.isCityCoord 
-          ? [c.lat + (Math.random() - 0.5) * 0.015, c.lng + (Math.random() - 0.5) * 0.015] 
-          : [c.lat, c.lng];
-        const m = L.circleMarker(pos, {
-          radius: isSel ? 7 : 4,
-          color: isSel ? "#16a34a" : "#0ea5e9",
-          fillColor: isSel ? "#16a34a" : "#0ea5e9",
-          fillOpacity: isSel ? 0.9 : 0.6,
-          weight: isSel ? 2 : 1,
-        }).bindPopup(
-          `<b>${c.name}</b><br/>${c.city ?? ""}/${c.state ?? ""}<br/>${c.abc_class ? "Classe " + c.abc_class + "<br/>" : ""}R$ ${Number(c.total_purchases ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-        );
-        if (selectMode) {
-          m.on("click", () => {
-            setSelected((cur) => cur.includes(c.id) ? cur.filter((x) => x !== c.id) : [...cur, c.id]);
-          });
-        }
-        markersRef.current?.addLayer(m);
+          const isSel = selected.includes(c.id);
+          const pos: [number, number] = c.isCityCoord 
+            ? [c.lat + (Math.random() - 0.5) * 0.015, c.lng + (Math.random() - 0.5) * 0.015] 
+            : [c.lat, c.lng];
+          const m = L.circleMarker(pos, {
+            radius: isSel ? 7 : 4,
+            color: isSel ? "#16a34a" : "#0ea5e9",
+            fillColor: isSel ? "#16a34a" : "#0ea5e9",
+            fillOpacity: isSel ? 0.9 : 0.6,
+            weight: isSel ? 2 : 1,
+          }).bindPopup(
+            `<b>${c.name}</b><br/>${c.city ?? ""}/${c.state ?? ""}<br/>${c.abc_class ? "Classe " + c.abc_class + "<br/>" : ""}Faturamento: R$ ${Number(c.total_purchases ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}<br/>Volume: ${Number(c.total_volume ?? 0).toLocaleString("pt-BR")} kg`
+          );
+          if (selectMode) {
+            m.on("click", () => {
+              setSelected((cur) => cur.includes(c.id) ? cur.filter((x) => x !== c.id) : [...cur, c.id]);
+            });
+          }
+          markersRef.current?.addLayer(m);
         });
       }
 
-      // Fit bounds inicial (apenas se não há rota)
       if (!routeLayerRef.current) {
         try {
           const bounds = L.latLngBounds(withCoords.map((c) => [Number(c.lat), Number(c.lng)] as [number, number]));
@@ -265,7 +268,6 @@ function Mapa() {
     setShowWeather(true);
     setWeatherLoading(true);
     try {
-      // Pontos: rota selecionada, ou top 12 por receita
       const basis = routeInfo
         ? routeInfo.ordered.map((p) => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng }))
         : [...withCoords]
@@ -315,11 +317,13 @@ function Mapa() {
   }
 
   const byState = useMemo(() => {
-    const m = new Map<string, { count: number; revenue: number }>();
+    const m = new Map<string, { count: number; revenue: number; volume: number }>();
     filtered.forEach((c) => {
       const k = c.state ?? "—";
-      const cur = m.get(k) ?? { count: 0, revenue: 0 };
-      cur.count++; cur.revenue += Number(c.total_purchases ?? 0);
+      const cur = m.get(k) ?? { count: 0, revenue: 0, volume: 0 };
+      cur.count++; 
+      cur.revenue += Number(c.total_purchases ?? 0);
+      cur.volume += Number(c.total_volume ?? 0);
       m.set(k, cur);
     });
     return Array.from(m.entries()).map(([state, v]) => ({ state, ...v })).sort((a, b) => b.count - a.count);
@@ -376,8 +380,13 @@ function Mapa() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
         <Card>
-          <CardContent className="p-0 overflow-hidden rounded-md">
-            <div ref={containerRef} className="w-full h-[60vh] min-h-[400px] z-0" />
+          <CardContent className="p-0 overflow-hidden rounded-md relative">
+            {isLoading && (
+              <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </div>
+            )}
+            <div ref={containerRef} className="w-full h-[65vh] min-h-[450px] z-0" />
           </CardContent>
         </Card>
 
@@ -399,7 +408,7 @@ function Mapa() {
                 {routeInfo && (
                   <>
                     <div className="text-muted-foreground mb-2">
-                      ≈ <b>{routeInfo.km.toFixed(1)} km</b> total (linha reta) · {routeInfo.ordered.length} paradas
+                      ≈ <b>{routeInfo.km.toFixed(1)} km</b> total · {routeInfo.ordered.length} paradas
                     </div>
                     <ol className="space-y-1">
                       {routeInfo.ordered.map((p, i) => (
@@ -416,14 +425,15 @@ function Mapa() {
           )}
 
           <Card>
-            <CardHeader><CardTitle className="text-sm">Clientes por UF</CardTitle></CardHeader>
-            <CardContent className="space-y-2 max-h-[40vh] overflow-y-auto">
+            <CardHeader><CardTitle className="text-sm">Consolidado por UF</CardTitle></CardHeader>
+            <CardContent className="space-y-2 max-h-[45vh] overflow-y-auto">
               {byState.map((s) => (
-                <div key={s.state} className="flex items-center justify-between border rounded-md p-2 text-sm">
-                  <Badge variant="outline">{s.state}</Badge>
-                  <div className="text-right">
-                    <div className="font-medium">{s.count}</div>
-                    <div className="text-xs text-muted-foreground">R$ {s.revenue.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div>
+                <div key={s.state} className="flex items-center justify-between border rounded-md p-2 text-xs">
+                  <Badge variant="outline" className="shrink-0">{s.state}</Badge>
+                  <div className="text-right flex-1 ml-2">
+                    <div className="font-medium text-sm">{s.count} clientes</div>
+                    <div className="text-muted-foreground">R$ {s.revenue.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}</div>
+                    <div className="text-muted-foreground">{s.volume.toLocaleString("pt-BR")} kg</div>
                   </div>
                 </div>
               ))}
@@ -432,7 +442,6 @@ function Mapa() {
           </Card>
         </div>
       </div>
-
     </div>
   );
 }
