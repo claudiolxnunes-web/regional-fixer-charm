@@ -223,7 +223,8 @@ function Mapa() {
           });
         }
         markersRef.current?.addLayer(m);
-      });
+        });
+      }
 
       // Fit bounds inicial (apenas se não há rota)
       if (!routeLayerRef.current) {
