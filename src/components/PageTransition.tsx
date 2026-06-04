@@ -1,4 +1,4 @@
-import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ReactNode, useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 
@@ -17,7 +17,7 @@ interface PageTransitionProps {
   children: ReactNode;
   type?: TransitionType;
   duration?: number;
-  easing?: string | number[];
+  easing?: any;
 }
 
 const variants: Record<string, any> = {
