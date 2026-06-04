@@ -174,10 +174,10 @@ function Mapa() {
       }) as any;
 
       heatRef.current = (L as any).heatLayer(heatPoints, {
-        radius: 45, 
-        blur: 8, 
+        radius: 35, 
+        blur: 15, 
         maxZoom: 5, 
-        minOpacity: 0.5,
+        minOpacity: 0.3,
         gradient: { 0.1: "#3b82f6", 0.3: "#22c55e", 0.5: "#eab308", 0.7: "#f97316", 1.0: "#ef4444" },
       }).addTo(map);
 
