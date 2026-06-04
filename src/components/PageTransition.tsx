@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ReactNode, useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 
@@ -27,14 +27,14 @@ const variants: Record<string, any> = {
     exit: { opacity: 0 },
   },
   "slide-left": {
-    initial: { x: "100%", opacity: 0 },
+    initial: { x: "10%", opacity: 0 },
     animate: { x: 0, opacity: 1 },
-    exit: { x: "-100%", opacity: 0 },
+    exit: { x: "-10%", opacity: 0 },
   },
   "slide-right": {
-    initial: { x: "-100%", opacity: 0 },
+    initial: { x: "-10%", opacity: 0 },
     animate: { x: 0, opacity: 1 },
-    exit: { x: "100%", opacity: 0 },
+    exit: { x: "10%", opacity: 0 },
   },
   "slide-up": {
     initial: { y: "20px", opacity: 0 },
@@ -57,9 +57,9 @@ const variants: Record<string, any> = {
     exit: { rotateY: -90, opacity: 0 },
   },
   parallax: {
-    initial: { x: "30%", opacity: 0, scale: 0.9 },
+    initial: { x: "15%", opacity: 0, scale: 0.95 },
     animate: { x: 0, opacity: 1, scale: 1 },
-    exit: { x: "-30%", opacity: 0, scale: 1.1 },
+    exit: { x: "-15%", opacity: 0, scale: 1.05 },
   },
   none: {
     initial: {},
