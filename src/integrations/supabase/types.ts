@@ -1871,6 +1871,44 @@ export type Database = {
           },
         ]
       }
+      supplementation_plans: {
+        Row: {
+          created_at: string | null
+          goals: Json | null
+          id: string
+          inputs: Json | null
+          link_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          goals?: Json | null
+          id?: string
+          inputs?: Json | null
+          link_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          goals?: Json | null
+          id?: string
+          inputs?: Json | null
+          link_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplementation_plans_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "crop_cycle_client_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           created_at: string

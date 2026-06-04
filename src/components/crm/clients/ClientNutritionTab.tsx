@@ -7,9 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Trash2, Beef, AlertCircle, Info } from "lucide-react";
+import { Calendar, Plus, Trash2, Beef, AlertCircle, Info, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { SupplementationPlanDialog } from "./SupplementationPlanDialog";
 
 interface ClientNutritionTabProps {
   clientId: string;
@@ -174,9 +175,21 @@ export function ClientNutritionTab({ clientId }: ClientNutritionTabProps) {
                     <Trash2 className="size-3.5 text-destructive" />
                   </Button>
                 </div>
-                <div className="text-[10px] flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className="text-[9px] h-4 py-0">{link.cycle.culture}</Badge>
-                  {link.rebanho && <Badge variant="secondary" className="text-[9px] h-4 py-0">{link.rebanho.name}</Badge>}
+                <div className="text-[10px] flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[9px] h-4 py-0">{link.cycle.culture}</Badge>
+                    {link.rebanho && <Badge variant="secondary" className="text-[9px] h-4 py-0">{link.rebanho.name}</Badge>}
+                  </div>
+                  <SupplementationPlanDialog 
+                    linkId={link.id} 
+                    cycleName={link.cycle.name}
+                    rebanhoName={link.rebanho?.name}
+                    trigger={
+                      <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 text-primary hover:text-primary-foreground hover:bg-primary">
+                        <ClipboardList className="size-3 mr-1" /> Plano de Suplementação
+                      </Button>
+                    }
+                  />
                 </div>
                 <div className="text-[10px] text-muted-foreground">
                   Período: {new Date(link.cycle.start_date).toLocaleDateString("pt-BR")} a {new Date(link.cycle.end_date).toLocaleDateString("pt-BR")}
