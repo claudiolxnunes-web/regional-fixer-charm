@@ -382,6 +382,12 @@ function Mapa() {
           <Button size="sm" variant={mode === "revenue" ? "default" : "outline"} onClick={() => setMode("revenue")}>Receita</Button>
         </div>
         <div className="flex items-center gap-2 ml-2 border-l pl-2">
+          <Checkbox id="showmk" checked={showMarkers} onCheckedChange={(v) => setShowMarkers(!!v)} />
+          <label htmlFor="showmk" className="text-xs cursor-pointer flex items-center gap-1">
+            <MapPin className="size-3" /> Marcadores
+          </label>
+        </div>
+        <div className="flex items-center gap-2 ml-2 border-l pl-2">
           <Checkbox id="selmode" checked={selectMode} onCheckedChange={(v) => setSelectMode(!!v)} />
           <label htmlFor="selmode" className="text-xs cursor-pointer flex items-center gap-1">
             <RouteIcon className="size-3" /> Montar rota
