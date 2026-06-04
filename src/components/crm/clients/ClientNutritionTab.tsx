@@ -7,10 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Trash2, Beef, AlertCircle, Info, ClipboardList } from "lucide-react";
+import { Calendar, Plus, Trash2, Beef, AlertCircle, Info, ClipboardList, ClipboardCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { SupplementationPlanDialog } from "./SupplementationPlanDialog";
+import { PlanExecutionDialog } from "./PlanExecutionDialog";
 
 interface ClientNutritionTabProps {
   clientId: string;
