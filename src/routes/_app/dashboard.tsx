@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard, Sparkles, Loader2, Trophy, Newspaper, Calendar } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
 import { RepRanking } from "@/components/RepRanking";
+import { CropPipeline } from "@/components/CropPipeline";
+import { CustomerHealthScore } from "@/components/CustomerHealthScore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyCompact } from "@/utils/formatters";
