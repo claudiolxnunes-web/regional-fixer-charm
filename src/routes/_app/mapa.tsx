@@ -18,6 +18,7 @@ type ClientPt = {
   id: string; name: string; city: string | null; state: string | null;
   lat: number | string | null; lng: number | string | null;
   abc_class: string | null; total_purchases: number | string | null;
+  total_volume?: number | null;
 };
 
 
@@ -57,7 +58,7 @@ function totalKm(ordered: { lat: number; lng: number }[]) {
 function Mapa() {
   const [q, setQ] = useState("");
   const [uf, setUf] = useState<string>("all");
-  const [mode, setMode] = useState<"density" | "revenue">("density");
+  const [mode, setMode] = useState<"density" | "revenue" | "volume">("density");
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [showWeather, setShowWeather] = useState(false);
@@ -73,8 +74,26 @@ function Mapa() {
 
   const { data: clients } = useQuery({
     queryKey: ["map-clients"],
-    queryFn: async () => (await supabase.from("clients")
-      .select("id, name, city, state, lat, lng, abc_class, total_purchases, representative_id").limit(5000)).data ?? [],
+    queryFn: async () => {
+      const { data: clients } = await supabase.from("clients")
+        .select("id, name, city, state, lat, lng, abc_class, total_purchases, representative_id")
+        .limit(5000);
+      
+      const { data: salesAgg } = await supabase.rpc('get_client_sales_totals');
+      
+      const clientsList = (clients ?? []) as ClientPt[];
+      if (!salesAgg) return clientsList;
+
+      return clientsList.map(c => {
+        const sales = (salesAgg as any[]).find(s => s.client_id === c.id);
+        return {
+          ...c,
+          total_volume: sales?.total_volume || 0,
+          // Use the RPC revenue if it's more accurate, otherwise stick to total_purchases
+          total_purchases: sales?.total_revenue || Number(c.total_purchases || 0)
+        };
+      });
+    },
   });
 
   const ufs = useMemo(() => Array.from(new Set((clients ?? []).map((c) => c.state).filter(Boolean))).sort(), [clients]);
