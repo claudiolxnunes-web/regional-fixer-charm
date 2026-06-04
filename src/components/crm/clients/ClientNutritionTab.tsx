@@ -182,16 +182,30 @@ export function ClientNutritionTab({ clientId }: ClientNutritionTabProps) {
                     <Badge variant="outline" className="text-[9px] h-4 py-0">{link.cycle.culture}</Badge>
                     {link.rebanho && <Badge variant="secondary" className="text-[9px] h-4 py-0">{link.rebanho.name}</Badge>}
                   </div>
-                  <SupplementationPlanDialog 
-                    linkId={link.id} 
-                    cycleName={link.cycle.name}
-                    rebanhoName={link.rebanho?.name}
-                    trigger={
-                      <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 text-primary hover:text-primary-foreground hover:bg-primary">
-                        <ClipboardList className="size-3 mr-1" /> Plano de Suplementação
-                      </Button>
-                    }
-                  />
+                  <div className="flex gap-1">
+                    <SupplementationPlanDialog 
+                      linkId={link.id} 
+                      cycleName={link.cycle.name}
+                      rebanhoName={link.rebanho?.name}
+                      trigger={
+                        <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 text-primary hover:text-primary-foreground hover:bg-primary">
+                          <ClipboardList className="size-3 mr-1" /> Plano
+                        </Button>
+                      }
+                    />
+                    {link.plans && link.plans.length > 0 && (
+                      <PlanExecutionDialog
+                        planId={link.plans[0].id}
+                        cycleName={link.cycle.name}
+                        rebanhoName={link.rebanho?.name}
+                        trigger={
+                          <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 text-green-600 hover:text-white hover:bg-green-600">
+                            <ClipboardCheck className="size-3 mr-1" /> Execução
+                          </Button>
+                        }
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="text-[10px] text-muted-foreground">
                   Período: {new Date(link.cycle.start_date).toLocaleDateString("pt-BR")} a {new Date(link.cycle.end_date).toLocaleDateString("pt-BR")}
