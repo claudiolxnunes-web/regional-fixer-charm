@@ -314,9 +314,14 @@ function Dashboard() {
           </div>
         </div>
         
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-4">
+          <CustomerHealthScore clientId={undefined} />
           <RepRanking />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <CropPipeline />
       </div>
     </div>
   );
