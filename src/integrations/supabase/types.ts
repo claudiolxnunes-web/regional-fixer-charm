@@ -396,6 +396,7 @@ export type Database = {
           recommended_products: Json | null
           region_id: string | null
           start_date: string
+          type: string | null
           updated_at: string
         }
         Insert: {
@@ -408,6 +409,7 @@ export type Database = {
           recommended_products?: Json | null
           region_id?: string | null
           start_date: string
+          type?: string | null
           updated_at?: string
         }
         Update: {
@@ -420,6 +422,7 @@ export type Database = {
           recommended_products?: Json | null
           region_id?: string | null
           start_date?: string
+          type?: string | null
           updated_at?: string
         }
         Relationships: [

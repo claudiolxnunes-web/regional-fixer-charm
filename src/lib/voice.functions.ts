@@ -57,7 +57,7 @@ export const transcribeAndStructure = createServerFn({ method: "POST" })
         : data.context === "field_checkin"
         ? `Extraia as notas de check-in de campo. Retorne JSON estrito:
 {
- "observations": "Resumo da visita e condições da lavoura",
+ "observations": "Resumo da visita, condições da lavoura ou do rebanho/pastagem",
  "visits_count": 1
 }`
         : `Extraia do relato do representante os números do dia e observações. Retorne JSON estrito:

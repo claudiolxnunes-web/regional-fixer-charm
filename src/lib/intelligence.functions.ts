@@ -214,7 +214,7 @@ export const generateNarrative = createServerFn({ method: "POST" })
     pipeline_won_30d: Math.round(pipelineWon),
   };
 
-  const prompt = `Você é o CFO/Diretor Comercial virtual de uma distribuidora agro brasileira. Gere o "Resumo da Manhã" — uma narrativa executiva, direta e estratégica, em português do Brasil, sobre o estado do negócio. Use no MÁXIMO 4 parágrafos curtos. Aponte 1 vitória, 1 risco e 1 ação prioritária do dia. Linguagem confiante, sem jargão de IA.
+  const prompt = `Você é o CFO/Diretor Comercial virtual de uma empresa de Nutrição Animal e Distribuição Agro brasileira. Gere o "Resumo da Manhã" — uma narrativa executiva, direta e estratégica, em português do Brasil, sobre o estado do negócio. Considere que o negócio lida com nutrição animal (gado, aves, suínos) e insumos agrícolas (safra/entresafra). Use no MÁXIMO 4 parágrafos curtos. Aponte 1 vitória, 1 risco e 1 ação prioritária do dia. Linguagem confiante, sem jargão de IA.
 
 DADOS:
 ${JSON.stringify(ctx, null, 2)}
