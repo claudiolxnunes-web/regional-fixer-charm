@@ -23,6 +23,7 @@ const TYPE_LABEL: Record<string, string> = {
   goal_at_risk: "Meta em risco",
   quote_expiring: "Proposta vencendo",
   ai_proactive: "IA proativa",
+  nutri: "Ciclo Nutricional",
 };
 
 const SEV_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -83,11 +84,13 @@ function AlertasPage() {
   };
 
   const markRead = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (r: any) => {
+      const table = r.type === 'nutri' ? 'nutrition_alerts' : 'alerts';
+      const updateData = r.type === 'nutri' ? { is_read: true } : { status: "read", read_at: new Date().toISOString() };
       const { error } = await supabase
-        .from("alerts")
-        .update({ status: "read", read_at: new Date().toISOString() })
-        .eq("id", id);
+        .from(table as any)
+        .update(updateData as any)
+        .eq("id", r.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alerts_list"] }),
@@ -95,11 +98,12 @@ function AlertasPage() {
   });
 
   const resolve = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (r: any) => {
+      if (r.type === 'nutri') return; // Nutrition alerts are just read/unread for now
       const { error } = await supabase
         .from("alerts")
         .update({ status: "resolved", resolved_at: new Date().toISOString() })
-        .eq("id", id);
+        .eq("id", r.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -226,12 +230,12 @@ function AlertasPage() {
                   <td className="p-3">
                     <div className="flex gap-1">
                       {r.status === "new" && (
-                        <Button size="sm" variant="ghost" title="Marcar lido" onClick={() => markRead.mutate(r.id)}>
+                        <Button size="sm" variant="ghost" title="Marcar lido" onClick={() => markRead.mutate(r)}>
                           <Eye className="size-4" />
                         </Button>
                       )}
-                      {r.status !== "resolved" && (
-                        <Button size="sm" variant="ghost" title="Resolver" onClick={() => resolve.mutate(r.id)}>
+                      {r.status !== "resolved" && r.type !== 'nutri' && (
+                        <Button size="sm" variant="ghost" title="Resolver" onClick={() => resolve.mutate(r)}>
                           <CheckCircle2 className="size-4 text-green-600" />
                         </Button>
                       )}
