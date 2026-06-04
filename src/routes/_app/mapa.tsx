@@ -202,7 +202,8 @@ function Mapa() {
       }).addTo(map);
 
       // Marcadores (até 500). Em selectMode, clicar adiciona/remove da rota.
-      withCoords.slice(0, 500).forEach((c) => {
+      if (showMarkers || selectMode) {
+        withCoords.slice(0, 500).forEach((c) => {
         const isSel = selected.includes(c.id);
         const pos: [number, number] = c.isCityCoord 
           ? [c.lat + (Math.random() - 0.5) * 0.015, c.lng + (Math.random() - 0.5) * 0.015] 
