@@ -19,6 +19,60 @@ type ClientPt = {
   abc_class: string | null; total_purchases: number | string | null;
 };
 
+// Coordenadas aproximadas dos principais municípios (MG/GO) para agilização
+const CITY_COORDS: Record<string, [number, number]> = {
+  "COROMANDEL-MG": [-18.4731, -47.2003],
+  "CATALAO-GO": [-18.1691, -47.9458],
+  "PATOS DE MINAS-MG": [-18.5789, -46.5181],
+  "JOAO PINHEIRO-MG": [-17.7428, -46.1722],
+  "CRUZEIRO DA FORTALEZA-MG": [-18.9431, -46.7703],
+  "DOURADOQUARA-MG": [-18.4419, -47.6078],
+  "PATROCINIO-MG": [-18.9439, -46.9922],
+  "ABADIA DOS DOURADOS-MG": [-18.4864, -47.4003],
+  "PARACATU-MG": [-17.2217, -46.8744],
+  "SERRA DO SALITRE-MG": [-19.1122, -46.6853],
+  "RIO VERDE-GO": [-17.7911, -50.9203],
+  "JOAIMA-MG": [-16.6536, -41.0319],
+  "CRISTALINA-GO": [-16.7658, -47.6133],
+  "GUIMARANIA-MG": [-18.8475, -46.7936],
+  "VAZANTE-MG": [-17.9869, -46.9075],
+  "LAGAMAR-MG": [-18.1722, -46.8094],
+  "LAGOA FORMOSA-MG": [-18.7781, -46.4078],
+  "SACRAMENTO-MG": [-19.8597, -47.4394],
+  "ALEXANIA-GO": [-16.0806, -48.5075],
+  "MONTE CARMELO-MG": [-18.7247, -47.4983],
+  "CARMO DO PARANAIBA-MG": [-18.995, -46.3189],
+  "GUARDA-MOR-MG": [-17.7725, -47.0989],
+  "IBIA-MG": [-19.4789, -46.6917],
+  "BRASILIA-DF": [-15.7801, -47.9292],
+  "UNAI-MG": [-16.3575, -46.9061],
+  "TIROS-MG": [-18.9842, -45.9753],
+  "CORUMBA DE GOIAS-GO": [-15.9231, -48.8089],
+  "SANTA ROSA DE GOIAS-GO": [-16.0828, -49.495],
+  "ESTRELA DO SUL-MG": [-18.7431, -47.695],
+  "LAGOA GRANDE-MG": [-17.8425, -46.5139],
+  "CAMPINA VERDE-MG": [-19.5356, -49.4864],
+  "ITAPURANGA-GO": [-15.5617, -49.9486],
+  "GOVERNADOR VALADARES-MG": [-18.8501, -41.9482],
+  "PERDIZES-MG": [-19.3528, -47.2889],
+  "JARAGUA-GO": [-15.7564, -49.3364],
+  "MONTE FORMOSO-MG": [-16.8833, -40.3833],
+  "JATAI-GO": [-17.8814, -51.7144],
+  "UBERABA-MG": [-19.7436, -47.9392],
+  "MINEIROS-GO": [-17.5622, -52.5514],
+  "SAO PATRICIO-GO": [-15.3506, -49.4186],
+  "GOIANESIA-GO": [-15.3183, -49.1172],
+  "SAO FRANCISCO-MG": [-15.9431, -44.8644],
+  "BRASILANDIA DE MINAS-MG": [-17.0011, -46.0003],
+  "QUIRINOPOLIS-GO": [-18.4481, -50.4514],
+  "ANAPOLIS-GO": [-16.3267, -48.9528],
+  "CHAPADA GAUCHA-MG": [-15.2906, -45.6178],
+  "MORRO AGUDO DE GOIAS-GO": [-15.3158, -49.9142],
+  "IPORA-GO": [-16.4419, -51.1175],
+  "GAMELEIRA DE GOIAS-GO": [-16.4636, -48.6703],
+  "CUMARI-GO": [-18.2661, -48.1508],
+};
+
 // Nearest-neighbor TSP (suficiente p/ ~20 pontos por dia)
 function optimizeRoute(points: { id: string; lat: number; lng: number }[], startIdx = 0) {
   if (points.length <= 2) return points.map((_, i) => i);
@@ -60,6 +114,7 @@ function Mapa() {
   const [showWeather, setShowWeather] = useState(false);
   const [weatherLoading, setWeatherLoading] = useState(false);
 
+  const [showMarkers, setShowMarkers] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const heatRef = useRef<any>(null);
@@ -83,7 +138,22 @@ function Mapa() {
     );
   }, [clients, q, uf]);
 
-  const withCoords = filtered.filter((c) => c.lat && c.lng);
+  const withCoords = useMemo(() => {
+    return (filtered as ClientPt[]).map(c => {
+      let lat = c.lat ? Number(c.lat) : null;
+      let lng = c.lng ? Number(c.lng) : null;
+      let isCityCoord = false;
+      
+      if (!lat && c.city) {
+        const k = `${c.city}-${c.state}`.toUpperCase();
+        if (CITY_COORDS[k]) {
+          [lat, lng] = CITY_COORDS[k];
+          isCityCoord = true;
+        }
+      }
+      return { ...c, lat, lng, isCityCoord };
+    }).filter(c => c.lat && c.lng) as (ClientPt & { lat: number, lng: number, isCityCoord: boolean })[];
+  }, [filtered]);
 
   // Init Leaflet
   useEffect(() => {
@@ -132,9 +202,13 @@ function Mapa() {
       }).addTo(map);
 
       // Marcadores (até 500). Em selectMode, clicar adiciona/remove da rota.
-      withCoords.slice(0, 500).forEach((c) => {
+      if (showMarkers || selectMode) {
+        withCoords.slice(0, 500).forEach((c) => {
         const isSel = selected.includes(c.id);
-        const m = L.circleMarker([Number(c.lat), Number(c.lng)], {
+        const pos: [number, number] = c.isCityCoord 
+          ? [c.lat + (Math.random() - 0.5) * 0.015, c.lng + (Math.random() - 0.5) * 0.015] 
+          : [c.lat, c.lng];
+        const m = L.circleMarker(pos, {
           radius: isSel ? 7 : 4,
           color: isSel ? "#16a34a" : "#0ea5e9",
           fillColor: isSel ? "#16a34a" : "#0ea5e9",
@@ -149,7 +223,8 @@ function Mapa() {
           });
         }
         markersRef.current?.addLayer(m);
-      });
+        });
+      }
 
       // Fit bounds inicial (apenas se não há rota)
       if (!routeLayerRef.current) {
@@ -160,7 +235,7 @@ function Mapa() {
       }
     })();
     return () => { cancelled = true; };
-  }, [withCoords, mode, selectMode, selected]);
+  }, [withCoords, mode, selectMode, selected, showMarkers]);
 
   // Rota otimizada
   const routeInfo = useMemo(() => {
@@ -278,11 +353,20 @@ function Mapa() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Mapa de Calor — Clientes</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Mapa de Calor por Município</h1>
         <p className="text-sm text-muted-foreground">
-          {filtered.length} clientes filtrados · {withCoords.length} com geolocalização.
+          {filtered.length} clientes filtrados · {withCoords.length} mapeados por município.
         </p>
       </div>
+
+      {withCoords.length === 0 && filtered.length > 0 && (
+        <Card className="bg-yellow-50 border-yellow-200">
+          <CardContent className="py-3 text-center text-sm text-yellow-700 flex items-center justify-center gap-2">
+            <MapPin className="size-4" />
+            Nenhum município dos clientes filtrados possui coordenadas cadastradas no sistema.
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Input placeholder="Buscar nome ou cidade..." value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
@@ -296,6 +380,12 @@ function Mapa() {
         <div className="flex gap-1">
           <Button size="sm" variant={mode === "density" ? "default" : "outline"} onClick={() => setMode("density")}>Densidade</Button>
           <Button size="sm" variant={mode === "revenue" ? "default" : "outline"} onClick={() => setMode("revenue")}>Receita</Button>
+        </div>
+        <div className="flex items-center gap-2 ml-2 border-l pl-2">
+          <Checkbox id="showmk" checked={showMarkers} onCheckedChange={(v) => setShowMarkers(!!v)} />
+          <label htmlFor="showmk" className="text-xs cursor-pointer flex items-center gap-1">
+            <MapPin className="size-3" /> Marcadores
+          </label>
         </div>
         <div className="flex items-center gap-2 ml-2 border-l pl-2">
           <Checkbox id="selmode" checked={selectMode} onCheckedChange={(v) => setSelectMode(!!v)} />
@@ -367,12 +457,6 @@ function Mapa() {
         </div>
       </div>
 
-      {withCoords.length === 0 && filtered.length > 0 && (
-        <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">
-          <MapPin className="size-5 mx-auto mb-2" />
-          Nenhum cliente filtrado tem latitude/longitude cadastrados. Importe coordenadas em /clientes para visualizar no mapa.
-        </CardContent></Card>
-      )}
     </div>
   );
 }
