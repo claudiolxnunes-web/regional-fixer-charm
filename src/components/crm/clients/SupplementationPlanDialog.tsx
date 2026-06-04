@@ -54,8 +54,8 @@ export function SupplementationPlanDialog({ linkId, cycleName, rebanhoName, trig
 
   useEffect(() => {
     if (plan) {
-      setGoals(plan.goals as PlanGoal[] || []);
-      setInputs(plan.inputs as PlanInput[] || []);
+      setGoals((plan.goals as unknown as PlanGoal[]) || []);
+      setInputs((plan.inputs as unknown as PlanInput[]) || []);
       setStatus(plan.status || "draft");
     } else {
       setGoals([]);
@@ -68,8 +68,8 @@ export function SupplementationPlanDialog({ linkId, cycleName, rebanhoName, trig
     mutationFn: async () => {
       const payload = {
         link_id: linkId,
-        goals,
-        inputs,
+        goals: goals as any,
+        inputs: inputs as any,
         status
       };
 
