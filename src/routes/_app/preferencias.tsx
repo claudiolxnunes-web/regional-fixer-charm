@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createPortalSession } from "@/utils/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
-import { Settings } from "lucide-react";
+import { Settings, Sparkles } from "lucide-react";
+import { useTransitionSettings } from "@/hooks/use-transition-settings";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { TransitionType } from "@/components/PageTransition";
 
 export const Route = createFileRoute("/_app/preferencias")({ component: Preferencias });
 
@@ -22,6 +26,7 @@ function Preferencias() {
   const [team, setTeam] = useState<{ plan: string; subscription_status: string; current_period_end: string | null } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const { type, setType, duration, setDuration } = useTransitionSettings();
 
   useEffect(() => {
     (async () => {
@@ -100,6 +105,51 @@ function Preferencias() {
           <div className="flex gap-2">
             <Button onClick={save} disabled={loading}>{loading ? "Salvando..." : "Salvar"}</Button>
             <Button variant="outline" onClick={changePassword}>Alterar senha</Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="size-4 text-primary" /> Interface & Transições
+          </CardTitle>
+          <CardDescription>Configure os efeitos visuais de navegação entre as telas.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label>Tipo de Transição</Label>
+            <Select value={type} onValueChange={(v: TransitionType) => setType(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o efeito" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fade">Fade (Suave)</SelectItem>
+                <SelectItem value="slide-left">Deslizar para Esquerda</SelectItem>
+                <SelectItem value="slide-right">Deslizar para Direita</SelectItem>
+                <SelectItem value="slide-up">Deslizar para Cima</SelectItem>
+                <SelectItem value="slide-down">Deslizar para Baixo</SelectItem>
+                <SelectItem value="zoom">Zoom In/Out</SelectItem>
+                <SelectItem value="flip">Flip (Girar)</SelectItem>
+                <SelectItem value="parallax">Parallax (Moderno)</SelectItem>
+                <SelectItem value="none">Nenhuma (Instantâneo)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <Label>Duração (segundos)</Label>
+              <span className="text-xs font-mono">{duration}s</span>
+            </div>
+            <Slider 
+              value={[duration]} 
+              min={0.1} 
+              max={1.5} 
+              step={0.1} 
+              onValueChange={(v) => setDuration(v[0])} 
+            />
+            <p className="text-[10px] text-muted-foreground italic">Duração menor é recomendada para melhor performance percebida.</p>
           </div>
         </CardContent>
       </Card>
