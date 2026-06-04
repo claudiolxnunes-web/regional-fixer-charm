@@ -2453,6 +2453,14 @@ export type Database = {
       generate_inactive_client_alerts: { Args: never; Returns: number }
       generate_low_stock_alerts: { Args: never; Returns: number }
       generate_quote_expiring_alerts: { Args: never; Returns: number }
+      get_client_sales_totals: {
+        Args: never
+        Returns: {
+          client_id: string
+          total_revenue: number
+          total_volume: number
+        }[]
+      }
       get_my_team_id: { Args: never; Returns: string }
       has_role: {
         Args: {
