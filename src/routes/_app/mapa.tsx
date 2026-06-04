@@ -112,7 +112,30 @@ function Mapa() {
     );
   }, [clients, q, uf]);
 
-  const withCoords = filtered.filter((c) => c.lat && c.lng);
+  const byCity = useMemo(() => {
+    const m = new Map<string, { city: string; state: string; count: number; revenue: number; lat: number | null; lng: number | null }>();
+    filtered.forEach((c) => {
+      if (!c.city) return;
+      const k = `${c.city}-${c.state}`.toUpperCase();
+      const cur = m.get(k) ?? { city: c.city, state: c.state || "", count: 0, revenue: 0, lat: null, lng: null };
+      cur.count++;
+      cur.revenue += Number(c.total_purchases ?? 0);
+      
+      if (!cur.lat && c.lat && c.lng) {
+        cur.lat = Number(c.lat);
+        cur.lng = Number(c.lng);
+      }
+      
+      if (!cur.lat && CITY_COORDS[k]) {
+        [cur.lat, cur.lng] = CITY_COORDS[k];
+      }
+      
+      m.set(k, cur);
+    });
+    return Array.from(m.values());
+  }, [filtered]);
+
+  const withCoords = byCity.filter((c) => c.lat && c.lng);
 
   // Init Leaflet
   useEffect(() => {
