@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { transcribeAndStructure } from "@/lib/voice.functions";
 
-type Context = "daily_report" | "visit_spin";
+type Context = "daily_report" | "visit_spin" | "field_checkin" | "semantic_search";
 
 interface Props {
   context?: Context;
