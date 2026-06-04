@@ -437,12 +437,6 @@ function Mapa() {
         </div>
       </div>
 
-      {withCoords.length === 0 && filtered.length > 0 && (
-        <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">
-          <MapPin className="size-5 mx-auto mb-2" />
-          Nenhum cliente filtrado tem latitude/longitude cadastrados. Importe coordenadas em /clientes para visualizar no mapa.
-        </CardContent></Card>
-      )}
     </div>
   );
 }
