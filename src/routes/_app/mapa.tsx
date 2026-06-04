@@ -158,17 +158,22 @@ function Mapa() {
 
       if (withCoords.length === 0) return;
 
-      const maxRev = Math.max(1, ...withCoords.map((c) => Number(c.total_purchases ?? 0)));
+      const maxVal = Math.max(1, ...withCoords.map((c) => {
+        if (mode === "revenue") return Number(c.total_purchases ?? 0);
+        if (mode === "volume") return Number(c.total_volume ?? 0);
+        return 1;
+      }));
+
       const heatPoints = withCoords.map((c) => {
-        const intensity = mode === "density" ? 0.8 : Math.min(1, (Number(c.total_purchases ?? 0) / maxRev) * 1.5);
-        return [Number(c.lat), Number(c.lng), intensity];
+        let val = 0.8;
+        if (mode === "revenue") val = (Number(c.total_purchases ?? 0) / maxVal) * 2.5;
+        if (mode === "volume") val = (Number(c.total_volume ?? 0) / maxVal) * 2.5;
+        return [Number(c.lat), Number(c.lng), Math.min(1, val)];
       }) as any;
 
       heatRef.current = (L as any).heatLayer(heatPoints, {
-        radius: 35, blur: 12, maxZoom: 8, minOpacity: 0.5,
+        radius: 40, blur: 10, maxZoom: 6, minOpacity: 0.5,
         gradient: { 0.1: "#3b82f6", 0.3: "#22c55e", 0.5: "#eab308", 0.7: "#f97316", 1.0: "#ef4444" },
-
-
       }).addTo(map);
 
       // Marcadores (até 500). Em selectMode, clicar adiciona/remove da rota.
@@ -349,7 +354,8 @@ function Mapa() {
         </Select>
         <div className="flex gap-1">
           <Button size="sm" variant={mode === "density" ? "default" : "outline"} onClick={() => setMode("density")}>Densidade</Button>
-          <Button size="sm" variant={mode === "revenue" ? "default" : "outline"} onClick={() => setMode("revenue")}>Receita</Button>
+          <Button size="sm" variant={mode === "revenue" ? "default" : "outline"} onClick={() => setMode("revenue")}>Faturamento</Button>
+          <Button size="sm" variant={mode === "volume" ? "default" : "outline"} onClick={() => setMode("volume")}>Volume</Button>
         </div>
         <div className="flex items-center gap-2 ml-2 border-l pl-2">
           <Checkbox id="showmk" checked={showMarkers} onCheckedChange={(v) => setShowMarkers(!!v)} />
