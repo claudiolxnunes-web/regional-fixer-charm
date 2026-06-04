@@ -160,9 +160,9 @@ export function ClientNutritionTab({ clientId }: ClientNutritionTabProps) {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="py-3"><CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ciclos Ativos</CardTitle></CardHeader>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-2">
+          <CardHeader className="py-3"><CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ciclos e Planos Ativos</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {activeLinks.map((link: any) => (
               <div key={link.id} className="p-3 rounded-lg border bg-muted/30 relative group">
