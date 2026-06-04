@@ -141,13 +141,14 @@ function Mapa() {
 
       const maxRev = Math.max(1, ...withCoords.map((c) => Number(c.total_purchases ?? 0)));
       const heatPoints = withCoords.map((c) => {
-        const intensity = mode === "density" ? 0.7 : Math.min(1, Number(c.total_purchases ?? 0) / maxRev);
+        const intensity = mode === "density" ? 0.8 : Math.min(1, (Number(c.total_purchases ?? 0) / maxRev) * 1.5);
         return [Number(c.lat), Number(c.lng), intensity];
       }) as any;
 
       heatRef.current = (L as any).heatLayer(heatPoints, {
-        radius: 30, blur: 15, maxZoom: 10, minOpacity: 0.4,
+        radius: 35, blur: 12, maxZoom: 8, minOpacity: 0.5,
         gradient: { 0.1: "#3b82f6", 0.3: "#22c55e", 0.5: "#eab308", 0.7: "#f97316", 1.0: "#ef4444" },
+
 
       }).addTo(map);
 
