@@ -40,7 +40,8 @@ export function ClientNutritionTab({ clientId }: ClientNutritionTabProps) {
         .select(`
           *,
           cycle:crop_cycles(*),
-          rebanho:rebanhos(name)
+          rebanho:rebanhos(name),
+          plans:supplementation_plans(*)
         `)
         .eq("client_id", clientId)
         .order("created_at", { ascending: false });
