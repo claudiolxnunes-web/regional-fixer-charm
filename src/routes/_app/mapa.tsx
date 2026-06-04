@@ -116,15 +116,17 @@ function Mapa() {
     return (filtered as ClientPt[]).map(c => {
       let lat = c.lat ? Number(c.lat) : null;
       let lng = c.lng ? Number(c.lng) : null;
+      let isCityCoord = false;
       
       if (!lat && c.city) {
         const k = `${c.city}-${c.state}`.toUpperCase();
         if (CITY_COORDS[k]) {
           [lat, lng] = CITY_COORDS[k];
+          isCityCoord = true;
         }
       }
-      return { ...c, lat, lng };
-    }).filter(c => c.lat && c.lng) as (ClientPt & { lat: number, lng: number })[];
+      return { ...c, lat, lng, isCityCoord };
+    }).filter(c => c.lat && c.lng) as (ClientPt & { lat: number, lng: number, isCityCoord: boolean })[];
   }, [filtered]);
 
   // Init Leaflet
