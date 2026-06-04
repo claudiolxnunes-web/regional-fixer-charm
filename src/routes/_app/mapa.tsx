@@ -167,17 +167,17 @@ function Mapa() {
       }));
 
       const heatPoints = withCoords.map((c) => {
-        let val = 0.8;
-        if (mode === "revenue") val = (Number(c.total_purchases ?? 0) / maxVal) * 3.5;
-        if (mode === "volume") val = (Number(c.total_volume ?? 0) / maxVal) * 3.5;
+        let val = 0.7;
+        if (mode === "revenue") val = (Number(c.total_purchases ?? 0) / maxVal) * 2.5;
+        if (mode === "volume") val = (Number(c.total_volume ?? 0) / maxVal) * 2.5;
         return [Number(c.lat), Number(c.lng), Math.min(1, val)];
       }) as any;
 
       heatRef.current = (L as any).heatLayer(heatPoints, {
-        radius: 35, 
-        blur: 15, 
+        radius: 12, 
+        blur: 18, 
         maxZoom: 5, 
-        minOpacity: 0.3,
+        minOpacity: 0.4,
         gradient: { 0.1: "#3b82f6", 0.3: "#22c55e", 0.5: "#eab308", 0.7: "#f97316", 1.0: "#ef4444" },
       }).addTo(map);
 
