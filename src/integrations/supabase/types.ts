@@ -233,6 +233,8 @@ export type Database = {
           final_clients_count: number | null
           group_code: string | null
           group_name: string | null
+          health_score: number | null
+          health_status: string | null
           id: string
           import_source: string | null
           last_purchase_date: string | null
@@ -280,6 +282,8 @@ export type Database = {
           final_clients_count?: number | null
           group_code?: string | null
           group_name?: string | null
+          health_score?: number | null
+          health_status?: string | null
           id?: string
           import_source?: string | null
           last_purchase_date?: string | null
@@ -327,6 +331,8 @@ export type Database = {
           final_clients_count?: number | null
           group_code?: string | null
           group_name?: string | null
+          health_score?: number | null
+          health_status?: string | null
           id?: string
           import_source?: string | null
           last_purchase_date?: string | null
@@ -375,6 +381,95 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crop_cycles: {
+        Row: {
+          created_at: string
+          culture: string
+          end_date: string
+          id: string
+          name: string
+          phase: string
+          recommended_products: Json | null
+          region_id: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          culture: string
+          end_date: string
+          id?: string
+          name: string
+          phase: string
+          recommended_products?: Json | null
+          region_id?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          culture?: string
+          end_date?: string
+          id?: string
+          name?: string
+          phase?: string
+          recommended_products?: Json | null
+          region_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_cycles_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_health_logs: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          new_score: number | null
+          old_score: number | null
+          reason: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          new_score?: number | null
+          old_score?: number | null
+          reason?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          new_score?: number | null
+          old_score?: number | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_health_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_health_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_view"
             referencedColumns: ["id"]
           },
         ]
