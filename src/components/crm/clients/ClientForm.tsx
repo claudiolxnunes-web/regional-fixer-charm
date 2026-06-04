@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Field } from "@/components/crm/Field";
 import { ClientSalesTab } from "./ClientSalesTab";
 import { ClientActivitiesTab } from "./ClientActivitiesTab";
+import { ClientNutritionTab } from "./ClientNutritionTab";
 import type { Client } from "@/types/crm";
 
 interface ClientFormProps {
@@ -63,6 +64,7 @@ export function ClientForm({ editing, onClose, onSave, isSaving }: ClientFormPro
         <TabsList>
           <TabsTrigger value="dados">Dados</TabsTrigger>
           <TabsTrigger value="vendas" disabled={!editing}>Vendas</TabsTrigger>
+          <TabsTrigger value="nutricao" disabled={!editing}>Nutrição/Ciclos</TabsTrigger>
           <TabsTrigger value="atividades" disabled={!editing}>Atividades</TabsTrigger>
         </TabsList>
 
@@ -128,6 +130,10 @@ export function ClientForm({ editing, onClose, onSave, isSaving }: ClientFormPro
 
         <TabsContent value="vendas">
           {editing && <ClientSalesTab clientId={editing.id} />}
+        </TabsContent>
+
+        <TabsContent value="nutricao">
+          {editing && <ClientNutritionTab clientId={editing.id} />}
         </TabsContent>
 
         <TabsContent value="atividades">

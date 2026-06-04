@@ -385,6 +385,62 @@ export type Database = {
           },
         ]
       }
+      crop_cycle_client_links: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          cycle_id: string
+          id: string
+          notes: string | null
+          rebanho_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          cycle_id: string
+          id?: string
+          notes?: string | null
+          rebanho_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          cycle_id?: string
+          id?: string
+          notes?: string | null
+          rebanho_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_cycle_client_links_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crop_cycle_client_links_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crop_cycle_client_links_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "crop_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crop_cycle_client_links_rebanho_id_fkey"
+            columns: ["rebanho_id"]
+            isOneToOne: false
+            referencedRelation: "rebanhos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crop_cycles: {
         Row: {
           created_at: string
@@ -723,6 +779,74 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutrition_alerts: {
+        Row: {
+          alert_date: string
+          client_id: string
+          created_at: string | null
+          cycle_id: string
+          description: string | null
+          id: string
+          is_read: boolean | null
+          rebanho_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          alert_date: string
+          client_id: string
+          created_at?: string | null
+          cycle_id: string
+          description?: string | null
+          id?: string
+          is_read?: boolean | null
+          rebanho_id?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          alert_date?: string
+          client_id?: string
+          created_at?: string | null
+          cycle_id?: string
+          description?: string | null
+          id?: string
+          is_read?: boolean | null
+          rebanho_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutrition_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutrition_alerts_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "crop_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutrition_alerts_rebanho_id_fkey"
+            columns: ["rebanho_id"]
+            isOneToOne: false
+            referencedRelation: "rebanhos"
             referencedColumns: ["id"]
           },
         ]
@@ -1110,6 +1234,57 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rebanhos: {
+        Row: {
+          category: string | null
+          client_id: string
+          created_at: string | null
+          id: string
+          location: string | null
+          name: string
+          quantity: number | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          client_id: string
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          quantity?: number | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          quantity?: number | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rebanhos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rebanhos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_view"
             referencedColumns: ["id"]
           },
         ]
