@@ -46,6 +46,20 @@ const CITY_COORDS: Record<string, [number, number]> = {
   "IBIA-MG": [-19.4789, -46.6917],
   "BRASILIA-DF": [-15.7801, -47.9292],
   "UNAI-MG": [-16.3575, -46.9061],
+  "TIROS-MG": [-18.9842, -45.9753],
+  "CORUMBA DE GOIAS-GO": [-15.9231, -48.8089],
+  "SANTA ROSA DE GOIAS-GO": [-16.0828, -49.495],
+  "ESTRELA DO SUL-MG": [-18.7431, -47.695],
+  "LAGOA GRANDE-MG": [-17.8425, -46.5139],
+  "CAMPINA VERDE-MG": [-19.5356, -49.4864],
+  "ITAPURANGA-GO": [-15.5617, -49.9486],
+  "GOVERNADOR VALADARES-MG": [-18.8501, -41.9482],
+  "PERDIZES-MG": [-19.3528, -47.2889],
+  "JARAGUA-GO": [-15.7564, -49.3364],
+  "MONTE FORMOSO-MG": [-16.8833, -40.3833],
+  "JATAI-GO": [-17.8814, -51.7144],
+  "UBERABA-MG": [-19.7436, -47.9392],
+  "MINEIROS-GO": [-17.5622, -52.5514],
 };
 
 // Nearest-neighbor TSP (suficiente p/ ~20 pontos por dia)
