@@ -114,6 +114,7 @@ function Mapa() {
   const [showWeather, setShowWeather] = useState(false);
   const [weatherLoading, setWeatherLoading] = useState(false);
 
+  const [showMarkers, setShowMarkers] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const heatRef = useRef<any>(null);
