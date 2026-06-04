@@ -60,6 +60,17 @@ const CITY_COORDS: Record<string, [number, number]> = {
   "JATAI-GO": [-17.8814, -51.7144],
   "UBERABA-MG": [-19.7436, -47.9392],
   "MINEIROS-GO": [-17.5622, -52.5514],
+  "SAO PATRICIO-GO": [-15.3506, -49.4186],
+  "GOIANESIA-GO": [-15.3183, -49.1172],
+  "SAO FRANCISCO-MG": [-15.9431, -44.8644],
+  "BRASILANDIA DE MINAS-MG": [-17.0011, -46.0003],
+  "QUIRINOPOLIS-GO": [-18.4481, -50.4514],
+  "ANAPOLIS-GO": [-16.3267, -48.9528],
+  "CHAPADA GAUCHA-MG": [-15.2906, -45.6178],
+  "MORRO AGUDO DE GOIAS-GO": [-15.3158, -49.9142],
+  "IPORA-GO": [-16.4419, -51.1175],
+  "GAMELEIRA DE GOIAS-GO": [-16.4636, -48.6703],
+  "CUMARI-GO": [-18.2661, -48.1508],
 };
 
 // Nearest-neighbor TSP (suficiente p/ ~20 pontos por dia)
