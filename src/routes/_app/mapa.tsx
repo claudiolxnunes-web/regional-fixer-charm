@@ -235,7 +235,7 @@ function Mapa() {
       }
     })();
     return () => { cancelled = true; };
-  }, [withCoords, mode, selectMode, selected]);
+  }, [withCoords, mode, selectMode, selected, showMarkers]);
 
   // Rota otimizada
   const routeInfo = useMemo(() => {
