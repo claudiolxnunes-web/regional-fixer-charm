@@ -520,25 +520,63 @@ function PlanningPanel() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {m.data.rep_plans.map((rp: any, i: number) => (
-                <Card key={i} className="flex flex-col border-l-4 border-l-primary/40">
-                  <CardHeader className="pb-2">
+                <Card key={i} className="flex flex-col overflow-hidden border-l-4 border-l-primary/40">
+                  <CardHeader className="pb-3 bg-muted/20">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-base">{rp.name}</CardTitle>
-                      <Badge variant={rp.priority_level === "Alta" ? "destructive" : "default"} className="text-[10px]">
-                        {rp.priority_level}
+                      <div>
+                        <CardTitle className="text-base font-bold">{rp.name}</CardTitle>
+                        {rp.metrics && (
+                          <Badge 
+                            variant={rp.metrics.status === "Crítico" ? "destructive" : rp.metrics.status === "Alerta" ? "warning" : "default"}
+                            className="text-[9px] mt-1 h-4 px-1.5"
+                          >
+                            Risco: {rp.metrics.status}
+                          </Badge>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="text-[10px] border-primary/20 text-primary">
+                        Impacto: {rp.priority_level}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3 flex-1">
-                    <div className="space-y-1">
-                      <div className="text-[10px] font-bold uppercase text-muted-foreground">Diagnóstico</div>
-                      <p className="text-xs leading-snug">{rp.diagnostic}</p>
-                    </div>
-                    <div className="p-2.5 rounded bg-muted/50 border border-muted-foreground/10">
-                      <div className="text-[10px] font-bold uppercase text-primary mb-1 flex items-center gap-1">
-                        <CheckCircle2 className="size-3" /> Ação Sugerida
+                  <CardContent className="p-4 space-y-4 flex-1">
+                    {/* Metrics Grid */}
+                    {rp.metrics && (
+                      <div className="grid grid-cols-2 gap-2 bg-muted/30 p-2 rounded-lg border border-muted-foreground/5">
+                        <div className="space-y-0.5">
+                          <div className="text-[9px] uppercase font-bold text-muted-foreground">Positivação</div>
+                          <div className="text-sm font-bold flex items-center gap-1">
+                            {rp.metrics.positivation_rate}%
+                            <Progress value={rp.metrics.positivation_rate} className="h-1 w-8" />
+                          </div>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-[9px] uppercase font-bold text-muted-foreground">Faturamento MTD</div>
+                          <div className="text-sm font-bold">{brl(rp.metrics.mtd_revenue)}</div>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-[9px] uppercase font-bold text-muted-foreground">Carteira Ativa</div>
+                          <div className="text-sm font-bold">{rp.metrics.clients_active} clis.</div>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-[9px] uppercase font-bold text-muted-foreground">Volume Positivado</div>
+                          <div className="text-sm font-bold text-emerald-600">{rp.metrics.clients_positivated} clis.</div>
+                        </div>
                       </div>
-                      <p className="text-xs font-medium leading-normal">{rp.suggestion}</p>
+                    )}
+
+                    <div className="space-y-1.5">
+                      <div className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1">
+                        <AlertCircle className="size-3 text-amber-500" /> Diagnóstico IA
+                      </div>
+                      <p className="text-xs leading-relaxed italic text-muted-foreground">"{rp.diagnostic}"</p>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                      <div className="text-[10px] font-bold uppercase text-primary mb-1.5 flex items-center gap-1">
+                        <CheckCircle2 className="size-3" /> Plano de Ação Sugerido
+                      </div>
+                      <p className="text-xs font-semibold leading-normal text-foreground">{rp.suggestion}</p>
                     </div>
                   </CardContent>
                 </Card>
