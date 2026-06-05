@@ -48,7 +48,7 @@ function Inteligencia() {
 
         <TabsContent value="narrative"><NarrativePanel /></TabsContent>
         <TabsContent value="planning"><PlanningPanel /></TabsContent>
-        <TabsContent value="positivation"><PositivationPanel /></TabsContent>
+        <TabsContent value="positivation"><PositivationPanel setTab={setTab} /></TabsContent>
         <TabsContent value="forecast"><ForecastPanel /></TabsContent>
         <TabsContent value="benchmark"><BenchmarkPanel /></TabsContent>
       </Tabs>
