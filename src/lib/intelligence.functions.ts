@@ -521,6 +521,7 @@ export const generateActionPlans = createServerFn({ method: "POST" })
       return {
         name: st.name,
         mtd_revenue: Math.round(st.mtdRevenue),
+        last_month_revenue: Math.round(st.lastMonthRevenue),
         positivation_rate: Math.round(rate),
         clients_active: total,
         clients_positivated: positivated,
@@ -588,7 +589,26 @@ export const generateActionPlans = createServerFn({ method: "POST" })
 
     if (!res.ok) throw new Error("IA temporariamente indisponível");
     const json = await res.json();
-    return JSON.parse(json.choices[0].message.content);
+    const aiResult = JSON.parse(json.choices[0].message.content);
+    
+    // Enriquecer rep_plans com as métricas reais
+    const enrichedRepPlans = aiResult.rep_plans.map((rp: any) => {
+      const stats = repsSummary.find(s => s.name === rp.name);
+      return {
+        ...rp,
+        metrics: stats || null
+      };
+    });
+
+    return {
+      ...aiResult,
+      rep_plans: enrichedRepPlans,
+      summary_metrics: {
+        total_reps: repsSummary.length,
+        avg_positivation: Math.round(repsSummary.reduce((s, r) => s + r.positivation_rate, 0) / (repsSummary.length || 1)),
+        total_mtd: repsSummary.reduce((s, r) => s + r.mtd_revenue, 0)
+      }
+    };
   });
 
 
