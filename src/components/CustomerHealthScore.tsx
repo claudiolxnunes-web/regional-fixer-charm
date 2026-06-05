@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Activity, AlertCircle, TrendingDown, TrendingUp, Calendar } from "lucide-react";
+import { Heart, Activity, AlertCircle, TrendingDown, TrendingUp, Calendar, Zap, Lightbulb } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -80,6 +80,26 @@ export function CustomerHealthScore({ clientId }: Props) {
                 <span>Risco de Churn: Cliente sem compras recentes. Recomendado contato imediato.</span>
               </div>
             )}
+            
+            {/* Health Score 2.0 Sugestão Preditiva */}
+            <div className="pt-2 border-t border-primary/5 mt-2">
+              <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-wider mb-2">
+                <Lightbulb className="size-3" /> Ações Recomendadas (IA)
+              </div>
+              <ul className="space-y-1.5">
+                <li className="text-[10px] leading-tight flex items-start gap-1.5">
+                  <div className="size-1 rounded-full bg-primary mt-1" />
+                  <span>{client.health_score && client.health_score < 50 
+                    ? "Agendar visita técnica para revisão de mix e retenção." 
+                    : "Apresentar nova linha Safra 2026 para expansão de faturamento."}</span>
+                </li>
+                <li className="text-[10px] leading-tight flex items-start gap-1.5">
+                  <div className="size-1 rounded-full bg-primary mt-1" />
+                  <span>Enviar relatório de benchmark regional para engajamento.</span>
+                </li>
+              </ul>
+            </div>
+
           </div>
         </div>
       </CardContent>
