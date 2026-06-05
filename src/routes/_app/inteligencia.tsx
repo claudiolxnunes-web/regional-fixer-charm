@@ -56,7 +56,7 @@ function Inteligencia() {
   );
 }
 
-function PositivationPanel() {
+function PositivationPanel({ setTab }: { setTab: (t: string) => void }) {
   const fn = useServerFn(getPositivationMetrics);
   const m = useMutation({
     mutationFn: () => fn({}),
