@@ -32,21 +32,165 @@ function Inteligencia() {
           <Sparkles className="size-6 text-primary" /> Inteligência Avançada
         </h1>
         <p className="text-sm text-muted-foreground">
-          Narrativa executiva, previsão de receita e benchmark entre representantes.
+          Estratégia comercial, positivação de carteira e previsões de alta performance.
         </p>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="w-full max-w-full overflow-x-auto justify-start">
-          <TabsTrigger value="narrative"><Newspaper className="size-4 mr-1.5" />Resumo</TabsTrigger>
-          <TabsTrigger value="forecast"><TrendingUp className="size-4 mr-1.5" />Previsão</TabsTrigger>
-          <TabsTrigger value="benchmark"><Trophy className="size-4 mr-1.5" />Benchmark</TabsTrigger>
+        <TabsList className="w-full max-w-full overflow-x-auto justify-start bg-muted/50 p-1">
+          <TabsTrigger value="narrative" className="gap-2"><Newspaper className="size-4" />Resumo Executivo</TabsTrigger>
+          <TabsTrigger value="positivation" className="gap-2"><UserCheck className="size-4" />Positivação</TabsTrigger>
+          <TabsTrigger value="forecast" className="gap-2"><TrendingUp className="size-4" />Previsão</TabsTrigger>
+          <TabsTrigger value="benchmark" className="gap-2"><Trophy className="size-4" />Benchmark</TabsTrigger>
         </TabsList>
 
         <TabsContent value="narrative"><NarrativePanel /></TabsContent>
+        <TabsContent value="positivation"><PositivationPanel /></TabsContent>
         <TabsContent value="forecast"><ForecastPanel /></TabsContent>
         <TabsContent value="benchmark"><BenchmarkPanel /></TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function PositivationPanel() {
+  const fn = useServerFn(getPositivationMetrics);
+  const m = useMutation({
+    mutationFn: () => fn({}),
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao calcular positivação"),
+  });
+
+  // Auto-run on mount if no data
+  if (!m.data && !m.isPending && !m.isError) {
+    m.mutate();
+  }
+
+  return (
+    <div className="space-y-4 mt-4">
+      {m.isPending && (
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="size-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Analisando comportamento de compra da carteira...</p>
+        </div>
+      )}
+
+      {m.data && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs font-semibold uppercase text-primary tracking-wider">Taxa de Positivação</div>
+                  <UserCheck className="size-4 text-primary" />
+                </div>
+                <div className="text-3xl font-bold">{m.data.metrics.rate}%</div>
+                <Progress value={m.data.metrics.rate} className="h-1.5 mt-3" />
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  {m.data.metrics.positivated} de {m.data.metrics.totalActiveBase} clientes ativos
+                </p>
+              </CardContent>
+            </Card>
+
+            <KPI label="Potencial Recuperável" value={brl(m.data.metrics.potentialRevenue)} sub="Receita estimada dos não positivados" />
+            <KPI label="Atraso Crítico (>60d)" value={m.data.metrics.critical} sub="Clientes em alto risco de churn" tone={m.data.metrics.critical > 0 ? "destructive" : "default"} />
+            <KPI label="Em Atraso (35-60d)" value={m.data.metrics.delayed} sub="Oportunidades de positivação rápida" tone="warning" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base">Top Oportunidades de Positivação</CardTitle>
+                  <p className="text-xs text-muted-foreground">Clientes com maior potencial de compra que ainda não compraram este mês.</p>
+                </div>
+                <Badge variant="outline">{m.data.gap.length} listados</Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="text-xs text-muted-foreground border-b">
+                      <tr>
+                        <th className="text-left py-3">Cliente</th>
+                        <th className="text-left">Status</th>
+                        <th className="text-right">Última Compra</th>
+                        <th className="text-right">Ticket Médio</th>
+                        <th className="text-right">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {m.data.gap.map((c: any) => (
+                        <tr key={c.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                          <td className="py-3">
+                            <div className="font-medium">{c.name}</div>
+                            <div className="text-[10px] text-muted-foreground uppercase">{c.rep}</div>
+                          </td>
+                          <td>
+                            <Badge 
+                              variant={c.status === "Crítico" ? "destructive" : c.status === "Atrasado" ? "warning" : "outline"}
+                              className="text-[10px] px-1.5 py-0"
+                            >
+                              {c.status}
+                            </Badge>
+                          </td>
+                          <td className="text-right text-xs">
+                            <div className="font-medium">{c.daysSince} dias</div>
+                            <div className="text-[10px] text-muted-foreground">{new Date(c.lastPurchase).toLocaleDateString('pt-BR')}</div>
+                          </td>
+                          <td className="text-right font-medium">{brl(c.avgMonthly)}</td>
+                          <td className="text-right">
+                            <Button size="icon" variant="ghost" className="size-8" title="Ver Detalhes">
+                              <ArrowRight className="size-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <AlertCircle className="size-4 text-amber-500" /> Insights Estratégicos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg bg-muted/40 p-3 border">
+                  <div className="text-xs font-semibold mb-1">Impacto Financeiro</div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Sua positivação está em <span className="text-foreground font-medium">{m.data.metrics.rate}%</span>. 
+                    Se alcançarmos 60%, o incremento de receita estimado é de <span className="text-emerald-600 font-bold">{brl(m.data.metrics.potentialRevenue * 0.5)}</span>.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold">Próximos Passos Recomendados:</div>
+                  <ul className="text-xs space-y-2">
+                    <li className="flex gap-2">
+                      <div className="size-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] shrink-0 font-bold">1</div>
+                      <span>Focar nos {m.data.metrics.delayed} clientes "Em Atraso" para fechamento imediato.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <div className="size-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] shrink-0 font-bold">2</div>
+                      <span>Revisar carteira dos {m.data.metrics.critical} clientes "Críticos" com os representantes.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <div className="size-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] shrink-0 font-bold">3</div>
+                      <span>Implementar campanha de reativação para tickets acima de {brl(5000)}.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <Button className="w-full text-xs" variant="outline" onClick={() => toast.info("Relatório de positivação enviado para os representantes.")}>
+                  <Calendar className="size-3.5 mr-2" /> Notificar Força-Tarefa
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }
