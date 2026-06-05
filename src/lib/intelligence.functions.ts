@@ -446,8 +446,8 @@ export const generateActionPlans = createServerFn({ method: "POST" })
 
     // Buscar dados necessários
     const [salesMTD, salesLastYear, salesLastMonth] = await Promise.all([
-      supabase.from("sales").select("revenue, representative, client_id").gte("invoice_date", mtdStart).limit(20000),
-      supabase.from("sales").select("revenue, representative, client_id").gte("invoice_date", twelveMonthsAgo).limit(50000),
+      supabase.from("sales").select("revenue, representative, client_id, client_name, invoice_date").gte("invoice_date", mtdStart).limit(20000),
+      supabase.from("sales").select("revenue, representative, client_id, client_name, invoice_date").gte("invoice_date", twelveMonthsAgo).limit(50000),
       supabase.from("sales").select("revenue, representative").gte("invoice_date", lastMonthStart).lt("invoice_date", mtdStart).limit(20000),
     ]);
 
@@ -459,73 +459,119 @@ export const generateActionPlans = createServerFn({ method: "POST" })
       positivatedClients: Set<string>;
     }> = {};
 
-    // Base de clientes ativos (últimos 12 meses)
+    const clientData: Record<string, {
+      id: string;
+      name: string;
+      rep: string;
+      lastPurchase: string;
+      avgMonthly: number;
+      totalRevenue: number;
+      purchasedThisMonth: boolean;
+    }> = {};
+
+    // Processar clientes ativos
     (salesLastYear.data ?? []).forEach(s => {
       const rep = s.representative || "—";
+      const clientId = s.client_id;
+      if (!clientId) return;
+
       if (!repStats[rep]) repStats[rep] = { name: rep, mtdRevenue: 0, lastMonthRevenue: 0, totalClients: new Set(), positivatedClients: new Set() };
-      if (s.client_id) repStats[rep].totalClients.add(s.client_id);
+      repStats[rep].totalClients.add(clientId);
+
+      if (!clientData[clientId]) {
+        clientData[clientId] = {
+          id: clientId,
+          name: s.client_name || "—",
+          rep: rep,
+          lastPurchase: s.invoice_date || "",
+          avgMonthly: 0,
+          totalRevenue: 0,
+          purchasedThisMonth: false
+        };
+      }
+      const rev = Number(s.revenue ?? 0);
+      clientData[clientId].totalRevenue += rev;
+      if (s.invoice_date && s.invoice_date > clientData[clientId].lastPurchase) {
+        clientData[clientId].lastPurchase = s.invoice_date;
+      }
     });
 
-    // Vendas este mês (positivação)
+    // MTD e Positivação
     (salesMTD.data ?? []).forEach(s => {
       const rep = s.representative || "—";
+      const clientId = s.client_id;
       if (repStats[rep]) {
         repStats[rep].mtdRevenue += Number(s.revenue ?? 0);
-        if (s.client_id) repStats[rep].positivatedClients.add(s.client_id);
+        if (clientId) repStats[rep].positivatedClients.add(clientId);
+      }
+      if (clientId && clientData[clientId]) {
+        clientData[clientId].purchasedThisMonth = true;
       }
     });
 
-    // Vendas mês passado
     (salesLastMonth.data ?? []).forEach(s => {
       const rep = s.representative || "—";
-      if (repStats[rep]) {
-        repStats[rep].lastMonthRevenue += Number(s.revenue ?? 0);
-      }
+      if (repStats[rep]) repStats[rep].lastMonthRevenue += Number(s.revenue ?? 0);
     });
 
     const repsSummary = Object.entries(repStats).map(([rep, st]) => {
       const total = st.totalClients.size;
       const positivated = st.positivatedClients.size;
       const rate = total > 0 ? (positivated / total) * 100 : 0;
-      const growth = st.lastMonthRevenue > 0 ? ((st.mtdRevenue - st.lastMonthRevenue) / st.lastMonthRevenue) * 100 : 0;
-
       return {
         name: st.name,
         mtd_revenue: Math.round(st.mtdRevenue),
         positivation_rate: Math.round(rate),
         clients_active: total,
         clients_positivated: positivated,
-        growth_vs_prev_pct: Math.round(growth),
         status: rate < 40 ? "Crítico" : rate < 60 ? "Alerta" : "Saudável"
       };
-    })
-    .filter(r => r.clients_active > 5)
-    .sort((a, b) => a.positivation_rate - b.positivation_rate)
-    .slice(0, 15);
+    }).filter(r => r.clients_active > 3).sort((a, b) => a.positivation_rate - b.positivation_rate);
 
-    const prompt = `Você é um Diretor Comercial especializado em agronegócio brasileiro. 
-    Analise os dados de desempenho da equipe abaixo e crie:
-    1. Um plano de ação individual para cada representante (focando em como aumentar a POSITIVAÇÃO).
-    2. Um plano estratégico geral para o Gestor Regional.
+    // Selecionar top 15 clientes NÃO positivados de maior valor
+    const unpositivatedClients = Object.values(clientData)
+      .filter(c => !c.purchasedThisMonth)
+      .map(c => ({
+        ...c,
+        avgMonthly: Math.round(c.totalRevenue / 12),
+        daysSince: c.lastPurchase ? daysSince(c.lastPurchase) : 999
+      }))
+      .sort((a, b) => b.avgMonthly - a.avgMonthly)
+      .slice(0, 15);
 
-    CONTEXTO: Baixa positivação (clientes que compram no mês) é o principal problema. A meta é >70%.
-    
-    DADOS DA EQUIPE:
-    ${JSON.stringify(repsSummary, null, 2)}
+    const prompt = `Você é um Diretor Comercial especializado em agronegócio (nutrição animal e insumos). 
+    Analise os dados de baixa POSITIVAÇÃO e gere um plano de ação estratégico.
+
+    META: >70% de positivação. Problema atual: Muitos clientes da base ativa não compraram este mês.
+
+    DADOS DA EQUIPE (Resumo):
+    ${JSON.stringify(repsSummary.slice(0, 10), null, 2)}
+
+    CLIENTES PRIORITÁRIOS NÃO POSITIVADOS (Para agir hoje):
+    ${JSON.stringify(unpositivatedClients.map(c => ({ name: c.name, rep: c.rep, ticket_medio: c.avgMonthly, dias_sem_compra: c.daysSince })), null, 2)}
 
     Responda em JSON estrito:
     {
       "manager_plan": {
         "title": "Manchete Estratégica",
-        "strategy": "Texto de 3 parágrafos sobre a visão regional",
+        "strategy": "Texto de 2 parágrafos sobre a visão regional focada em recuperação de base",
         "priorities": ["p1", "p2", "p3"]
       },
+      "client_plans": [
+        {
+          "client_name": "Nome",
+          "rep": "Representante",
+          "priority": "Alta/Crítica",
+          "next_step": "Ação específica (ex: Visita técnica, oferta de volume, checagem de estoque)",
+          "goal": "Meta de retorno (ex: Reativar mix de ração, vender 10 sacos)"
+        }
+      ],
       "rep_plans": [
         {
           "name": "Nome",
-          "diagnostic": "problema",
-          "suggestion": "ação prática",
-          "priority_level": "Alta/Média/Baixa"
+          "diagnostic": "problema de positivação",
+          "suggestion": "ação prática de campo",
+          "priority_level": "Alta/Média"
         }
       ]
     }`;
@@ -542,7 +588,7 @@ export const generateActionPlans = createServerFn({ method: "POST" })
 
     if (!res.ok) throw new Error("IA temporariamente indisponível");
     const json = await res.json();
-    const content = json.choices[0].message.content;
-    return JSON.parse(content);
+    return JSON.parse(json.choices[0].message.content);
   });
+
 
