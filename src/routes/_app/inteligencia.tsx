@@ -15,6 +15,7 @@ import {
   benchmarkPeers,
   generateNarrative,
   getPositivationMetrics,
+  generateActionPlans,
 } from "@/lib/intelligence.functions";
 
 export const Route = createFileRoute("/_app/inteligencia")({ component: Inteligencia });
