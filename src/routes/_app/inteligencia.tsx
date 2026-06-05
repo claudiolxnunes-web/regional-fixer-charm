@@ -393,7 +393,122 @@ function BenchmarkPanel() {
   );
 }
 
+
+function PlanningPanel() {
+  const fn = useServerFn(generateActionPlans);
+  const m = useMutation({
+    mutationFn: () => fn({}),
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao gerar planejamento"),
+  });
+
+  return (
+    <div className="space-y-6 mt-4 pb-12">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <BrainCircuit className="size-5 text-primary" /> Radar de Planejamento Estratégico
+          </h2>
+          <p className="text-xs text-muted-foreground">Planos de ação personalizados para representantes e gestão regional.</p>
+        </div>
+        <Button onClick={() => m.mutate()} disabled={m.isPending} className="gap-2">
+          {m.isPending ? <><Loader2 className="size-4 animate-spin" />Analisando equipe...</> : <><Sparkles className="size-4" />Gerar Plano de Impacto</>}
+        </Button>
+      </div>
+
+      {!m.data && !m.isPending && (
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center flex flex-col items-center gap-4">
+            <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Target className="size-6 text-primary" />
+            </div>
+            <div className="max-w-sm space-y-1">
+              <p className="font-medium">Otimização de Positivação</p>
+              <p className="text-sm text-muted-foreground">
+                Clique no botão acima para que a IA analise o desempenho individual de cada representante e proponha ações corretivas imediatas.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {m.isPending && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="animate-pulse bg-muted/50 h-32"></Card>
+            ))}
+          </div>
+          <Card className="animate-pulse bg-muted/50 h-64"></Card>
+        </div>
+      )}
+
+      {m.data && (
+        <>
+          {/* Manager Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wider">
+              <ShieldCheck className="size-4" /> Visão do Gestor Regional
+            </div>
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl text-primary">{m.data.manager_plan.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {m.data.manager_plan.strategy}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {m.data.manager_plan.priorities.map((p: string, i: number) => (
+                    <div key={i} className="flex gap-3 items-start bg-background/60 p-3 rounded-lg border border-primary/10">
+                      <div className="size-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i+1}</div>
+                      <span className="text-xs font-medium">{p}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Reps Section */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wider">
+              <ClipboardList className="size-4" /> Planos Individuais por Representante
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {m.data.rep_plans.map((rp: any, i: number) => (
+                <Card key={i} className="flex flex-col border-l-4 border-l-primary/40">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-base">{rp.name}</CardTitle>
+                      <Badge variant={rp.priority_level === "Alta" ? "destructive" : rp.priority_level === "Média" ? "warning" : "default"} className="text-[10px]">
+                        {rp.priority_level}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3 flex-1">
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-bold uppercase text-muted-foreground">Diagnóstico</div>
+                      <p className="text-xs leading-snug">{rp.diagnostic}</p>
+                    </div>
+                    <div className="p-2.5 rounded bg-muted/50 border border-muted-foreground/10">
+                      <div className="text-[10px] font-bold uppercase text-primary mb-1 flex items-center gap-1">
+                        <CheckCircle2 className="size-3" /> Ação Sugerida
+                      </div>
+                      <p className="text-xs font-medium leading-normal">{rp.suggestion}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function KPI({ label, value, sub, tone = "default" }: { label: string; value: any; sub?: string; tone?: "default" | "destructive" | "warning" | "success" }) {
+
   const toneCls = 
     tone === "destructive" ? "text-destructive" : 
     tone === "warning" ? "text-amber-600" : 
