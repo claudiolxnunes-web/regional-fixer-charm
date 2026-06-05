@@ -176,12 +176,15 @@ export const generateNarrative = createServerFn({ method: "POST" })
   const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 10);
   const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().slice(0, 10);
 
-  const [mtd, prev, alerts, quotes] = await Promise.all([
+  const [mtd, prev, alerts, quotes, base] = await Promise.all([
     supabase.from("sales").select("revenue, representative, client_name, line").gte("invoice_date", mtdStart).limit(20000),
     supabase.from("sales").select("revenue").gte("invoice_date", prevMonthStart).lte("invoice_date", prevMonthEnd).limit(20000),
     supabase.from("alerts").select("type, severity, title").gte("created_at", last30).limit(500),
     supabase.from("quotes").select("status, total").gte("created_at", last30).limit(500),
+    supabase.from("sales").select("client_id").gte("invoice_date", last30).limit(50000),
   ]);
+
+  const activeClients30d = new Set((base.data ?? []).map(s => s.client_id)).size;
 
   const mtdRev = (mtd.data ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
   const prevRev = (prev.data ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
@@ -218,9 +221,11 @@ export const generateNarrative = createServerFn({ method: "POST" })
     alerts_last_30d_by_severity: alertsBySev,
     pipeline_open: Math.round(pipelineOpen),
     pipeline_won_30d: Math.round(pipelineWon),
+    active_clients_last_30d: activeClients30d,
   };
 
-  const prompt = `Você é o CFO/Diretor Comercial virtual de uma empresa de Nutrição Animal e Distribuição Agro brasileira. Gere o "Resumo da Manhã" — uma narrativa executiva, direta e estratégica, em português do Brasil, sobre o estado do negócio. Considere que o negócio lida com nutrição animal (gado, aves, suínos) e insumos agrícolas (safra/entresafra). Use no MÁXIMO 4 parágrafos curtos. Aponte 1 vitória, 1 risco e 1 ação prioritária do dia. Linguagem confiante, sem jargão de IA.
+  const prompt = `Você é o CFO/Diretor Comercial virtual de uma empresa de Nutrição Animal e Distribuição Agro brasileira. Gere o "Resumo da Manhã" — uma narrativa executiva, direta e estratégica, em português do Brasil, sobre o estado do negócio. Fale especificamente sobre faturamento e Positivação de carteira (quantos clientes compraram no mês). Considere que o negócio lida com nutrição animal (gado, aves, suínos) e insumos agrícolas (safra/entresafra). Use no MÁXIMO 4 parágrafos curtos. Aponte 1 vitória, 1 risco e 1 ação prioritária do dia. Linguagem confiante, sem jargão de IA.
+
 
 DADOS:
 ${JSON.stringify(ctx, null, 2)}
