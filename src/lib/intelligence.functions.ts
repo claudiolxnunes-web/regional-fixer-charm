@@ -20,6 +20,12 @@ function linreg(ys: number[]): { a: number; b: number } {
   return { a, b };
 }
 
+function daysSince(dateStr: string) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 function monthKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
@@ -170,12 +176,15 @@ export const generateNarrative = createServerFn({ method: "POST" })
   const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 10);
   const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().slice(0, 10);
 
-  const [mtd, prev, alerts, quotes] = await Promise.all([
+  const [mtd, prev, alerts, quotes, base] = await Promise.all([
     supabase.from("sales").select("revenue, representative, client_name, line").gte("invoice_date", mtdStart).limit(20000),
     supabase.from("sales").select("revenue").gte("invoice_date", prevMonthStart).lte("invoice_date", prevMonthEnd).limit(20000),
     supabase.from("alerts").select("type, severity, title").gte("created_at", last30).limit(500),
     supabase.from("quotes").select("status, total").gte("created_at", last30).limit(500),
+    supabase.from("sales").select("client_id").gte("invoice_date", last30).limit(50000),
   ]);
+
+  const activeClients30d = new Set((base.data ?? []).map(s => s.client_id)).size;
 
   const mtdRev = (mtd.data ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
   const prevRev = (prev.data ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
@@ -212,9 +221,11 @@ export const generateNarrative = createServerFn({ method: "POST" })
     alerts_last_30d_by_severity: alertsBySev,
     pipeline_open: Math.round(pipelineOpen),
     pipeline_won_30d: Math.round(pipelineWon),
+    active_clients_last_30d: activeClients30d,
   };
 
-  const prompt = `Você é o CFO/Diretor Comercial virtual de uma empresa de Nutrição Animal e Distribuição Agro brasileira. Gere o "Resumo da Manhã" — uma narrativa executiva, direta e estratégica, em português do Brasil, sobre o estado do negócio. Considere que o negócio lida com nutrição animal (gado, aves, suínos) e insumos agrícolas (safra/entresafra). Use no MÁXIMO 4 parágrafos curtos. Aponte 1 vitória, 1 risco e 1 ação prioritária do dia. Linguagem confiante, sem jargão de IA.
+  const prompt = `Você é o CFO/Diretor Comercial virtual de uma empresa de Nutrição Animal e Distribuição Agro brasileira. Gere o "Resumo da Manhã" — uma narrativa executiva, direta e estratégica, em português do Brasil, sobre o estado do negócio. Fale especificamente sobre faturamento e Positivação de carteira (quantos clientes compraram no mês). Considere que o negócio lida com nutrição animal (gado, aves, suínos) e insumos agrícolas (safra/entresafra). Use no MÁXIMO 4 parágrafos curtos. Aponte 1 vitória, 1 risco e 1 ação prioritária do dia. Linguagem confiante, sem jargão de IA.
+
 
 DADOS:
 ${JSON.stringify(ctx, null, 2)}
@@ -330,4 +341,94 @@ export const findForgottenOpportunities = createServerFn({ method: "POST" })
 
     return opportunities.sort((a, b) => b.score - a.score).slice(0, 12);
   });
+
+// ============= POSITIVAÇÃO E RETENÇÃO =============
+export const getPositivationMetrics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const supabase = supabaseAdmin;
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+    const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1).toISOString().slice(0, 10);
+
+    // 1. Pegar todos os clientes da base ativa (compras nos últimos 12 meses)
+    const { data: sales, error } = await supabase
+      .from("sales")
+      .select("client_id, client_name, revenue, invoice_date, representative")
+      .gte("invoice_date", twelveMonthsAgo)
+      .limit(50000);
+
+    if (error) throw new Error(error.message);
+
+    const clientData: Record<string, { 
+      name: string; 
+      lastPurchase: string; 
+      totalRevenue: number; 
+      purchasedThisMonth: boolean;
+      orders: number;
+      rep: string;
+    }> = {};
+
+    (sales ?? []).forEach(s => {
+      if (!s.client_id) return;
+      const val = Number(s.revenue ?? 0);
+      const isThisMonth = s.invoice_date && s.invoice_date >= firstDayOfMonth;
+
+      if (!clientData[s.client_id]) {
+        clientData[s.client_id] = { 
+          name: s.client_name || "—", 
+          lastPurchase: s.invoice_date || "", 
+          totalRevenue: 0, 
+          purchasedThisMonth: false,
+          orders: 0,
+          rep: s.representative || "—"
+        };
+      }
+
+      clientData[s.client_id].totalRevenue += val;
+      clientData[s.client_id].orders += 1;
+      if (isThisMonth) clientData[s.client_id].purchasedThisMonth = true;
+      if (s.invoice_date && s.invoice_date > clientData[s.client_id].lastPurchase) {
+        clientData[s.client_id].lastPurchase = s.invoice_date;
+      }
+    });
+
+    const clients = Object.entries(clientData).map(([id, st]) => ({
+      id,
+      ...st,
+      avgMonthly: Math.round(st.totalRevenue / 12),
+      daysSince: st.lastPurchase ? daysSince(st.lastPurchase) : 999
+    }));
+
+    const totalActiveBase = clients.length;
+    const positivated = clients.filter(c => c.purchasedThisMonth).length;
+    const rate = totalActiveBase > 0 ? (positivated / totalActiveBase) * 100 : 0;
+
+    // Gap: Clientes que não compraram este mês, ordenados pelo ticket médio mensal (potencial recuperável)
+    const gap = clients
+      .filter(c => !c.purchasedThisMonth)
+      .sort((a, b) => b.avgMonthly - a.avgMonthly)
+      .slice(0, 20);
+
+    // Agrupamento por risco (baseado no ciclo médio de 30-45 dias)
+    const critical = gap.filter(c => c.daysSince > 60).length;
+    const delayed = gap.filter(c => c.daysSince > 35 && c.daysSince <= 60).length;
+
+    return {
+      metrics: {
+        totalActiveBase,
+        positivated,
+        rate: Math.round(rate),
+        gapCount: gap.length,
+        potentialRevenue: Math.round(gap.reduce((s, c) => s + c.avgMonthly, 0)),
+        critical,
+        delayed
+      },
+      gap: gap.map(c => ({
+        ...c,
+        status: c.daysSince > 60 ? "Crítico" : c.daysSince > 35 ? "Atrasado" : "No Prazo"
+      }))
+    };
+  });
+
 
