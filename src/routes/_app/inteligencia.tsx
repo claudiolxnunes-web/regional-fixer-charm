@@ -452,6 +452,15 @@ function PlanningPanel() {
 
       {m.data && (
         <>
+          {/* Summary KPIs */}
+          {m.data.summary_metrics && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <KPI label="Equipe Analisada" value={`${m.data.summary_metrics.total_reps} Reps`} sub="Representantes com carteira ativa" />
+              <KPI label="Positivação Média" value={`${m.data.summary_metrics.avg_positivation}%`} sub="Média da regional" tone={m.data.summary_metrics.avg_positivation < 50 ? "warning" : "success"} />
+              <KPI label="Faturamento Total MTD" value={brl(m.data.summary_metrics.total_mtd)} sub="Acumulado do mês" />
+            </div>
+          )}
+
           {/* Manager Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wider">
