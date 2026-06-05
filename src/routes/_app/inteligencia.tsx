@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TrendingUp, Trophy, Newspaper, Sparkles, UserCheck, AlertCircle, Calendar, ArrowRight } from "lucide-react";
+import { Loader2, TrendingUp, Trophy, Newspaper, Sparkles, UserCheck, AlertCircle, Calendar, ArrowRight, Target, ClipboardList, LayoutDashboard, BrainCircuit, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 
