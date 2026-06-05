@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -60,10 +60,12 @@ function PositivationPanel() {
     onError: (e: any) => toast.error(e?.message ?? "Falha ao calcular positivação"),
   });
 
-  // Auto-run on mount if no data
-  if (!m.data && !m.isPending && !m.isError) {
-    m.mutate();
-  }
+  // Auto-run on mount
+  useEffect(() => {
+    if (!m.data && !m.isPending && !m.isError) {
+      m.mutate();
+    }
+  }, [m.data, m.isPending, m.isError, m.mutate]);
 
   return (
     <div className="space-y-4 mt-4">
