@@ -40,7 +40,10 @@ function Inteligencia() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="w-full max-w-full overflow-x-auto justify-start bg-muted/50 p-1">
           <TabsTrigger value="narrative" className="gap-2"><Newspaper className="size-4" />Resumo Executivo</TabsTrigger>
-          <TabsTrigger value="planning" className="gap-2"><Target className="size-4" />Plano de Ação</TabsTrigger>
+          <TabsTrigger value="planning" className="gap-2 relative">
+            <Target className="size-4" /> Radar de Planejamento
+            <Badge className="absolute -top-2 -right-2 px-1 py-0 h-4 text-[8px] bg-emerald-500 hover:bg-emerald-600 border-none">NOVO</Badge>
+          </TabsTrigger>
           <TabsTrigger value="positivation" className="gap-2"><UserCheck className="size-4" />Positivação</TabsTrigger>
           <TabsTrigger value="forecast" className="gap-2"><TrendingUp className="size-4" />Previsão</TabsTrigger>
           <TabsTrigger value="benchmark" className="gap-2"><Trophy className="size-4" />Benchmark</TabsTrigger>
