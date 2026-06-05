@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Zap, TrendingUp, Target, Users, AlertTriangle, 
   ArrowUpRight, ArrowDownRight, Sparkles, Loader2,
-  Calendar, ChevronRight, ShoppingBag
+  Calendar, ChevronRight, ShoppingBag, Trophy as TrophyIcon
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { formatCurrencyCompact } from "@/utils/formatters";
 import { generateNarrative, predictChurnRisk, findForgottenOpportunities, benchmarkPeers } from "@/lib/intelligence.functions";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+
 
 export const Route = createFileRoute("/_app/dashboard")({ component: CommandCenter });
 
@@ -191,7 +192,7 @@ function CommandCenter() {
           <Card className="shadow-lg border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Trophy className="size-5 text-amber-500" /> Top Performance
+                <TrophyIcon className="size-5 text-amber-500" /> Top Performance
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -253,24 +254,3 @@ function CommandCenter() {
   );
 }
 
-function Trophy({ className }: { className?: string }) {
-  return (
-    <svg 
-      className={className}
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  );
-}
