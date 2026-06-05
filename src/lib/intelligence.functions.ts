@@ -431,4 +431,118 @@ export const getPositivationMetrics = createServerFn({ method: "POST" })
     };
   });
 
+// ============= ACTION PLANS =============
+export const generateActionPlans = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
+    const supabase = supabaseAdmin;
+
+    const now = new Date();
+    const mtdStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+    const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1).toISOString().slice(0, 10);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10);
+
+    // Buscar dados necessários
+    const [salesMTD, salesLastYear, salesLastMonth] = await Promise.all([
+      supabase.from("sales").select("revenue, representative, client_id").gte("invoice_date", mtdStart).limit(20000),
+      supabase.from("sales").select("revenue, representative, client_id").gte("invoice_date", twelveMonthsAgo).limit(50000),
+      supabase.from("sales").select("revenue, representative").gte("invoice_date", lastMonthStart).lt("invoice_date", mtdStart).limit(20000),
+    ]);
+
+    const repStats: Record<string, {
+      name: string;
+      mtdRevenue: number;
+      lastMonthRevenue: number;
+      totalClients: Set<string>;
+      positivatedClients: Set<string>;
+    }> = {};
+
+    // Base de clientes ativos (últimos 12 meses)
+    (salesLastYear.data ?? []).forEach(s => {
+      const rep = s.representative || "—";
+      if (!repStats[rep]) repStats[rep] = { name: rep, mtdRevenue: 0, lastMonthRevenue: 0, totalClients: new Set(), positivatedClients: new Set() };
+      if (s.client_id) repStats[rep].totalClients.add(s.client_id);
+    });
+
+    // Vendas este mês (positivação)
+    (salesMTD.data ?? []).forEach(s => {
+      const rep = s.representative || "—";
+      if (repStats[rep]) {
+        repStats[rep].mtdRevenue += Number(s.revenue ?? 0);
+        if (s.client_id) repStats[rep].positivatedClients.add(s.client_id);
+      }
+    });
+
+    // Vendas mês passado
+    (salesLastMonth.data ?? []).forEach(s => {
+      const rep = s.representative || "—";
+      if (repStats[rep]) {
+        repStats[rep].lastMonthRevenue += Number(s.revenue ?? 0);
+      }
+    });
+
+    const repsSummary = Object.entries(repStats).map(([rep, st]) => {
+      const total = st.totalClients.size;
+      const positivated = st.positivatedClients.size;
+      const rate = total > 0 ? (positivated / total) * 100 : 0;
+      const growth = st.lastMonthRevenue > 0 ? ((st.mtdRevenue - st.lastMonthRevenue) / st.lastMonthRevenue) * 100 : 0;
+
+      return {
+        name: st.name,
+        mtd_revenue: Math.round(st.mtdRevenue),
+        positivation_rate: Math.round(rate),
+        clients_active: total,
+        clients_positivated: positivated,
+        growth_vs_prev_pct: Math.round(growth),
+        status: rate < 40 ? "Crítico" : rate < 60 ? "Alerta" : "Saudável"
+      };
+    })
+    .filter(r => r.clients_active > 5)
+    .sort((a, b) => a.positivation_rate - b.positivation_rate)
+    .slice(0, 15);
+
+    const prompt = `Você é um Diretor Comercial especializado em agronegócio brasileiro. 
+    Analise os dados de desempenho da equipe abaixo e crie:
+    1. Um plano de ação individual para cada representante (focando em como aumentar a POSITIVAÇÃO).
+    2. Um plano estratégico geral para o Gestor Regional.
+
+    CONTEXTO: Baixa positivação (clientes que compram no mês) é o principal problema. A meta é >70%.
+    
+    DADOS DA EQUIPE:
+    ${JSON.stringify(repsSummary, null, 2)}
+
+    Responda em JSON estrito:
+    {
+      "manager_plan": {
+        "title": "Manchete Estratégica",
+        "strategy": "Texto de 3 parágrafos sobre a visão regional",
+        "priorities": ["p1", "p2", "p3"]
+      },
+      "rep_plans": [
+        {
+          "name": "Nome",
+          "diagnostic": "problema",
+          "suggestion": "ação prática",
+          "priority_level": "Alta/Média/Baixa"
+        }
+      ]
+    }`;
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.0-pro",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!res.ok) throw new Error("IA temporariamente indisponível");
+    const json = await res.json();
+    const content = json.choices[0].message.content;
+    return JSON.parse(content);
+  });
 
