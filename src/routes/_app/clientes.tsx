@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { ImportDialog } from "@/components/ImportDialog";
 import { useClients } from "@/hooks/useClients";
 import { ClientForm } from "@/components/crm/clients/ClientForm";
 import { formatCurrency } from "@/utils/formatters";
 import type { Client } from "@/types/crm";
+import { ClientBriefingDialog } from "@/components/ClientBriefingDialog";
+
 
 export const Route = createFileRoute("/_app/clientes")({ component: ClientesPage });
 
@@ -113,7 +115,9 @@ function ClientesPage() {
                 <th className="text-left p-3 font-medium">Status</th>
                 <th className="text-left p-3 font-medium">ABC</th>
                 <th className="text-right p-3 font-medium">Compras</th>
+                <th className="p-3">Briefing IA</th>
                 {isStaff && <th className="p-3"></th>}
+
               </tr>
             </thead>
             <tbody>
@@ -134,6 +138,10 @@ function ClientesPage() {
                   </td>
                   <td className="p-3">{c.abc_class && <Badge variant="outline">{c.abc_class}</Badge>}</td>
                   <td className="p-3 text-right">{formatCurrency(c.total_purchases)}</td>
+                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                    <ClientBriefingDialog clientId={c.id} clientName={c.name} />
+                  </td>
+
                   {isStaff && (
                     <td className="p-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="size-4" /></Button>

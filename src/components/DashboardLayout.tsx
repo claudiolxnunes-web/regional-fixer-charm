@@ -18,10 +18,18 @@ import { useTransitionSettings } from "@/hooks/use-transition-settings";
 
 const groups = [
   {
+    label: "Alta Performance",
+    items: [
+      { to: "/dashboard", label: "Command Center", icon: Zap },
+      { to: "/oportunidades", label: "Oportunidades Esquecidas", icon: Sparkles },
+    ],
+  },
+  {
     label: "Uso Diário (Representante)",
     items: [
-      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/dashboard", label: "Dashboard Antigo", icon: LayoutDashboard },
       { to: "/app-representante", label: "App de Registro (Campo)", icon: Smartphone },
+
       { to: "/planejamento-visitas", label: "Agenda SMART", icon: RouteIcon },
       { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
     ],

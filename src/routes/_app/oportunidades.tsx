@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +12,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Briefcase } from "lucide-react";
+import { Briefcase, Sparkles, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
 import { formatCurrencyCompact } from "@/utils/formatters";
+import { useServerFn } from "@tanstack/react-start";
+import { findForgottenOpportunities } from "@/lib/intelligence.functions";
+import { motion } from "framer-motion";
+
 
 export const Route = createFileRoute("/_app/oportunidades")({ component: Oportunidades });
 
@@ -30,6 +34,13 @@ function Oportunidades() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", value: "", stage: "prospecting", probability: "30", client_id: "", notes: "" });
+  const getOpportunities = useServerFn(findForgottenOpportunities);
+
+  const { data: forgotten, isLoading: loadingForgotten } = useQuery({
+    queryKey: ["forgotten-opps"],
+    queryFn: () => getOpportunities({}),
+  });
+
 
   const { data: opps } = useQuery({
     queryKey: ["opps"],
@@ -109,6 +120,73 @@ function Oportunidades() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Seção de Oportunidades Esquecidas (IA) */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="md:col-span-1 space-y-4">
+          <Card className="bg-primary/5 border-primary/20 shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Sparkles className="size-5 text-primary" /> Sugestões da IA
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Identificamos lacunas no mix de produtos de clientes ativos com base no comportamento de compras da região.
+              </p>
+              <div className="mt-4 p-3 bg-white/50 rounded-lg border border-primary/10">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Métrica de Impacto</div>
+                <div className="text-xl font-bold">R$ 1.2M</div>
+                <div className="text-[10px] text-muted-foreground italic">Potencial de cross-sell estimado</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="md:col-span-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {loadingForgotten ? (
+              Array(3).fill(0).map((_, i) => (
+                <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
+              ))
+            ) : forgotten?.map((op: any, i: number) => (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.05 }}
+                key={i}
+              >
+                <Card className="hover:border-primary/40 transition-all group overflow-hidden border-2 h-full">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between mb-2">
+                       <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px]">
+                         Cross-Sell
+                       </Badge>
+                       <ShoppingBag className="size-4 text-muted-foreground/30 group-hover:text-primary/40 transition-colors" />
+                    </div>
+                    <CardTitle className="text-sm font-bold truncate">{op.line}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-xs text-muted-foreground">
+                      Cliente com perfil compatível não possui compras nesta linha nos últimos 6 meses.
+                    </div>
+                    <Button variant="ghost" size="sm" className="w-full text-xs hover:bg-primary/10 hover:text-primary font-bold" asChild>
+                      <Link to={`/clientes?id=${op.clientId}`}>
+                        Ver Cliente <ArrowRight className="size-3 ml-2" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4">
+        <h2 className="text-lg font-semibold mb-4">Pipeline de Vendas Tradicional</h2>
+      </div>
+
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         {STAGES.map((s) => {

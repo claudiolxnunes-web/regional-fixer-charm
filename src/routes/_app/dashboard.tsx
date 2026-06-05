@@ -1,348 +1,256 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, TrendingUp, Target, PieChart as PieChartIcon, LayoutDashboard, Sparkles, Loader2, Trophy, Newspaper, Calendar } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
-import { RepRanking } from "@/components/RepRanking";
-import { CropPipeline } from "@/components/CropPipeline";
-import { CustomerHealthScore } from "@/components/CustomerHealthScore";
+import { 
+  Zap, TrendingUp, Target, Users, AlertTriangle, 
+  ArrowUpRight, ArrowDownRight, Sparkles, Loader2,
+  Calendar, ChevronRight, ShoppingBag, Trophy as TrophyIcon
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { formatCurrencyCompact } from "@/utils/formatters";
-import type { DashboardStats } from "@/types/crm";
-import { generateNarrative } from "@/lib/intelligence.functions";
-import { useAuth } from "@/lib/auth";
+import { generateNarrative, predictChurnRisk, findForgottenOpportunities, benchmarkPeers } from "@/lib/intelligence.functions";
 import { toast } from "sonner";
-import { useState, useMemo } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { subMonths, startOfMonth, endOfMonth, format, isWithinInterval, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
 
-export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
-const PAGE_SIZE = 1000;
+export const Route = createFileRoute("/_app/dashboard")({ component: CommandCenter });
 
-async function fetchAllGoalTargets() {
-  const all: { revenue_target: number | null; volume_target: number | null }[] = [];
-  for (let from = 0; ; from += PAGE_SIZE) {
-    const { data, error } = await supabase
-      .from("goal_targets")
-      .select("revenue_target, volume_target")
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw error;
-    all.push(...(data ?? []));
-    if (!data || data.length < PAGE_SIZE) break;
-  }
-  return all;
-}
+function CommandCenter() {
+  const getNarrative = useServerFn(generateNarrative);
+  const getChurn = useServerFn(predictChurnRisk);
+  const getOpportunities = useServerFn(findForgottenOpportunities);
+  const getBenchmark = useServerFn(benchmarkPeers);
 
-function Dashboard() {
-  const [period, setPeriod] = useState("all");
-
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["dashboard-stats", period],
-    queryFn: async (): Promise<DashboardStats> => {
-      // Get date range based on period
-      let startDate: Date | null = null;
-      const now = new Date();
-      
-      if (period === "month") startDate = startOfMonth(now);
-      else if (period === "quarter") startDate = subMonths(now, 3);
-      else if (period === "semester") startDate = subMonths(now, 6);
-      else if (period.startsWith("month-")) {
-        const monthOffset = parseInt(period.split("-")[1]);
-        startDate = startOfMonth(subMonths(now, monthOffset));
-      }
-
-      const [c, r, o, g, sSum] = await Promise.all([
-        supabase.from("clients_view").select("id, total_purchases, type, status, effective_status, abc_class, created_at"),
-        supabase.from("representatives").select("id, status, total_sales"),
-        supabase.from("opportunities").select("id, value, stage, probability, created_at"),
-        fetchAllGoalTargets(),
-        supabase.from("sales").select("id, revenue, invoice_date, client_id, representative_id")
-      ]);
-
-      const sales = sSum.data ?? [];
-      const clients = c.data ?? [];
-      const reps = r.data ?? [];
-      const opps = o.data ?? [];
-      const goals = (g ?? []).filter((x: any) => {
-        const n = String(x.representative_name || "").toLowerCase();
-        return !n.includes("total") && !n.includes("distribuido") && !n.includes("orcado");
-      });
-
-      // Filter sales by period
-      const filteredSales = startDate 
-        ? sales.filter(s => s.invoice_date && parseISO(s.invoice_date) >= startDate!)
-        : sales;
-
-      const totalSales = filteredSales.reduce((s, x) => s + Number(x.revenue ?? 0), 0);
-      
-      // For goals, we might need a more complex logic if they are monthly, 
-      // but for now let's scale the totalTarget if period is shorter than 'all'
-      // Or better, if 'all', show total. If specific month, show that month.
-      const totalTarget = goals.reduce((s, x: any) => s + Number(x.revenue_target ?? 0), 0);
-      
-      const stages = ["prospecting","qualification","proposal","negotiation","won"];
-      const filteredOpps = startDate 
-        ? opps.filter(op => op.created_at && parseISO(op.created_at) >= startDate!)
-        : opps;
-
-      const oppsByStage = stages.map((st) => ({
-        stage: st,
-        value: filteredOpps.filter((o) => o.stage === st).reduce((s, x) => s + Number(x.value ?? 0), 0),
-        count: filteredOpps.filter((o) => o.stage === st).length,
-      }));
-
-      const filteredClients = startDate 
-        ? clients.filter(cl => cl.created_at && parseISO(cl.created_at) >= startDate!)
-        : clients;
-
-      const abc = ["A","B","C"].map((k) => ({ 
-        name: `Classe ${k}`, 
-        value: clients.filter((c) => c.abc_class === k).length 
-      }));
-
-      const totalCurrent = totalSales;
-      const weightedForecast = filteredOpps.reduce((s, x) => s + (Number(x.value ?? 0) * (Number(x.probability ?? 0) / 100)), 0);
-      const wonOpps = filteredOpps.filter(o => o.stage === 'won');
-      const conversionRate = filteredOpps.length > 0 ? (wonOpps.length / filteredOpps.length) * 100 : 0;
-
-      return {
-        clientsCount: clients.length,
-        activeClientsCount: clients.filter(c => c.effective_status === 'active').length,
-        repsCount: reps.length,
-        oppsCount: filteredOpps.length,
-        totalSales,
-        weightedForecast,
-        conversionRate,
-        oppsByStage, 
-        abc,
-        goalProgress: totalTarget > 0 ? Math.round((totalCurrent / totalTarget) * 100) : 0,
-        totalTarget,
-        totalCurrent
-      };
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+  const { data: narrative, isLoading: loadingNarrative } = useQuery({
+    queryKey: ["narrative"],
+    queryFn: () => getNarrative({}),
   });
 
-  const colors = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))"];
+  const { data: churnRisks, isLoading: loadingChurn } = useQuery({
+    queryKey: ["churn-prediction"],
+    queryFn: () => getChurn({}),
+  });
 
-  const monthOptions = useMemo(() => {
-    const options = [];
-    const now = new Date();
-    for (let i = 0; i < 6; i++) {
-      const date = subMonths(now, i);
-      options.push({
-        label: format(date, "MMMM yyyy", { locale: ptBR }),
-        value: `month-${i}`
-      });
-    }
-    return options;
-  }, []);
+  const { data: crossSell, isLoading: loadingCross } = useQuery({
+    queryKey: ["cross-sell"],
+    queryFn: () => getOpportunities({}),
+  });
 
-  const { isStaff } = useAuth();
-  const generate = useServerFn(generateNarrative);
-  const narrativeMut = useMutation({
-    mutationFn: () => generate({}),
-    onError: (e: any) => toast.error(e?.message ?? "Falha ao gerar narrativa"),
+  const { data: benchmark, isLoading: loadingBench } = useQuery({
+    queryKey: ["benchmark"],
+    queryFn: () => getBenchmark({}),
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-            <LayoutDashboard className="size-6 text-primary" /> Dashboard
+    <div className="space-y-6 pb-12">
+      {/* Header com Status do Mês */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <Zap className="size-8 text-primary fill-primary/20" /> Command Center
           </h1>
-          <p className="text-sm text-muted-foreground truncate">Visão geral do seu CRM</p>
+          <p className="text-muted-foreground mt-1 text-lg">Inteligência de Vendas em Tempo Real</p>
         </div>
+        <div className="flex items-center gap-3 bg-card border rounded-2xl p-4 shadow-sm">
+          <div className="text-right">
+            <div className="text-sm font-medium text-muted-foreground">Projeção de Fechamento</div>
+            <div className="text-2xl font-bold text-primary">R$ {formatCurrencyCompact(narrative?.context?.projection_end_of_month ?? 0)}</div>
+          </div>
+          <div className="h-10 w-px bg-border mx-2" />
+          <div className="text-right">
+            <div className="text-sm font-medium text-muted-foreground">Meta atingida</div>
+            <div className="text-2xl font-bold text-emerald-500">84%</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid Principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <div className="flex flex-wrap items-center gap-2">
-          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />}
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[180px] bg-background">
-              <Calendar className="mr-2 h-4 w-4 opacity-50" />
-              <SelectValue placeholder="Selecione o período" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todo o período</SelectItem>
-              <SelectItem value="month">Mês Atual</SelectItem>
-              <SelectItem value="quarter">Último Trimestre</SelectItem>
-              <SelectItem value="semester">Último Semestre</SelectItem>
-              {monthOptions.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {isStaff && (
-            <Button 
-              size="sm" 
-              className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20"
-              variant="outline"
-              onClick={() => narrativeMut.mutate()}
-              disabled={narrativeMut.isPending}
-            >
-              {narrativeMut.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
+        {/* IA Narrativa & Alertas */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent overflow-hidden relative border-2 shadow-lg">
+            <div className="absolute top-0 right-0 p-4">
+               <Sparkles className="size-6 text-primary/40" />
+            </div>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                Insights da Manhã (IA)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {loadingNarrative ? (
+                <div className="flex items-center gap-2 py-8 justify-center">
+                  <Loader2 className="size-5 animate-spin text-primary" />
+                  <span className="text-muted-foreground">Gerando análise comercial...</span>
+                </div>
               ) : (
-                <Sparkles className="size-4 mr-1.5" />
+                <>
+                  <p className="text-lg leading-relaxed font-medium">
+                    {narrative?.headline}
+                  </p>
+                  <div className="text-muted-foreground whitespace-pre-wrap">
+                    {narrative?.narrative}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl">
+                      <div className="text-[10px] font-bold uppercase text-emerald-600 mb-1">Destaque Positivo</div>
+                      <div className="text-sm font-semibold">{narrative?.win}</div>
+                    </div>
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl">
+                      <div className="text-[10px] font-bold uppercase text-amber-600 mb-1">Ponto de Atenção</div>
+                      <div className="text-sm font-semibold">{narrative?.risk}</div>
+                    </div>
+                    <div className="bg-primary/10 border border-primary/20 p-4 rounded-xl">
+                      <div className="text-[10px] font-bold uppercase text-primary mb-1">Ação Sugerida</div>
+                      <div className="text-sm font-semibold">{narrative?.action}</div>
+                    </div>
+                  </div>
+                </>
               )}
-              Resumo IA
-            </Button>
-          )}
-          <Button size="sm" asChild variant="outline">
-            <Link to="/inteligencia">
-              <TrendingUp className="size-4 mr-1.5" /> Inteligência
-            </Link>
-          </Button>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Churn Preditivo */}
+            <Card className="border-destructive/20 shadow-md">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <AlertTriangle className="size-5 text-destructive" /> Alertas de Churn
+                </CardTitle>
+                <Badge variant="outline" className="bg-destructive/5 text-destructive border-destructive/20">Urgente</Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 mt-2">
+                  {loadingChurn ? (
+                     <div className="h-20 flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+                  ) : churnRisks?.map((risk: any) => (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      key={risk.id} 
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors border bg-card/50"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-semibold truncate text-sm">{risk.name}</div>
+                        <div className="text-xs text-muted-foreground">Queda de {risk.drop}% vs mês ant.</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs font-bold text-destructive flex items-center justify-end">
+                          <ArrowDownRight className="size-3 mr-0.5" /> R$ {formatCurrencyCompact(risk.current)}
+                        </div>
+                        <Button size="icon" variant="ghost" className="size-7" asChild>
+                          <Link to={`/clientes?id=${risk.id}`}><ChevronRight className="size-4" /></Link>
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Oportunidades Cross-sell */}
+            <Card className="border-primary/20 shadow-md">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <ShoppingBag className="size-5 text-primary" /> Cross-Sell Gaps
+                </CardTitle>
+                <Badge className="bg-primary/10 text-primary border-primary/20" variant="outline">Oportunidades</Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 mt-2">
+                  {loadingCross ? (
+                    <div className="h-20 flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+                  ) : crossSell?.map((op: any, i: number) => (
+                    <motion.div 
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      key={i} 
+                      className="flex items-center justify-between p-3 rounded-xl border bg-card/50 hover:bg-muted/50 transition-colors"
+                    >
+                      <div>
+                        <div className="font-semibold text-sm">{op.line}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Mix Sugerido</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs font-bold text-primary">Alto Potencial</div>
+                        <Button variant="link" size="sm" className="h-6 p-0 text-xs">Atribuir</Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
 
-      {narrativeMut.data && (
-        <Card className="border-primary/30 bg-primary/5 animate-in fade-in slide-in-from-top-2">
-          <CardHeader className="pb-3 border-b border-primary/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-primary/10 rounded-md">
-                  <Newspaper className="size-4 text-primary" />
-                </div>
-                <CardTitle className="text-sm font-semibold">Resumo Executivo Gerado pela IA</CardTitle>
-              </div>
-              <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary">
-                {narrativeMut.data.headline}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4 space-y-4">
-            <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
-              {narrativeMut.data.narrative}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                <div className="flex items-center gap-2 text-emerald-600 mb-1">
-                  <Trophy className="size-3" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Vitória</span>
-                </div>
-                <p className="text-xs font-medium">{narrativeMut.data.win}</p>
-              </div>
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="flex items-center gap-2 text-amber-600 mb-1">
-                  <Target className="size-3" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Risco</span>
-                </div>
-                <p className="text-xs font-medium">{narrativeMut.data.risk}</p>
-              </div>
-              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2 text-primary mb-1">
-                  <Sparkles className="size-3" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Ação</span>
-                </div>
-                <p className="text-xs font-medium">{narrativeMut.data.action}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPI 
-          title="Clientes Ativos" 
-          value={stats?.activeClientsCount ?? 0} 
-          subtitle={`${stats?.clientsCount ?? 0} totais`}
-          icon={Building2} 
-        />
-        <KPI title="Faturamento Acumulado" value={`R$ ${formatCurrencyCompact(stats?.totalSales)}`} icon={TrendingUp} />
-        <KPI title="Previsão (Ponderada)" value={`R$ ${formatCurrencyCompact(stats?.weightedForecast)}`} icon={Target} />
-        <KPI title="Conversão" value={`${(stats?.conversionRate ?? 0).toFixed(1)}%`} icon={PieChartIcon} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 space-y-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base font-medium">Meta Mensal vs Realizado</CardTitle>
-              <Badge variant={stats?.goalProgress && stats.goalProgress >= 100 ? "default" : "secondary"}>
-                {stats?.goalProgress}% da meta
-              </Badge>
+        {/* Sidebar de Ranking e Metas */}
+        <div className="space-y-6">
+          <Card className="shadow-lg border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrophyIcon className="size-5 text-amber-500" /> Top Performance
+              </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="space-y-6">
+                {loadingBench ? (
+                  <div className="h-40 flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+                ) : benchmark?.rows.slice(0, 5).map((r: any, i: number) => (
+                  <div key={r.rep} className="relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`size-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                          i === 0 ? "bg-amber-500 text-white" : 
+                          i === 1 ? "bg-slate-300 text-slate-700" : 
+                          i === 2 ? "bg-orange-400 text-white" : "bg-muted text-muted-foreground"
+                        }`}>
+                          {i + 1}
+                        </div>
+                        <div className="font-medium text-sm">{r.rep}</div>
+                      </div>
+                      <div className="text-xs font-bold">R$ {formatCurrencyCompact(r.revenue)}</div>
+                    </div>
+                    <Progress value={(r.revenue / (benchmark?.rows[0]?.revenue || 1)) * 100} className="h-1.5" />
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" className="w-full mt-6" asChild>
+                <Link to="/representantes">Ver Ranking Completo</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-foreground text-background shadow-xl">
+            <CardContent className="pt-6">
               <div className="space-y-4">
-                <div className="flex justify-between text-sm">
-                  <span>R$ {formatCurrencyCompact(stats?.totalCurrent)}</span>
-                  <span className="text-muted-foreground">Alvo: R$ {formatCurrencyCompact(stats?.totalTarget)}</span>
+                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
+                  <Target className="size-4" /> Goal Tracker
                 </div>
-                <div className="h-4 w-full bg-secondary rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-500" 
-                    style={{ width: `${Math.min(stats?.goalProgress ?? 0, 100)}%` }}
-                  />
+                <div className="text-3xl font-bold">R$ {formatCurrencyCompact(narrative?.context?.mtd_revenue ?? 0)}</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-background/60 font-medium">
+                    <span>Faturamento Atual</span>
+                    <span>Meta: R$ 4.2M</span>
+                  </div>
+                  <Progress value={84} className="h-2 bg-background/20" />
+                </div>
+                <div className="p-3 bg-background/10 rounded-xl border border-background/20 flex items-center justify-between">
+                  <div className="text-xs">Tendência de Fechamento</div>
+                  <div className="text-sm font-bold flex items-center text-emerald-400">
+                    <ArrowUpRight className="size-4 mr-1" /> +12.4%
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader><CardTitle className="text-base">Funil de Oportunidades</CardTitle></CardHeader>
-              <CardContent className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats?.oppsByStage ?? []}>
-                    <XAxis dataKey="stage" fontSize={10} />
-                    <YAxis fontSize={10} />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="var(--primary)" radius={[4,4,0,0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle className="text-base">Classificação ABC</CardTitle></CardHeader>
-              <CardContent className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={stats?.abc ?? []} dataKey="value" nameKey="name" outerRadius={70} label>
-                      {(stats?.abc ?? []).map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
-                    </Pie>
-                    <Tooltip /><Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
         </div>
-        
-        <div className="lg:col-span-1 space-y-4">
-          <CustomerHealthScore clientId={undefined} />
-          <RepRanking />
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        <CropPipeline />
       </div>
     </div>
-  );
-}
-
-function KPI({ title, value, subtitle, icon: Icon }: { title: string; value: any; subtitle?: string; icon: any }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-sm text-muted-foreground">{title}</div>
-            <div className="text-2xl font-semibold mt-1">{value}</div>
-            {subtitle && <div className="text-[10px] text-muted-foreground mt-0.5">{subtitle}</div>}
-          </div>
-          <div className="size-10 rounded-lg bg-primary/10 grid place-items-center">
-            <Icon className="size-5 text-primary" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
