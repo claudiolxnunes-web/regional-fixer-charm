@@ -243,5 +243,88 @@ Responda em JSON estrito:
   let parsed: any = {};
   try { parsed = JSON.parse(content); } catch { parsed = {}; }
 
-  return { context: ctx, ...parsed };
+
+// ============= CHURN PREDICTION =============
+export const predictChurnRisk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const supabase = supabaseAdmin;
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10);
+    const prevMonth = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString().slice(0, 10);
+
+    // Pegamos vendas dos últimos 2 meses para comparar
+    const { data: sales } = await supabase
+      .from("sales")
+      .select("client_id, client_name, revenue, invoice_date")
+      .gte("invoice_date", prevMonth)
+      .limit(50000);
+
+    const clientStats: Record<string, { name: string; current: number; previous: number }> = {};
+    (sales ?? []).forEach(s => {
+      if (!s.client_id) return;
+      if (!clientStats[s.client_id]) clientStats[s.client_id] = { name: s.client_name || "—", current: 0, previous: 0 };
+      const val = Number(s.revenue ?? 0);
+      if (s.invoice_date && s.invoice_date >= lastMonth) {
+        clientStats[s.client_id].current += val;
+      } else {
+        clientStats[s.client_id].previous += val;
+      }
+    });
+
+    const risks = Object.entries(clientStats)
+      .map(([id, st]) => {
+        const drop = st.previous > 0 ? ((st.previous - st.current) / st.previous) * 100 : 0;
+        return { id, name: st.name, drop: Math.round(drop), current: Math.round(st.current), previous: Math.round(st.previous) };
+      })
+      .filter(r => r.drop > 30 && r.previous > 1000) // Queda > 30% em clientes relevantes
+      .sort((a, b) => b.drop - a.drop)
+      .slice(0, 10);
+
+    return risks;
   });
+
+// ============= CROSS-SELL OPPORTUNITIES =============
+export const findForgottenOpportunities = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const supabase = supabaseAdmin;
+    // Pegamos mix de produtos dos últimos 6 meses
+    const since = new Date();
+    since.setMonth(since.getMonth() - 6);
+    
+    const { data: sales } = await supabase
+      .from("sales")
+      .select("client_id, line, revenue")
+      .gte("invoice_date", since.toISOString().slice(0, 10))
+      .limit(50000);
+
+    const clientMix: Record<string, Set<string>> = {};
+    const lineStats: Record<string, { clients: Set<string>; total: number }> = {};
+    
+    (sales ?? []).forEach(s => {
+      if (!s.client_id || !s.line) return;
+      if (!clientMix[s.client_id]) clientMix[s.client_id] = new Set();
+      clientMix[s.client_id].add(s.line);
+      
+      if (!lineStats[s.line]) lineStats[s.line] = { clients: new Set(), total: 0 };
+      lineStats[s.line].clients.add(s.client_id);
+      lineStats[s.line].total += Number(s.revenue ?? 0);
+    });
+
+    // Lógica simples: Se o cliente compra Linha A mas não Linha B, e a Linha B é popular entre quem compra A
+    const opportunities: any[] = [];
+    const lines = Object.keys(lineStats).sort((a, b) => lineStats[b].total - lineStats[a].total);
+
+    Object.entries(clientMix).slice(0, 50).forEach(([clientId, bought]) => {
+      lines.forEach(line => {
+        if (!bought.has(line)) {
+          // Potencial gap
+          opportunities.push({ clientId, line, score: lineStats[line].total });
+        }
+      });
+    });
+
+    return opportunities.sort((a, b) => b.score - a.score).slice(0, 12);
+  });
+
