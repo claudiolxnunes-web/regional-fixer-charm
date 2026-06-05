@@ -244,6 +244,9 @@ Responda em JSON estrito:
   try { parsed = JSON.parse(content); } catch { parsed = {}; }
 
 
+  return { context: ctx, ...parsed };
+  });
+
 // ============= CHURN PREDICTION =============
 export const predictChurnRisk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
