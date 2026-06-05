@@ -188,9 +188,14 @@ function PositivationPanel() {
                   </ul>
                 </div>
 
-                <Button className="w-full text-xs" variant="outline" onClick={() => toast.info("Relatório de positivação enviado para os representantes.")}>
-                  <Calendar className="size-3.5 mr-2" /> Notificar Força-Tarefa
-                </Button>
+                <div className="pt-2 space-y-2">
+                  <Button className="w-full text-xs" variant="outline" onClick={() => toast.info("Relatório de positivação enviado para os representantes.")}>
+                    <Calendar className="size-3.5 mr-2" /> Notificar Força-Tarefa
+                  </Button>
+                  <Button className="w-full text-xs gap-2" variant="secondary" onClick={() => setTab("planning")}>
+                    <Target className="size-3.5" /> Ver Plano de Ação IA
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
