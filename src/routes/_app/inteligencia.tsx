@@ -6,13 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TrendingUp, Trophy, Newspaper, Sparkles } from "lucide-react";
+import { Loader2, TrendingUp, Trophy, Newspaper, Sparkles, UserCheck, AlertCircle, Calendar, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 import {
   forecastRevenue,
   benchmarkPeers,
   generateNarrative,
+  getPositivationMetrics,
 } from "@/lib/intelligence.functions";
 
 export const Route = createFileRoute("/_app/inteligencia")({ component: Inteligencia });
@@ -242,11 +244,18 @@ function BenchmarkPanel() {
   );
 }
 
-function KPI({ label, value }: { label: string; value: any }) {
+function KPI({ label, value, sub, tone = "default" }: { label: string; value: any; sub?: string; tone?: "default" | "destructive" | "warning" | "success" }) {
+  const toneCls = 
+    tone === "destructive" ? "text-destructive" : 
+    tone === "warning" ? "text-amber-600" : 
+    tone === "success" ? "text-emerald-600" : 
+    "";
+  
   return (
-    <div className="rounded-lg border p-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="text-base font-semibold mt-1">{value}</div>
+    <div className="rounded-lg border p-3 bg-card">
+      <div className="text-xs text-muted-foreground font-medium">{label}</div>
+      <div className={`text-xl font-bold mt-1 ${toneCls}`}>{value}</div>
+      {sub && <div className="text-[10px] text-muted-foreground mt-1 leading-tight">{sub}</div>}
     </div>
   );
 }
