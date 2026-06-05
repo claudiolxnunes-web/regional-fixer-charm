@@ -20,6 +20,12 @@ function linreg(ys: number[]): { a: number; b: number } {
   return { a, b };
 }
 
+function daysSince(dateStr: string) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 function monthKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
@@ -330,4 +336,94 @@ export const findForgottenOpportunities = createServerFn({ method: "POST" })
 
     return opportunities.sort((a, b) => b.score - a.score).slice(0, 12);
   });
+
+// ============= POSITIVAÇÃO E RETENÇÃO =============
+export const getPositivationMetrics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const supabase = supabaseAdmin;
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+    const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1).toISOString().slice(0, 10);
+
+    // 1. Pegar todos os clientes da base ativa (compras nos últimos 12 meses)
+    const { data: sales, error } = await supabase
+      .from("sales")
+      .select("client_id, client_name, revenue, invoice_date, representative")
+      .gte("invoice_date", twelveMonthsAgo)
+      .limit(50000);
+
+    if (error) throw new Error(error.message);
+
+    const clientData: Record<string, { 
+      name: string; 
+      lastPurchase: string; 
+      totalRevenue: number; 
+      purchasedThisMonth: boolean;
+      orders: number;
+      rep: string;
+    }> = {};
+
+    (sales ?? []).forEach(s => {
+      if (!s.client_id) return;
+      const val = Number(s.revenue ?? 0);
+      const isThisMonth = s.invoice_date && s.invoice_date >= firstDayOfMonth;
+
+      if (!clientData[s.client_id]) {
+        clientData[s.client_id] = { 
+          name: s.client_name || "—", 
+          lastPurchase: s.invoice_date || "", 
+          totalRevenue: 0, 
+          purchasedThisMonth: false,
+          orders: 0,
+          rep: s.representative || "—"
+        };
+      }
+
+      clientData[s.client_id].totalRevenue += val;
+      clientData[s.client_id].orders += 1;
+      if (isThisMonth) clientData[s.client_id].purchasedThisMonth = true;
+      if (s.invoice_date && s.invoice_date > clientData[s.client_id].lastPurchase) {
+        clientData[s.client_id].lastPurchase = s.invoice_date;
+      }
+    });
+
+    const clients = Object.entries(clientData).map(([id, st]) => ({
+      id,
+      ...st,
+      avgMonthly: Math.round(st.totalRevenue / 12),
+      daysSince: st.lastPurchase ? daysSince(st.lastPurchase) : 999
+    }));
+
+    const totalActiveBase = clients.length;
+    const positivated = clients.filter(c => c.purchasedThisMonth).length;
+    const rate = totalActiveBase > 0 ? (positivated / totalActiveBase) * 100 : 0;
+
+    // Gap: Clientes que não compraram este mês, ordenados pelo ticket médio mensal (potencial recuperável)
+    const gap = clients
+      .filter(c => !c.purchasedThisMonth)
+      .sort((a, b) => b.avgMonthly - a.avgMonthly)
+      .slice(0, 20);
+
+    // Agrupamento por risco (baseado no ciclo médio de 30-45 dias)
+    const critical = gap.filter(c => c.daysSince > 60).length;
+    const delayed = gap.filter(c => c.daysSince > 35 && c.daysSince <= 60).length;
+
+    return {
+      metrics: {
+        totalActiveBase,
+        positivated,
+        rate: Math.round(rate),
+        gapCount: gap.length,
+        potentialRevenue: Math.round(gap.reduce((s, c) => s + c.avgMonthly, 0)),
+        critical,
+        delayed
+      },
+      gap: gap.map(c => ({
+        ...c,
+        status: c.daysSince > 60 ? "Crítico" : c.daysSince > 35 ? "Atrasado" : "No Prazo"
+      }))
+    };
+  });
+
 
