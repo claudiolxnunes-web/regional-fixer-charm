@@ -477,10 +477,46 @@ function PlanningPanel() {
             </Card>
           </div>
 
+          {/* New Client Section: Action Plan per Unpositivated Client */}
+          {m.data.client_plans && (
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-amber-600 uppercase tracking-wider">
+                <BrainCircuit className="size-4" /> Foco em Positivação: Plano por Cliente
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {m.data.client_plans.map((cp: any, i: number) => (
+                  <Card key={i} className="flex flex-col border-l-4 border-l-amber-500">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-sm font-bold">{cp.client_name}</CardTitle>
+                          <p className="text-[10px] text-muted-foreground uppercase">{cp.rep}</p>
+                        </div>
+                        <Badge variant={cp.priority === "Crítica" ? "destructive" : "warning"} className="text-[9px] px-1 py-0">
+                          {cp.priority}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3 flex-1">
+                      <div className="p-2 rounded bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30">
+                        <div className="text-[9px] font-bold uppercase text-amber-700 dark:text-amber-400 mb-1">Próximo Passo</div>
+                        <p className="text-xs font-medium leading-snug">{cp.next_step}</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px]">
+                        <span className="font-bold text-muted-foreground uppercase">Meta:</span>
+                        <span className="text-foreground">{cp.goal}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Reps Section */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wider">
-              <ClipboardList className="size-4" /> Planos Individuais por Representante
+              <ClipboardList className="size-4" /> Diagnóstico por Representante
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {m.data.rep_plans.map((rp: any, i: number) => (
@@ -488,7 +524,7 @@ function PlanningPanel() {
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-base">{rp.name}</CardTitle>
-                      <Badge variant={rp.priority_level === "Alta" ? "destructive" : rp.priority_level === "Média" ? "warning" : "default"} className="text-[10px]">
+                      <Badge variant={rp.priority_level === "Alta" ? "destructive" : "default"} className="text-[10px]">
                         {rp.priority_level}
                       </Badge>
                     </div>
@@ -511,6 +547,7 @@ function PlanningPanel() {
           </div>
         </>
       )}
+
     </div>
   );
 }
