@@ -16,9 +16,9 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 
-export const Route = createFileRoute("/_app/dashboard")({ component: CommandCenter });
+export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
-function CommandCenter() {
+function Dashboard() {
   const getNarrative = useServerFn(generateNarrative);
   const getChurn = useServerFn(predictChurnRisk);
   const getOpportunities = useServerFn(findForgottenOpportunities);
