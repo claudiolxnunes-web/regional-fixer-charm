@@ -50,9 +50,9 @@ function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
-            <Zap className="size-8 text-primary fill-primary/20" /> Command Center
+            <Zap className="size-8 text-primary fill-primary/20" /> Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1 text-lg">Inteligência de Vendas em Tempo Real</p>
+          <p className="text-muted-foreground mt-1 text-lg">Visão geral do seu negócio</p>
         </div>
         <div className="flex items-center gap-3 bg-card border rounded-2xl p-4 shadow-sm">
           <div className="text-right">
