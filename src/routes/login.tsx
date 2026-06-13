@@ -149,19 +149,17 @@ function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {import.meta.env.DEV && (
-            <div className="mb-4 space-y-2 rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 p-3">
-              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-200">
-                <Zap className="size-3.5" /> Acesso rápido (owner)
-              </div>
-              <Button type="button" size="sm" variant="outline" className="w-full justify-start text-xs" onClick={() => onQuickLogin("claudiolx.nunes@gmail.com")} disabled={loading}>
-                Entrar como Superadmin (claudiolx.nunes@gmail.com)
-              </Button>
-              <Button type="button" size="sm" variant="outline" className="w-full justify-start text-xs" onClick={() => onQuickLogin("clxn2000@hotmail.com")} disabled={loading}>
-                Entrar como Admin (clxn2000@hotmail.com)
-              </Button>
+          <div className="mb-4 space-y-2 rounded-lg border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 p-3">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-200">
+              <Zap className="size-3.5" /> Acesso rápido (owner)
             </div>
-          )}
+            <Button type="button" size="sm" variant="outline" className="w-full justify-start text-xs" onClick={() => onQuickLogin("claudiolx.nunes@gmail.com")} disabled={loading}>
+              Entrar como Superadmin (claudiolx.nunes@gmail.com)
+            </Button>
+            <Button type="button" size="sm" variant="outline" className="w-full justify-start text-xs" onClick={() => onQuickLogin("clxn2000@hotmail.com")} disabled={loading}>
+              Entrar como Admin (clxn2000@hotmail.com)
+            </Button>
+          </div>
 
           <Button type="button" variant="outline" className="w-full h-11" onClick={onGoogle} disabled={loading}>
             <GoogleIcon />
