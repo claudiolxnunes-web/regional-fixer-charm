@@ -106,9 +106,8 @@ function AppLayout() {
         }
 
         if (!tm) {
-          // Sem team/licença → libera acesso mesmo assim (com aviso)
-          setBanner({ tone: "warn", msg: "Você está usando o app sem uma assinatura ativa. Acesse /planos quando quiser contratar." });
-          finish();
+          try { sessionStorage.setItem("lvbl-access-block", "Você ainda não possui licença ativa. Escolha um plano ou inicie o teste gratuito de 7 dias para acessar o app."); } catch {}
+          navigate({ to: "/planos" });
           return;
         }
 
@@ -116,8 +115,11 @@ function AppLayout() {
         const { ok, banner: b } = evaluateAccess(team);
 
         if (!ok) {
-          setBanner({ tone: "warn", msg: "Sua assinatura não está ativa. Acesse /planos para renovar — o acesso ao app segue liberado." });
-          finish();
+          const msg = team?.subscription_status === "trialing"
+            ? "Seu período de teste de 7 dias expirou. Assine um plano para continuar usando o app."
+            : "Sua licença expirou ou foi cancelada. Renove sua assinatura para voltar a acessar o app.";
+          try { sessionStorage.setItem("lvbl-access-block", msg); } catch {}
+          navigate({ to: "/planos" });
           return;
         }
 
