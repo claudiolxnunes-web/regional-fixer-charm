@@ -2,6 +2,8 @@ import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-rout
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { startTrialTeam } from "@/lib/trial.functions";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
 import { AlertTriangle, Terminal } from "lucide-react";
@@ -48,6 +50,7 @@ const RELOAD_STORAGE_KEY = "lvbl-app-permission-reload-count";
 function AppLayout() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const startTrial = useServerFn(startTrialTeam);
   const [checking, setChecking] = useState(true);
   const [banner, setBanner] = useState<{ tone: "warn" | "danger"; msg: string } | null>(null);
   const [stalled, setStalled] = useState(false);
@@ -105,13 +108,12 @@ function AppLayout() {
           return;
         }
 
+        let team = (tm as any)?.teams;
         if (!tm) {
-          try { sessionStorage.setItem("lvbl-access-block", "Você ainda não possui licença ativa. Escolha um plano ou inicie o teste gratuito de 7 dias para acessar o app."); } catch {}
-          navigate({ to: "/planos" });
-          return;
+          team = await startTrial();
+          if (!isMounted) return;
         }
 
-        const team = (tm as any).teams;
         const { ok, banner: b } = evaluateAccess(team);
 
         if (!ok) {
@@ -156,7 +158,7 @@ function AppLayout() {
       isMounted = false;
       clearTimeout(timeout);
     };
-  }, [loading, session, navigate]);
+  }, [loading, session, navigate, startTrial]);
 
   if (loading || checking) {
     return (
