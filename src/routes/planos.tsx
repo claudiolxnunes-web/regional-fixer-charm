@@ -45,6 +45,14 @@ export const Route = createFileRoute("/planos")({
 function PlanosPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const [blockMsg, setBlockMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const m = sessionStorage.getItem("lvbl-access-block");
+      if (m) { setBlockMsg(m); sessionStorage.removeItem("lvbl-access-block"); }
+    } catch {}
+  }, []);
 
   const handleSelect = () => {
     window.open(CHECKOUT_URL, "_blank", "noopener,noreferrer");
@@ -59,6 +67,14 @@ function PlanosPage() {
             Voltar
           </Button>
         </div>
+
+        {blockMsg && (
+          <div className="mb-8 flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-destructive">
+            <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
+            <p className="text-sm font-medium">{blockMsg}</p>
+          </div>
+        )}
+
 
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight mb-3">Escolha seu plano</h1>
