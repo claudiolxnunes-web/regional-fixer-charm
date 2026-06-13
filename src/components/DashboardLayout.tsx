@@ -84,7 +84,7 @@ function SidebarContent({
   currentPath: string;
 }) {
   return (
-    <div className="h-full flex flex-col bg-sidebar text-sidebar-foreground">
+    <div className="h-full w-full min-w-0 max-w-full overflow-hidden flex flex-col bg-sidebar text-sidebar-foreground">
       <div className="px-4 py-4 flex items-center gap-2.5 border-b border-sidebar-border">
         <div className="size-10 rounded-lg bg-white grid place-items-center shrink-0 overflow-hidden">
           <img src={logo} alt="AgroGestão CRM" className="size-9 object-contain" />
@@ -95,7 +95,7 @@ function SidebarContent({
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="flex-1 min-w-0 overflow-y-auto py-2">
         {groups.map((group) => (
           <div key={group.label} className="mb-3">
             <div className="px-4 pt-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
@@ -108,7 +108,7 @@ function SidebarContent({
                   key={to}
                   to={to}
                   onClick={onNavigate}
-                  className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                  className={`flex w-full min-w-0 items-center gap-3 px-4 py-2 text-sm transition-colors ${
                     active
                       ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-sidebar-primary"
                       : "hover:bg-sidebar-accent/50 border-l-2 border-transparent"
@@ -123,7 +123,7 @@ function SidebarContent({
         ))}
       </nav>
 
-      <div className="p-3 border-t border-sidebar-border flex items-center gap-2.5">
+      <div className="p-3 border-t border-sidebar-border flex min-w-0 items-center gap-2.5">
         <div className="size-9 rounded-full bg-sidebar-primary/20 text-sidebar-primary grid place-items-center font-semibold text-sm shrink-0">
           {initial}
         </div>
@@ -160,7 +160,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-60 shrink-0">
+      <aside className="hidden lg:flex w-56 shrink-0 overflow-hidden border-r border-sidebar-border">
         <SidebarContent
           user={user}
           initial={initial}
