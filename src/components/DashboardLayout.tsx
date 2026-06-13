@@ -98,7 +98,7 @@ function SidebarContent({
       <nav className="flex-1 overflow-y-auto py-2">
         {groups.map((group) => (
           <div key={group.label} className="mb-3">
-            <div className="px-5 pt-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+            <div className="px-4 pt-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
               {group.label}
             </div>
             {group.items.map(({ to, label, icon: Icon }) => {
@@ -108,7 +108,7 @@ function SidebarContent({
                   key={to}
                   to={to}
                   onClick={onNavigate}
-                  className={`flex items-center gap-3 px-5 py-2 text-sm transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
                     active
                       ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-sidebar-primary"
                       : "hover:bg-sidebar-accent/50 border-l-2 border-transparent"
@@ -178,7 +178,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 bg-sidebar border-sidebar-border">
+            <SheetContent side="left" className="p-0 w-64 bg-sidebar border-sidebar-border">
               <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
               <SidebarContent
                 user={user}
