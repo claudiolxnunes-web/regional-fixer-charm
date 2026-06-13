@@ -106,7 +106,9 @@ function AppLayout() {
         }
 
         if (!tm) {
-          navigate({ to: "/planos" });
+          // Sem team/licença → libera acesso mesmo assim (com aviso)
+          setBanner({ tone: "warn", msg: "Você está usando o app sem uma assinatura ativa. Acesse /planos quando quiser contratar." });
+          finish();
           return;
         }
 
@@ -114,7 +116,8 @@ function AppLayout() {
         const { ok, banner: b } = evaluateAccess(team);
 
         if (!ok) {
-          navigate({ to: tm.role === "admin" ? "/planos" : "/login" });
+          setBanner({ tone: "warn", msg: "Sua assinatura não está ativa. Acesse /planos para renovar — o acesso ao app segue liberado." });
+          finish();
           return;
         }
 
