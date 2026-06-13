@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Check, ArrowLeft, ExternalLink } from "lucide-react";
+import { Check, ArrowLeft, ExternalLink, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { PLANS } from "@/lib/stripe";
 import { Button } from "@/components/ui/button";
