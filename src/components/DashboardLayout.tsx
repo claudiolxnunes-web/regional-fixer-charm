@@ -84,21 +84,21 @@ function SidebarContent({
   currentPath: string;
 }) {
   return (
-    <div className="h-full flex flex-col bg-sidebar text-sidebar-foreground">
-      <div className="px-4 py-4 flex items-center gap-2.5 border-b border-sidebar-border">
-        <div className="size-10 rounded-lg bg-white grid place-items-center shrink-0 overflow-hidden">
-          <img src={logo} alt="AgroGestão CRM" className="size-9 object-contain" />
+    <div className="h-full w-full min-w-0 max-w-full overflow-hidden flex flex-col bg-sidebar text-sidebar-foreground">
+      <div className="px-4 py-4 flex items-center gap-2.5 border-b border-sidebar-border lg:justify-center lg:px-2 xl:justify-start xl:px-4">
+        <div className="size-10 rounded-lg bg-white grid place-items-center shrink-0 overflow-hidden lg:size-9 xl:size-10">
+          <img src={logo} alt="AgroGestão CRM" className="size-9 object-contain lg:size-8 xl:size-9" />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 lg:hidden xl:block">
           <div className="font-semibold leading-none truncate">AgroGestão</div>
           <div className="text-[11px] text-sidebar-foreground/60 mt-1">CRM Regional</div>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="flex-1 min-w-0 overflow-y-auto py-2">
         {groups.map((group) => (
           <div key={group.label} className="mb-3">
-            <div className="px-4 pt-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+            <div className="px-4 pt-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 lg:hidden xl:block">
               {group.label}
             </div>
             {group.items.map(({ to, label, icon: Icon }) => {
@@ -108,14 +108,15 @@ function SidebarContent({
                   key={to}
                   to={to}
                   onClick={onNavigate}
-                  className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                  title={label}
+                  className={`flex w-full min-w-0 items-center gap-3 px-4 py-2 text-sm transition-colors lg:justify-center lg:gap-0 lg:px-0 xl:justify-start xl:gap-3 xl:px-4 ${
                     active
                       ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-sidebar-primary"
                       : "hover:bg-sidebar-accent/50 border-l-2 border-transparent"
                   }`}
                 >
                   <Icon className="size-4 shrink-0" />
-                  <span className="truncate">{label}</span>
+                  <span className="truncate lg:hidden xl:block">{label}</span>
                 </Link>
               );
             })}
@@ -123,15 +124,17 @@ function SidebarContent({
         ))}
       </nav>
 
-      <div className="p-3 border-t border-sidebar-border flex items-center gap-2.5">
+      <div className="p-3 border-t border-sidebar-border flex min-w-0 items-center gap-2.5 lg:flex-col xl:flex-row">
         <div className="size-9 rounded-full bg-sidebar-primary/20 text-sidebar-primary grid place-items-center font-semibold text-sm shrink-0">
           {initial}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 lg:hidden xl:block">
           <div className="text-xs font-medium truncate">{user?.user_metadata?.name || user?.email?.split("@")[0]}</div>
           <div className="text-[10px] text-sidebar-foreground/60 truncate">{user?.email}</div>
         </div>
-        <ThemeToggle compact />
+        <div className="lg:hidden xl:block">
+          <ThemeToggle compact />
+        </div>
         <Button
           variant="ghost"
           size="icon"
@@ -160,7 +163,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-60 shrink-0">
+      <aside className="hidden lg:flex w-14 shrink-0 overflow-hidden border-r border-sidebar-border xl:w-56">
         <SidebarContent
           user={user}
           initial={initial}
@@ -198,7 +201,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         <main className="flex-1 overflow-x-hidden">
-          <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 max-w-[1400px] mx-auto w-full">
+          <div className="px-4 py-4 sm:px-6 lg:px-6 lg:py-6 xl:px-8 max-w-[1400px] mx-auto w-full">
             <PageTransition type={type} duration={duration}>
               {children}
             </PageTransition>
