@@ -78,6 +78,19 @@ function AppLayout() {
 
     (async () => {
       try {
+        // Superadmin bypass — full access without team/subscription
+        const { data: roleRow } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .eq("role", "superadmin")
+          .maybeSingle();
+        if (roleRow) {
+          if (!isMounted) return;
+          finish();
+          return;
+        }
+
         const { data: tm, error } = await supabase
           .from("team_members")
           .select("role, team_id, teams!inner(subscription_status, current_period_end, plan)")
