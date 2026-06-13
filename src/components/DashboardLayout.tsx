@@ -160,7 +160,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0">
+      <aside className="hidden lg:flex w-60 shrink-0">
         <SidebarContent
           user={user}
           initial={initial}
