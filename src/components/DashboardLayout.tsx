@@ -30,6 +30,7 @@ const groups = [
       { to: "/app-representante", label: "App de Registro (Campo)", icon: Smartphone },
       { to: "/planejamento-visitas", label: "Agenda SMART", icon: RouteIcon },
       { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
+      { to: "/whatsapp", label: "WhatsApp", icon: MessageSquare },
     ],
   },
   {
