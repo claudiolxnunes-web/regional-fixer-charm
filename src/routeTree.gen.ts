@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as AppWhatsappRouteImport } from './routes/_app/whatsapp'
 import { Route as AppVendasRouteImport } from './routes/_app/vendas'
 import { Route as AppStatusRouteImport } from './routes/_app/status'
 import { Route as AppRepresentantesRouteImport } from './routes/_app/representantes'
@@ -84,6 +85,11 @@ const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppWhatsappRoute = AppWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppVendasRoute = AppVendasRouteImport.update({
   id: '/vendas',
@@ -292,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/representantes': typeof AppRepresentantesRouteWithChildren
   '/status': typeof AppStatusRoute
   '/vendas': typeof AppVendasRoute
+  '/whatsapp': typeof AppWhatsappRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
   '/representantes/$id': typeof AppRepresentantesIdRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/representantes': typeof AppRepresentantesRouteWithChildren
   '/status': typeof AppStatusRoute
   '/vendas': typeof AppVendasRoute
+  '/whatsapp': typeof AppWhatsappRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/alertas/config': typeof AppAlertasConfigRoute
   '/representantes/$id': typeof AppRepresentantesIdRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/_app/representantes': typeof AppRepresentantesRouteWithChildren
   '/_app/status': typeof AppStatusRoute
   '/_app/vendas': typeof AppVendasRoute
+  '/_app/whatsapp': typeof AppWhatsappRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/_app/alertas/config': typeof AppAlertasConfigRoute
   '/_app/representantes/$id': typeof AppRepresentantesIdRoute
@@ -422,6 +431,7 @@ export interface FileRouteTypes {
     | '/representantes'
     | '/status'
     | '/vendas'
+    | '/whatsapp'
     | '/checkout/return'
     | '/alertas/config'
     | '/representantes/$id'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/representantes'
     | '/status'
     | '/vendas'
+    | '/whatsapp'
     | '/checkout/return'
     | '/alertas/config'
     | '/representantes/$id'
@@ -507,6 +518,7 @@ export interface FileRouteTypes {
     | '/_app/representantes'
     | '/_app/status'
     | '/_app/vendas'
+    | '/_app/whatsapp'
     | '/checkout/return'
     | '/_app/alertas/config'
     | '/_app/representantes/$id'
@@ -582,6 +594,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout/return'
       preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/whatsapp': {
+      id: '/_app/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof AppWhatsappRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/vendas': {
       id: '/_app/vendas'
@@ -875,6 +894,7 @@ interface AppRouteChildren {
   AppRepresentantesRoute: typeof AppRepresentantesRouteWithChildren
   AppStatusRoute: typeof AppStatusRoute
   AppVendasRoute: typeof AppVendasRoute
+  AppWhatsappRoute: typeof AppWhatsappRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -905,6 +925,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRepresentantesRoute: AppRepresentantesRouteWithChildren,
   AppStatusRoute: AppStatusRoute,
   AppVendasRoute: AppVendasRoute,
+  AppWhatsappRoute: AppWhatsappRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

@@ -2048,6 +2048,47 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_config: {
+        Row: {
+          api_key: string
+          api_url: string
+          ativo: boolean
+          created_at: string
+          id: string
+          instance_name: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          api_key: string
+          api_url?: string
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          instance_name: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          api_url?: string
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          instance_name?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_config_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       clients_view: {
