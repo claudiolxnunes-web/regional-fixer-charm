@@ -21,6 +21,7 @@ const groups = [
     label: "Alta Performance",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/whatsapp", label: "WhatsApp", icon: MessageSquare },
       { to: "/oportunidades", label: "Oportunidades Esquecidas", icon: Sparkles },
     ],
   },
@@ -30,7 +31,6 @@ const groups = [
       { to: "/app-representante", label: "App de Registro (Campo)", icon: Smartphone },
       { to: "/planejamento-visitas", label: "Agenda SMART", icon: RouteIcon },
       { to: "/registro-campo", label: "Registro de Campo", icon: ClipboardList },
-      { to: "/whatsapp", label: "WhatsApp", icon: MessageSquare },
     ],
   },
   {
@@ -222,10 +222,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <Link to="/planejamento-visitas" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/planejamento-visitas" ? "text-primary" : "text-sidebar-foreground/60"}`}>
             <RouteIcon className="size-5" />
             <span>Agenda</span>
-          </Link>
-          <Link to="/registro-campo" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/registro-campo" ? "text-primary" : "text-sidebar-foreground/60"}`}>
-            <ClipboardList className="size-5" />
-            <span>Check-in</span>
           </Link>
           <Link to="/whatsapp" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/whatsapp" ? "text-primary" : "text-sidebar-foreground/60"}`}>
             <MessageSquare className="size-5" />
