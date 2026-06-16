@@ -154,8 +154,9 @@ Deno.serve(async (req) => {
         method: 'POST',
         body: JSON.stringify({
           number: toNumber,
-          options: { delay: 1200, presence: 'composing', linkPreview: false },
-          textMessage: { text: message },
+          text: message,
+          delay: 1200,
+          linkPreview: false,
         }),
       });
       if (!sent.ok) return json({ error: 'Falha ao enviar mensagem pela Evolution', details: sent.data }, sent.status);
