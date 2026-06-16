@@ -61,7 +61,6 @@ const groups = [
     label: "Operações",
     items: [
       { to: "/alertas", label: "Alertas", icon: Bell },
-      { to: "/whatsapp", label: "WhatsApp", icon: MessageSquare },
       { to: "/preferencias", label: "Preferências", icon: Settings },
       { to: "/licencas", label: "Licenças", icon: Shield },
       { to: "/importacao", label: "Importar Dados", icon: Upload },
