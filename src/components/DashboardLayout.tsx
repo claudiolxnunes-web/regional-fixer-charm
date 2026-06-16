@@ -227,6 +227,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <ClipboardList className="size-5" />
             <span>Check-in</span>
           </Link>
+          <Link to="/whatsapp" className={`flex flex-col items-center gap-1 text-[10px] ${loc.pathname === "/whatsapp" ? "text-primary" : "text-sidebar-foreground/60"}`}>
+            <MessageSquare className="size-5" />
+            <span>WhatsApp</span>
+          </Link>
         </nav>
       </div>
     </div>
