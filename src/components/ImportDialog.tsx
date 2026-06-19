@@ -120,17 +120,34 @@ export function ImportDialog({
       if (!tm?.team_id) throw new Error("Usuário sem time associado");
 
       // Injetar o team_id em todos os registros
-      const dataWithTeam = parsed.map(row => ({
+      let dataWithTeam: Record<string, any>[] = parsed.map(row => ({
         ...row,
         team_id: tm.team_id
       }));
 
+      // Deduplicar dentro do próprio arquivo pelas chaves do upsert.
+      // Sem isso, duas linhas com a mesma chave dentro do mesmo lote causam
+      // "ON CONFLICT cannot affect row a second time" e o lote inteiro é perdido.
+      let dupesInFile = 0;
+      if (matchBy) {
+        const keys = matchBy.split(",").map(k => k.trim()).filter(Boolean);
+        const seen = new Map<string, Record<string, any>>();
+        for (const row of dataWithTeam) {
+          const k = keys.map(c => String(row[c] ?? "")).join("||");
+          if (seen.has(k)) dupesInFile++;
+          seen.set(k, row); // mantém a última ocorrência
+        }
+        if (dupesInFile > 0) {
+          dataWithTeam = Array.from(seen.values());
+        }
+      }
+
       const tbl: any = supabase.from(table as any);
-      
-      // Se não for snapshot, vamos processar em lotes menores para evitar limites do payload
-      // e melhorar o tratamento de erro por lote
-      const batchSize = 500;
+
+      // Lotes pequenos: payload menor + erro localizado
+      const batchSize = 200;
       let successCount = 0;
+      const failedBatches: Array<{ start: number; message: string }> = [];
 
       if (snapshot) {
         setProgress({ current: 0, total: dataWithTeam.length, pct: 0 });
@@ -145,33 +162,49 @@ export function ImportDialog({
         successCount = dataWithTeam.length;
         setProgress({ current: successCount, total: dataWithTeam.length, pct: 100 });
       } else {
-        // Para upsert ou insert normal, processamos em lotes
+        // Para upsert ou insert normal, processamos em lotes.
+        // NÃO abortamos o processo se um lote falhar — registramos e seguimos.
         for (let i = 0; i < dataWithTeam.length; i += batchSize) {
           const batch = dataWithTeam.slice(i, i + batchSize);
           const { error } = await (matchBy
             ? tbl.upsert(batch, { onConflict: matchBy, ignoreDuplicates: false })
             : tbl.insert(batch));
-          
+
           if (error) {
-            console.error(`Erro no lote ${i / batchSize}:`, error);
-            throw new Error(`Erro ao importar lote de registros (iniciando em ${i}): ${error.message}`);
+            console.error(`Erro no lote iniciando em ${i}:`, error);
+            failedBatches.push({ start: i, message: error.message });
+          } else {
+            successCount += batch.length;
           }
-          successCount += batch.length;
-          const pct = Math.round((successCount / dataWithTeam.length) * 100);
-          setProgress({ current: successCount, total: dataWithTeam.length, pct });
+          const processed = Math.min(i + batchSize, dataWithTeam.length);
+          const pct = Math.round((processed / dataWithTeam.length) * 100);
+          setProgress({ current: processed, total: dataWithTeam.length, pct });
         }
       }
-      
-      toast.success(snapshot
-        ? `Snapshot atualizado: ${successCount} registro(s)`
-        : `${successCount} registro(s) importado(s)`);
+
+      const dedupeNote = dupesInFile > 0 ? ` (${dupesInFile} duplicata(s) no arquivo agrupadas)` : "";
+      if (failedBatches.length) {
+        const failedRows = failedBatches.length * batchSize;
+        setErrors(prev => [
+          ...prev,
+          `${failedBatches.length} lote(s) falharam (~${failedRows} linha(s)):`,
+          ...failedBatches.slice(0, 5).map(f => `  • Lote em ${f.start}: ${f.message}`),
+        ]);
+        toast.warning(`Importação parcial: ${successCount}/${dataWithTeam.length}${dedupeNote}. Veja os avisos.`);
+      } else {
+        toast.success(snapshot
+          ? `Snapshot atualizado: ${successCount} registro(s)`
+          : `${successCount} registro(s) importado(s)${dedupeNote}`);
+      }
       if (invalidateKey) qc.invalidateQueries({ queryKey: [invalidateKey] });
       if (invalidateKeys) {
         invalidateKeys.forEach(key => qc.invalidateQueries({ queryKey: [key] }));
       }
-      setParsed([]);
-      setErrors([]);
-      setOpen(false);
+      if (!failedBatches.length) {
+        setParsed([]);
+        setErrors([]);
+        setOpen(false);
+      }
     } catch (e: any) {
       toast.error(e.message);
     } finally {
