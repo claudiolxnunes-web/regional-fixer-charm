@@ -56,7 +56,7 @@ function VendasPage() {
         .from(table)
         .select(cols)
         .order("invoice_date", { ascending: false, nullsFirst: false })
-        .limit(10000);
+        .limit(50000);
 
       if (startDate) {
         query = query.gte("invoice_date", startDate.toISOString().split('T')[0]);
