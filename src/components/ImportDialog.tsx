@@ -201,13 +201,13 @@ export function ImportDialog({
 
       const dedupeNote = dupesInFile > 0 ? ` (${dupesInFile} duplicata(s) no arquivo agrupadas)` : "";
       if (failedBatches.length) {
-        const failedRows = failedBatches.length * batchSize;
         setErrors(prev => [
           ...prev,
-          `${failedBatches.length} lote(s) falharam (~${failedRows} linha(s)):`,
-          ...failedBatches.slice(0, 5).map(f => `  • Lote em ${f.start}: ${f.message}`),
+          `${failedBatches.length} linha(s) falharam:`,
+          ...failedBatches.slice(0, 30).map(f => `  • Linha ${f.start + 1}: ${f.message}`),
+          ...(failedBatches.length > 30 ? [`  • ...e mais ${failedBatches.length - 30} (veja console)`] : []),
         ]);
-        toast.warning(`Importação parcial: ${successCount}/${dataWithTeam.length}${dedupeNote}. Veja os avisos.`);
+        toast.warning(`Importação parcial: ${successCount}/${dataWithTeam.length}${dedupeNote}. Veja os avisos abaixo.`);
       } else {
         toast.success(snapshot
           ? `Snapshot atualizado: ${successCount} registro(s)`
