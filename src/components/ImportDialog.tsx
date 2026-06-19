@@ -120,17 +120,34 @@ export function ImportDialog({
       if (!tm?.team_id) throw new Error("Usuário sem time associado");
 
       // Injetar o team_id em todos os registros
-      const dataWithTeam = parsed.map(row => ({
+      let dataWithTeam = parsed.map(row => ({
         ...row,
         team_id: tm.team_id
       }));
 
+      // Deduplicar dentro do próprio arquivo pelas chaves do upsert.
+      // Sem isso, duas linhas com a mesma chave dentro do mesmo lote causam
+      // "ON CONFLICT cannot affect row a second time" e o lote inteiro é perdido.
+      let dupesInFile = 0;
+      if (matchBy) {
+        const keys = matchBy.split(",").map(k => k.trim()).filter(Boolean);
+        const seen = new Map<string, Record<string, any>>();
+        for (const row of dataWithTeam) {
+          const k = keys.map(c => String(row[c] ?? "")).join("||");
+          if (seen.has(k)) dupesInFile++;
+          seen.set(k, row); // mantém a última ocorrência
+        }
+        if (dupesInFile > 0) {
+          dataWithTeam = Array.from(seen.values());
+        }
+      }
+
       const tbl: any = supabase.from(table as any);
-      
-      // Se não for snapshot, vamos processar em lotes menores para evitar limites do payload
-      // e melhorar o tratamento de erro por lote
-      const batchSize = 500;
+
+      // Lotes pequenos: payload menor + erro localizado
+      const batchSize = 200;
       let successCount = 0;
+      const failedBatches: Array<{ start: number; message: string }> = [];
 
       if (snapshot) {
         setProgress({ current: 0, total: dataWithTeam.length, pct: 0 });
