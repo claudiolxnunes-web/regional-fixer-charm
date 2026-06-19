@@ -162,26 +162,40 @@ export function ImportDialog({
         successCount = dataWithTeam.length;
         setProgress({ current: successCount, total: dataWithTeam.length, pct: 100 });
       } else {
-        // Para upsert ou insert normal, processamos em lotes
+        // Para upsert ou insert normal, processamos em lotes.
+        // NÃO abortamos o processo se um lote falhar — registramos e seguimos.
         for (let i = 0; i < dataWithTeam.length; i += batchSize) {
           const batch = dataWithTeam.slice(i, i + batchSize);
           const { error } = await (matchBy
             ? tbl.upsert(batch, { onConflict: matchBy, ignoreDuplicates: false })
             : tbl.insert(batch));
-          
+
           if (error) {
-            console.error(`Erro no lote ${i / batchSize}:`, error);
-            throw new Error(`Erro ao importar lote de registros (iniciando em ${i}): ${error.message}`);
+            console.error(`Erro no lote iniciando em ${i}:`, error);
+            failedBatches.push({ start: i, message: error.message });
+          } else {
+            successCount += batch.length;
           }
-          successCount += batch.length;
-          const pct = Math.round((successCount / dataWithTeam.length) * 100);
-          setProgress({ current: successCount, total: dataWithTeam.length, pct });
+          const processed = Math.min(i + batchSize, dataWithTeam.length);
+          const pct = Math.round((processed / dataWithTeam.length) * 100);
+          setProgress({ current: processed, total: dataWithTeam.length, pct });
         }
       }
-      
-      toast.success(snapshot
-        ? `Snapshot atualizado: ${successCount} registro(s)`
-        : `${successCount} registro(s) importado(s)`);
+
+      const dedupeNote = dupesInFile > 0 ? ` (${dupesInFile} duplicata(s) no arquivo agrupadas)` : "";
+      if (failedBatches.length) {
+        const failedRows = failedBatches.length * batchSize;
+        setErrors(prev => [
+          ...prev,
+          `${failedBatches.length} lote(s) falharam (~${failedRows} linha(s)):`,
+          ...failedBatches.slice(0, 5).map(f => `  • Lote em ${f.start}: ${f.message}`),
+        ]);
+        toast.warning(`Importação parcial: ${successCount}/${dataWithTeam.length}${dedupeNote}. Veja os avisos.`);
+      } else {
+        toast.success(snapshot
+          ? `Snapshot atualizado: ${successCount} registro(s)`
+          : `${successCount} registro(s) importado(s)${dedupeNote}`);
+      }
       if (invalidateKey) qc.invalidateQueries({ queryKey: [invalidateKey] });
       if (invalidateKeys) {
         invalidateKeys.forEach(key => qc.invalidateQueries({ queryKey: [key] }));
