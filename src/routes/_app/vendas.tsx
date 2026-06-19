@@ -186,7 +186,7 @@ function VendasPage() {
               ))}
             </tbody>
           </table>
-          {filtered.length > 5000 && <p className="p-2 text-center text-xs text-muted-foreground">Mostrando 5000 de {filtered.length} linhas. Refine a busca.</p>}
+          {filtered.length > 10000 && <p className="p-2 text-center text-xs text-muted-foreground">Mostrando 10000 de {filtered.length} linhas. Refine a busca.</p>}
         </div>
       </Card>
     </div>
