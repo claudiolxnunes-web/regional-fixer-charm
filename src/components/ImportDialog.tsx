@@ -120,7 +120,7 @@ export function ImportDialog({
       if (!tm?.team_id) throw new Error("Usuário sem time associado");
 
       // Injetar o team_id em todos os registros
-      let dataWithTeam = parsed.map(row => ({
+      let dataWithTeam: Record<string, any>[] = parsed.map(row => ({
         ...row,
         team_id: tm.team_id
       }));
