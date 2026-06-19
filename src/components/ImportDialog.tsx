@@ -163,7 +163,8 @@ export function ImportDialog({
         setProgress({ current: successCount, total: dataWithTeam.length, pct: 100 });
       } else {
         // Para upsert ou insert normal, processamos em lotes.
-        // NÃO abortamos o processo se um lote falhar — registramos e seguimos.
+        // Se um lote falha, tentamos linha-a-linha para identificar EXATAMENTE
+        // qual linha está com problema (sem perder o lote inteiro).
         for (let i = 0; i < dataWithTeam.length; i += batchSize) {
           const batch = dataWithTeam.slice(i, i + batchSize);
           const { error } = await (matchBy
@@ -171,8 +172,24 @@ export function ImportDialog({
             : tbl.insert(batch));
 
           if (error) {
-            console.error(`Erro no lote iniciando em ${i}:`, error);
-            failedBatches.push({ start: i, message: error.message });
+            console.error(`Lote ${i}-${i + batch.length} falhou, tentando linha-a-linha:`, error);
+            for (let j = 0; j < batch.length; j++) {
+              const row = batch[j];
+              const { error: rowErr } = await (matchBy
+                ? (supabase.from(table as any) as any).upsert([row], { onConflict: matchBy, ignoreDuplicates: false })
+                : (supabase.from(table as any) as any).insert([row]));
+              if (rowErr) {
+                const rowIndex = i + j;
+                const keyVals = matchBy
+                  ? matchBy.split(",").map(k => `${k.trim()}=${row[k.trim()] ?? "∅"}`).join(" ")
+                  : `linha ${rowIndex + 1}`;
+                const detail = [rowErr.message, (rowErr as any).details, (rowErr as any).hint].filter(Boolean).join(" | ");
+                console.error(`Linha ${rowIndex + 1} (${keyVals}) falhou:`, rowErr);
+                failedBatches.push({ start: rowIndex, message: `${keyVals} → ${detail}` });
+              } else {
+                successCount++;
+              }
+            }
           } else {
             successCount += batch.length;
           }
@@ -184,13 +201,13 @@ export function ImportDialog({
 
       const dedupeNote = dupesInFile > 0 ? ` (${dupesInFile} duplicata(s) no arquivo agrupadas)` : "";
       if (failedBatches.length) {
-        const failedRows = failedBatches.length * batchSize;
         setErrors(prev => [
           ...prev,
-          `${failedBatches.length} lote(s) falharam (~${failedRows} linha(s)):`,
-          ...failedBatches.slice(0, 5).map(f => `  • Lote em ${f.start}: ${f.message}`),
+          `${failedBatches.length} linha(s) falharam:`,
+          ...failedBatches.slice(0, 30).map(f => `  • Linha ${f.start + 1}: ${f.message}`),
+          ...(failedBatches.length > 30 ? [`  • ...e mais ${failedBatches.length - 30} (veja console)`] : []),
         ]);
-        toast.warning(`Importação parcial: ${successCount}/${dataWithTeam.length}${dedupeNote}. Veja os avisos.`);
+        toast.warning(`Importação parcial: ${successCount}/${dataWithTeam.length}${dedupeNote}. Veja os avisos abaixo.`);
       } else {
         toast.success(snapshot
           ? `Snapshot atualizado: ${successCount} registro(s)`
