@@ -200,9 +200,11 @@ export function ImportDialog({
       if (invalidateKeys) {
         invalidateKeys.forEach(key => qc.invalidateQueries({ queryKey: [key] }));
       }
-      setParsed([]);
-      setErrors([]);
-      setOpen(false);
+      if (!failedBatches.length) {
+        setParsed([]);
+        setErrors([]);
+        setOpen(false);
+      }
     } catch (e: any) {
       toast.error(e.message);
     } finally {
