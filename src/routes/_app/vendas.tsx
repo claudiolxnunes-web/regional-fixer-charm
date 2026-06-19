@@ -56,7 +56,7 @@ function VendasPage() {
         .from(table)
         .select(cols)
         .order("invoice_date", { ascending: false, nullsFirst: false })
-        .limit(10000);
+        .limit(50000);
 
       if (startDate) {
         query = query.gte("invoice_date", startDate.toISOString().split('T')[0]);
@@ -170,7 +170,7 @@ function VendasPage() {
             <tbody>
               {isLoading && <tr><td colSpan={isStaff ? 10 : 8} className="p-8 text-center text-muted-foreground">Carregando...</td></tr>}
               {!isLoading && !filtered.length && <tr><td colSpan={isStaff ? 10 : 8} className="p-8 text-center text-muted-foreground">Nenhuma venda encontrada</td></tr>}
-              {filtered.slice(0, 5000).map((r: any, i: number) => (
+              {filtered.slice(0, 10000).map((r: any, i: number) => (
                 <tr key={i} className="border-t hover:bg-muted/30">
                   <td className="p-2 whitespace-nowrap">{r.invoice_date ? new Date(r.invoice_date).toLocaleDateString("pt-BR") : "-"}</td>
                   <td className="p-2 font-mono">{r.invoice_number}</td>
@@ -186,7 +186,7 @@ function VendasPage() {
               ))}
             </tbody>
           </table>
-          {filtered.length > 5000 && <p className="p-2 text-center text-xs text-muted-foreground">Mostrando 5000 de {filtered.length} linhas. Refine a busca.</p>}
+          {filtered.length > 10000 && <p className="p-2 text-center text-xs text-muted-foreground">Mostrando 10000 de {filtered.length} linhas. Refine a busca.</p>}
         </div>
       </Card>
     </div>
