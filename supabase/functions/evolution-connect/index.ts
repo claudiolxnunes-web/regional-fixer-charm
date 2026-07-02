@@ -150,6 +150,17 @@ Deno.serve(async (req) => {
       if (!toNumber) return json({ error: 'Número de destino obrigatório' }, 400);
       if (!message) return json({ error: 'Mensagem obrigatória' }, 400);
 
+      // Pre-check connection state to avoid Evolution 500 "Connection Closed"
+      const preState = await callEvolution(`${baseUrl}/instance/connectionState/${encodedInstance}`, config.api_key);
+      if (!preState.ok || !isAlreadyConnected(preState.data)) {
+        return json({
+          error: 'WhatsApp desconectado. Reconecte a instância (leia o QR Code) antes de enviar mensagens.',
+          code: 'INSTANCE_DISCONNECTED',
+          fallback: true,
+          details: preState.data,
+        });
+      }
+
       const sent = await callEvolution(`${baseUrl}/message/sendText/${encodeURIComponent(instanceName)}`, config.api_key, {
         method: 'POST',
         body: JSON.stringify({
@@ -159,7 +170,18 @@ Deno.serve(async (req) => {
           linkPreview: false,
         }),
       });
-      if (!sent.ok) return json({ error: 'Falha ao enviar mensagem pela Evolution', details: sent.data }, sent.status);
+      if (!sent.ok) {
+        const raw = JSON.stringify(sent.data ?? '');
+        const closed = raw.toLowerCase().includes('connection closed');
+        return json({
+          error: closed
+            ? 'WhatsApp desconectado durante o envio. Reconecte a instância e tente novamente.'
+            : 'Falha ao enviar mensagem pela Evolution',
+          code: closed ? 'INSTANCE_DISCONNECTED' : 'SEND_FAILED',
+          fallback: true,
+          details: { status: sent.status, response: sent.data },
+        });
+      }
       return json({ success: true, response: sent.data });
     }
 
