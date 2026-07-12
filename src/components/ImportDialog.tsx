@@ -161,7 +161,7 @@ export function ImportDialog({
       const failedBatches: Array<{ start: number; message: string }> = [];
 
       if (snapshot) {
-        setProgress({ current: 0, total: dataWithTeam.length, pct: 0 });
+        setProgress({ current: 0, total: dataWithTeam.length, pct: 0, inserted: 0, failed: 0, read: dataWithTeam.length });
         const { error: delErr } = await (supabase.from(table as any) as any)
           .delete()
           .eq("team_id", tm.team_id);
@@ -189,9 +189,10 @@ export function ImportDialog({
             successCount += batch.length;
           }
           const processed = Math.min(i + batchSize, dataWithTeam.length);
-          setProgress({ current: processed, total: dataWithTeam.length, pct: Math.round((processed / dataWithTeam.length) * 100) });
+          setProgress({ current: processed, total: dataWithTeam.length, pct: Math.round((processed / dataWithTeam.length) * 100), inserted: successCount, failed: failedBatches.length, read: dataWithTeam.length });
         }
       } else {
+
 
         // Para upsert ou insert normal, processamos em lotes.
         // Se um lote falha, tentamos linha-a-linha para identificar EXATAMENTE
