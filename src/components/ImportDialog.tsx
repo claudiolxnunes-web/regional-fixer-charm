@@ -164,20 +164,32 @@ export function ImportDialog({
 
       if (snapshot) {
         setProgress({ current: 0, total: dataWithTeam.length, pct: 0, inserted: 0, failed: 0, read: dataWithTeam.length });
-        const { error: delErr } = await (supabase.from(table as any) as any)
-          .delete()
-          .eq("team_id", tm.team_id);
-        if (delErr) throw delErr;
 
-        // Inserir em lotes para evitar payload gigante / timeout
+        // Snapshot via UPSERT em vez de DELETE+INSERT.
+        // Motivo: a política RLS de DELETE em algumas tabelas (ex.: open_orders)
+        // exige papel admin/manager; para um representante comum o DELETE é filtrado
+        // silenciosamente (0 linhas) e o INSERT seguinte colide com as linhas antigas
+        // resultando em "duplicate key ... unique constraint". UPSERT funciona para
+        // qualquer role autorizada a INSERT/UPDATE e evita o problema.
+        const snapshotOnConflict = table === "open_orders" ? "order_number,product_code" : undefined;
+
+        // Coleta as chaves novas ANTES de inserir, para depois apagar o que sumiu.
+        const newKeys = snapshotOnConflict
+          ? new Set(dataWithTeam.map(r => `${r.order_number ?? ""}||${r.product_code ?? ""}`))
+          : null;
+
         for (let i = 0; i < dataWithTeam.length; i += batchSize) {
           const batch = dataWithTeam.slice(i, i + batchSize);
-          const { error } = await tbl.insert(batch);
+          const { error } = snapshotOnConflict
+            ? await tbl.upsert(batch, { onConflict: snapshotOnConflict, ignoreDuplicates: false })
+            : await tbl.insert(batch);
           if (error) {
             // fallback linha-a-linha para localizar o problema
             for (let j = 0; j < batch.length; j++) {
               const row = batch[j];
-              const { error: rowErr } = await (supabase.from(table as any) as any).insert([row]);
+              const { error: rowErr } = snapshotOnConflict
+                ? await (supabase.from(table as any) as any).upsert([row], { onConflict: snapshotOnConflict, ignoreDuplicates: false })
+                : await (supabase.from(table as any) as any).insert([row]);
               if (rowErr) {
                 const rowIndex = i + j;
                 const detail = [rowErr.message, (rowErr as any).details, (rowErr as any).hint].filter(Boolean).join(" | ");
@@ -193,7 +205,29 @@ export function ImportDialog({
           const processed = Math.min(i + batchSize, dataWithTeam.length);
           setProgress({ current: processed, total: dataWithTeam.length, pct: Math.round((processed / dataWithTeam.length) * 100), inserted: successCount, failed: failedBatches.length, read: dataWithTeam.length });
         }
+
+        // Após upsert: remover linhas do team que NÃO estão no novo arquivo (snapshot real).
+        // Se o usuário não tiver permissão de DELETE, apenas ignora (upsert já refletiu o novo estado).
+        if (newKeys && successCount > 0) {
+          try {
+            const { data: existing } = await (supabase.from(table as any) as any)
+              .select("id, order_number, product_code")
+              .eq("team_id", tm.team_id);
+            const toDelete = (existing ?? []).filter((r: any) =>
+              !newKeys.has(`${r.order_number ?? ""}||${r.product_code ?? ""}`)
+            ).map((r: any) => r.id);
+            if (toDelete.length) {
+              const { error: delErr } = await (supabase.from(table as any) as any)
+                .delete()
+                .in("id", toDelete);
+              if (delErr) console.warn("Snapshot: não foi possível remover linhas antigas (RLS?)", delErr);
+            }
+          } catch (e) {
+            console.warn("Snapshot: falha ao limpar linhas antigas", e);
+          }
+        }
       } else {
+
 
 
         // Para upsert ou insert normal, processamos em lotes.
