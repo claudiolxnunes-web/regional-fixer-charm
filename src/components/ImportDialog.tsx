@@ -59,7 +59,7 @@ export function ImportDialog({
   const [parsed, setParsed] = useState<Record<string, any>[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 0, pct: 0 });
+  const [progress, setProgress] = useState({ current: 0, total: 0, pct: 0, inserted: 0, failed: 0, read: 0 });
   const [autoRows, setAutoRows] = useState<Record<string, any>[] | null>(null);
 
   function downloadTemplate() {
@@ -70,6 +70,8 @@ export function ImportDialog({
   }
 
   async function handleFile(file: File) {
+    setProgress({ current: 0, total: 0, pct: 0, inserted: 0, failed: 0, read: 0 });
+
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf);
     const ws = wb.Sheets[wb.SheetNames[0]];
@@ -105,7 +107,7 @@ export function ImportDialog({
   async function commitImport() {
     if (!parsed.length) return;
     setBusy(true);
-    setProgress({ current: 0, total: parsed.length, pct: 0 });
+    setProgress({ current: 0, total: parsed.length, pct: 0, inserted: 0, failed: 0, read: parsed.length });
     try {
       // Obter o team_id do usuário atual para garantir o isolamento
       const { data: { user } } = await supabase.auth.getUser();
@@ -161,7 +163,7 @@ export function ImportDialog({
       const failedBatches: Array<{ start: number; message: string }> = [];
 
       if (snapshot) {
-        setProgress({ current: 0, total: dataWithTeam.length, pct: 0 });
+        setProgress({ current: 0, total: dataWithTeam.length, pct: 0, inserted: 0, failed: 0, read: dataWithTeam.length });
         const { error: delErr } = await (supabase.from(table as any) as any)
           .delete()
           .eq("team_id", tm.team_id);
@@ -189,9 +191,10 @@ export function ImportDialog({
             successCount += batch.length;
           }
           const processed = Math.min(i + batchSize, dataWithTeam.length);
-          setProgress({ current: processed, total: dataWithTeam.length, pct: Math.round((processed / dataWithTeam.length) * 100) });
+          setProgress({ current: processed, total: dataWithTeam.length, pct: Math.round((processed / dataWithTeam.length) * 100), inserted: successCount, failed: failedBatches.length, read: dataWithTeam.length });
         }
       } else {
+
 
         // Para upsert ou insert normal, processamos em lotes.
         // Se um lote falha, tentamos linha-a-linha para identificar EXATAMENTE
@@ -226,7 +229,8 @@ export function ImportDialog({
           }
           const processed = Math.min(i + batchSize, dataWithTeam.length);
           const pct = Math.round((processed / dataWithTeam.length) * 100);
-          setProgress({ current: processed, total: dataWithTeam.length, pct });
+          setProgress({ current: processed, total: dataWithTeam.length, pct, inserted: successCount, failed: failedBatches.length, read: dataWithTeam.length });
+
         }
       }
 
@@ -257,9 +261,9 @@ export function ImportDialog({
       toast.error(e.message);
     } finally {
       setBusy(false);
-      setProgress({ current: 0, total: 0, pct: 0 });
     }
   }
+
 
   async function runAutoDetect() {
     if (!autoDetect) return;
@@ -345,15 +349,32 @@ export function ImportDialog({
                 </Button>
               )}
               
-              {busy && progress.total > 0 && (
+              {progress.total > 0 && (
                 <div className="space-y-2 animate-in fade-in">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Enviando para o banco de dados...</span>
-                    <span className="font-medium">{progress.current} / {progress.total} ({progress.pct}%)</span>
+                    <span className="text-muted-foreground">
+                      {busy ? "Enviando para o banco de dados..." : "Importação concluída"}
+                    </span>
+                    <span className="font-medium">{progress.pct}%</span>
                   </div>
                   <Progress value={progress.pct} className="h-3" />
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="rounded-md border bg-muted/30 p-2">
+                      <div className="text-muted-foreground">Lidas</div>
+                      <div className="text-base font-bold tabular-nums">{progress.read}</div>
+                    </div>
+                    <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2">
+                      <div className="text-emerald-700 dark:text-emerald-400">Inseridas</div>
+                      <div className="text-base font-bold tabular-nums text-emerald-700 dark:text-emerald-400">{progress.inserted}</div>
+                    </div>
+                    <div className={`rounded-md border p-2 ${progress.failed > 0 ? "border-destructive/40 bg-destructive/10" : "bg-muted/30"}`}>
+                      <div className={progress.failed > 0 ? "text-destructive" : "text-muted-foreground"}>Falhadas</div>
+                      <div className={`text-base font-bold tabular-nums ${progress.failed > 0 ? "text-destructive" : ""}`}>{progress.failed}</div>
+                    </div>
+                  </div>
                 </div>
               )}
+
             </div>
             {errors.length > 0 && (
               <Card className="p-3 bg-destructive/10 border-destructive/30 max-h-40 overflow-auto">
