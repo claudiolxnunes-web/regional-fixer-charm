@@ -70,6 +70,8 @@ export function ImportDialog({
   }
 
   async function handleFile(file: File) {
+    setProgress({ current: 0, total: 0, pct: 0, inserted: 0, failed: 0, read: 0 });
+
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf);
     const ws = wb.Sheets[wb.SheetNames[0]];
