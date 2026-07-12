@@ -142,6 +142,17 @@ export function ImportDialog({
         }
       }
 
+      // Snapshot (sem matchBy): deduplicar pela unique key da tabela para não violar índice único
+      if (snapshot && !matchBy && table === "open_orders") {
+        const seen = new Map<string, Record<string, any>>();
+        for (const row of dataWithTeam) {
+          const k = `${row.order_number ?? ""}||${row.product_code ?? ""}`;
+          if (seen.has(k)) dupesInFile++;
+          seen.set(k, row);
+        }
+        if (dupesInFile > 0) dataWithTeam = Array.from(seen.values());
+      }
+
       const tbl: any = supabase.from(table as any);
 
       // Lotes pequenos: payload menor + erro localizado
