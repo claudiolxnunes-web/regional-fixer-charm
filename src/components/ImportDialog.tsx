@@ -227,32 +227,36 @@ export function ImportDialog({
           }
         }
       } else {
+        // Upsert/insert normal com paralelismo controlado — vital para vendas grandes.
+        // Batches maiores + várias requisições simultâneas reduzem tempo total de
+        // minutos para segundos e evitam a sensação de "travou".
+        const bigBatch = 500;
+        const concurrency = 5;
 
+        const batches: Record<string, any>[][] = [];
+        for (let i = 0; i < dataWithTeam.length; i += bigBatch) {
+          batches.push(dataWithTeam.slice(i, i + bigBatch));
+        }
 
-
-        // Para upsert ou insert normal, processamos em lotes.
-        // Se um lote falha, tentamos linha-a-linha para identificar EXATAMENTE
-        // qual linha está com problema (sem perder o lote inteiro).
-        for (let i = 0; i < dataWithTeam.length; i += batchSize) {
-          const batch = dataWithTeam.slice(i, i + batchSize);
+        let processed = 0;
+        const runBatch = async (batch: Record<string, any>[], batchStart: number) => {
           const { error } = await (matchBy
             ? tbl.upsert(batch, { onConflict: matchBy, ignoreDuplicates: false })
             : tbl.insert(batch));
 
           if (error) {
-            console.error(`Lote ${i}-${i + batch.length} falhou, tentando linha-a-linha:`, error);
+            console.error(`Lote ${batchStart}-${batchStart + batch.length} falhou, tentando linha-a-linha:`, error);
             for (let j = 0; j < batch.length; j++) {
               const row = batch[j];
               const { error: rowErr } = await (matchBy
                 ? (supabase.from(table as any) as any).upsert([row], { onConflict: matchBy, ignoreDuplicates: false })
                 : (supabase.from(table as any) as any).insert([row]));
               if (rowErr) {
-                const rowIndex = i + j;
+                const rowIndex = batchStart + j;
                 const keyVals = matchBy
                   ? matchBy.split(",").map(k => `${k.trim()}=${row[k.trim()] ?? "∅"}`).join(" ")
                   : `linha ${rowIndex + 1}`;
                 const detail = [rowErr.message, (rowErr as any).details, (rowErr as any).hint].filter(Boolean).join(" | ");
-                console.error(`Linha ${rowIndex + 1} (${keyVals}) falhou:`, rowErr);
                 failedBatches.push({ start: rowIndex, message: `${keyVals} → ${detail}` });
               } else {
                 successCount++;
@@ -261,11 +265,21 @@ export function ImportDialog({
           } else {
             successCount += batch.length;
           }
-          const processed = Math.min(i + batchSize, dataWithTeam.length);
+          processed += batch.length;
           const pct = Math.round((processed / dataWithTeam.length) * 100);
           setProgress({ current: processed, total: dataWithTeam.length, pct, inserted: successCount, failed: failedBatches.length, read: dataWithTeam.length });
+        };
 
-        }
+        // pool de concorrência
+        let cursor = 0;
+        const workers = Array.from({ length: Math.min(concurrency, batches.length) }, async () => {
+          while (true) {
+            const idx = cursor++;
+            if (idx >= batches.length) return;
+            await runBatch(batches[idx], idx * bigBatch);
+          }
+        });
+        await Promise.all(workers);
       }
 
       const dedupeNote = dupesInFile > 0 ? ` (${dupesInFile} duplicata(s) no arquivo agrupadas)` : "";
