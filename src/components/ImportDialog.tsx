@@ -227,7 +227,8 @@ export function ImportDialog({
           }
           const processed = Math.min(i + batchSize, dataWithTeam.length);
           const pct = Math.round((processed / dataWithTeam.length) * 100);
-          setProgress({ current: processed, total: dataWithTeam.length, pct });
+          setProgress({ current: processed, total: dataWithTeam.length, pct, inserted: successCount, failed: failedBatches.length, read: dataWithTeam.length });
+
         }
       }
 
