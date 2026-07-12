@@ -105,7 +105,7 @@ export function ImportDialog({
   async function commitImport() {
     if (!parsed.length) return;
     setBusy(true);
-    setProgress({ current: 0, total: parsed.length, pct: 0 });
+    setProgress({ current: 0, total: parsed.length, pct: 0, inserted: 0, failed: 0, read: parsed.length });
     try {
       // Obter o team_id do usuário atual para garantir o isolamento
       const { data: { user } } = await supabase.auth.getUser();
