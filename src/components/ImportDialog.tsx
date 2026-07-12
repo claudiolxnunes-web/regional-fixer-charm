@@ -142,6 +142,17 @@ export function ImportDialog({
         }
       }
 
+      // Snapshot (sem matchBy): deduplicar pela unique key da tabela para não violar índice único
+      if (snapshot && !matchBy && table === "open_orders") {
+        const seen = new Map<string, Record<string, any>>();
+        for (const row of dataWithTeam) {
+          const k = `${row.order_number ?? ""}||${row.product_code ?? ""}`;
+          if (seen.has(k)) dupesInFile++;
+          seen.set(k, row);
+        }
+        if (dupesInFile > 0) dataWithTeam = Array.from(seen.values());
+      }
+
       const tbl: any = supabase.from(table as any);
 
       // Lotes pequenos: payload menor + erro localizado
@@ -153,15 +164,35 @@ export function ImportDialog({
         setProgress({ current: 0, total: dataWithTeam.length, pct: 0 });
         const { error: delErr } = await (supabase.from(table as any) as any)
           .delete()
-          .eq("team_id", tm.team_id); 
+          .eq("team_id", tm.team_id);
         if (delErr) throw delErr;
 
-        // Para snapshot, inserimos tudo de uma vez após deletar
-        const { error } = await tbl.insert(dataWithTeam);
-        if (error) throw error;
-        successCount = dataWithTeam.length;
-        setProgress({ current: successCount, total: dataWithTeam.length, pct: 100 });
+        // Inserir em lotes para evitar payload gigante / timeout
+        for (let i = 0; i < dataWithTeam.length; i += batchSize) {
+          const batch = dataWithTeam.slice(i, i + batchSize);
+          const { error } = await tbl.insert(batch);
+          if (error) {
+            // fallback linha-a-linha para localizar o problema
+            for (let j = 0; j < batch.length; j++) {
+              const row = batch[j];
+              const { error: rowErr } = await (supabase.from(table as any) as any).insert([row]);
+              if (rowErr) {
+                const rowIndex = i + j;
+                const detail = [rowErr.message, (rowErr as any).details, (rowErr as any).hint].filter(Boolean).join(" | ");
+                console.error(`Linha ${rowIndex + 1} falhou:`, rowErr, row);
+                failedBatches.push({ start: rowIndex, message: `linha ${rowIndex + 1} → ${detail}` });
+              } else {
+                successCount++;
+              }
+            }
+          } else {
+            successCount += batch.length;
+          }
+          const processed = Math.min(i + batchSize, dataWithTeam.length);
+          setProgress({ current: processed, total: dataWithTeam.length, pct: Math.round((processed / dataWithTeam.length) * 100) });
+        }
       } else {
+
         // Para upsert ou insert normal, processamos em lotes.
         // Se um lote falha, tentamos linha-a-linha para identificar EXATAMENTE
         // qual linha está com problema (sem perder o lote inteiro).
