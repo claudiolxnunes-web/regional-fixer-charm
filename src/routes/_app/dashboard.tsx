@@ -62,10 +62,13 @@ function Dashboard() {
           <div className="h-10 w-px bg-border mx-2" />
           <div className="text-right">
             <div className="text-sm font-medium text-muted-foreground">Meta atingida</div>
-            <div className="text-2xl font-bold text-emerald-500">84%</div>
+            <div className="text-2xl font-bold text-emerald-500">
+              {narrative?.context?.goal_pct != null ? `${narrative.context.goal_pct}%` : "—"}
+            </div>
           </div>
         </div>
       </div>
+
 
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -233,20 +236,22 @@ function Dashboard() {
                 <div className="text-3xl font-bold">R$ {formatCurrencyCompact(narrative?.context?.mtd_revenue ?? 0)}</div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs text-background/60 font-medium">
-                    <span>Faturamento Atual</span>
-                    <span>Meta: R$ 4.2M</span>
+                    <span>Faturamento MTD</span>
+                    <span>Meta: {narrative?.context?.month_goal ? `R$ ${formatCurrencyCompact(narrative.context.month_goal)}` : "—"}</span>
                   </div>
-                  <Progress value={84} className="h-2 bg-background/20" />
+                  <Progress value={narrative?.context?.goal_pct ?? 0} className="h-2 bg-background/20" />
                 </div>
                 <div className="p-3 bg-background/10 rounded-xl border border-background/20 flex items-center justify-between">
-                  <div className="text-xs">Tendência de Fechamento</div>
-                  <div className="text-sm font-bold flex items-center text-emerald-400">
-                    <ArrowUpRight className="size-4 mr-1" /> +12.4%
+                  <div className="text-xs">vs mês anterior</div>
+                  <div className={`text-sm font-bold flex items-center ${(narrative?.context?.growth_vs_prev_pct ?? 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {(narrative?.context?.growth_vs_prev_pct ?? 0) >= 0 ? <ArrowUpRight className="size-4 mr-1" /> : <ArrowDownRight className="size-4 mr-1" />}
+                    {narrative?.context?.growth_vs_prev_pct != null ? `${narrative.context.growth_vs_prev_pct > 0 ? "+" : ""}${narrative.context.growth_vs_prev_pct}%` : "—"}
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+
         </div>
 
       </div>

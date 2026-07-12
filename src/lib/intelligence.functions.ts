@@ -165,36 +165,41 @@ export const benchmarkPeers = createServerFn({ method: "POST" })
 // ============= DAILY NARRATIVE =============
 export const generateNarrative = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
-  const supabase = supabaseAdmin;
+  // Usa o client autenticado (RLS por team) para não misturar dados entre times
+  const supabase = context.supabase;
 
   const today = new Date();
   const mtdStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
   const last30 = new Date(today.getTime() - 30 * 86400000).toISOString().slice(0, 10);
   const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 10);
   const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().slice(0, 10);
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
 
-  const [mtd, prev, alerts, quotes, base] = await Promise.all([
+  const [mtd, prev, alerts, quotes, base, goals] = await Promise.all([
     supabase.from("sales").select("revenue, representative, client_name, line").gte("invoice_date", mtdStart).limit(20000),
     supabase.from("sales").select("revenue").gte("invoice_date", prevMonthStart).lte("invoice_date", prevMonthEnd).limit(20000),
     supabase.from("alerts").select("type, severity, title").gte("created_at", last30).limit(500),
     supabase.from("quotes").select("status, total").gte("created_at", last30).limit(500),
     supabase.from("sales").select("client_id").gte("invoice_date", last30).limit(50000),
+    supabase.from("goal_targets").select("revenue_target").eq("year", currentYear).eq("month", currentMonth).limit(5000),
   ]);
 
-  const activeClients30d = new Set((base.data ?? []).map(s => s.client_id)).size;
+  const activeClients30d = new Set((base.data ?? []).map((s: any) => s.client_id)).size;
 
-  const mtdRev = (mtd.data ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
-  const prevRev = (prev.data ?? []).reduce((s, x) => s + Number(x.revenue ?? 0), 0);
+  const mtdRev = (mtd.data ?? []).reduce((s: number, x: any) => s + Number(x.revenue ?? 0), 0);
+  const prevRev = (prev.data ?? []).reduce((s: number, x: any) => s + Number(x.revenue ?? 0), 0);
+  const monthGoal = (goals.data ?? []).reduce((s: number, x: any) => s + Number(x.revenue_target ?? 0), 0);
   const dayOfMonth = today.getDate();
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-  const projection = (mtdRev / dayOfMonth) * daysInMonth;
+  const projection = dayOfMonth > 0 ? (mtdRev / dayOfMonth) * daysInMonth : 0;
 
   const repRanking: Record<string, number> = {};
   const lineRanking: Record<string, number> = {};
-  (mtd.data ?? []).forEach((s) => {
+  (mtd.data ?? []).forEach((s: any) => {
     const r = Number(s.revenue ?? 0);
     if (s.representative) repRanking[s.representative] = (repRanking[s.representative] ?? 0) + r;
     if (s.line) lineRanking[s.line] = (lineRanking[s.line] ?? 0) + r;
@@ -203,10 +208,10 @@ export const generateNarrative = createServerFn({ method: "POST" })
   const topLines = Object.entries(lineRanking).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   const alertsBySev: Record<string, number> = { high: 0, medium: 0, low: 0 };
-  (alerts.data ?? []).forEach((a) => { alertsBySev[a.severity] = (alertsBySev[a.severity] ?? 0) + 1; });
+  (alerts.data ?? []).forEach((a: any) => { alertsBySev[a.severity] = (alertsBySev[a.severity] ?? 0) + 1; });
 
-  const pipelineOpen = (quotes.data ?? []).filter((q) => q.status === "pending").reduce((s, q) => s + Number(q.total ?? 0), 0);
-  const pipelineWon = (quotes.data ?? []).filter((q) => q.status === "accepted").reduce((s, q) => s + Number(q.total ?? 0), 0);
+  const pipelineOpen = (quotes.data ?? []).filter((q: any) => q.status === "pending").reduce((s: number, q: any) => s + Number(q.total ?? 0), 0);
+  const pipelineWon = (quotes.data ?? []).filter((q: any) => q.status === "accepted").reduce((s: number, q: any) => s + Number(q.total ?? 0), 0);
 
   const ctx = {
     data_ref: today.toISOString().slice(0, 10),
@@ -216,6 +221,8 @@ export const generateNarrative = createServerFn({ method: "POST" })
     day_of_month: dayOfMonth,
     days_in_month: daysInMonth,
     growth_vs_prev_pct: prevRev > 0 ? Math.round(((mtdRev - prevRev) / prevRev) * 100) : null,
+    month_goal: Math.round(monthGoal),
+    goal_pct: monthGoal > 0 ? Math.round((mtdRev / monthGoal) * 100) : null,
     top_reps_mtd: topReps.map(([n, v]) => ({ name: n, revenue: Math.round(v) })),
     top_lines_mtd: topLines.map(([n, v]) => ({ line: n, revenue: Math.round(v) })),
     alerts_last_30d_by_severity: alertsBySev,

@@ -31,7 +31,24 @@ const parseDate = (v: any) => {
   const dt = new Date(s);
   return isNaN(dt.getTime()) ? null : dt.toISOString().slice(0, 10);
 };
-const num = (v: any) => (v == null || v === "" ? null : Number(String(v).replace(",", ".")) || 0);
+const num = (v: any) => {
+  if (v == null || v === "") return null;
+  if (typeof v === "number") return isFinite(v) ? v : 0;
+  // Aceita "R$ 10.777,24", "1.234,56", "1234.56", "1,234.56", "1234,56"
+  let s = String(v).trim().replace(/[R$\s]/g, "");
+  if (s === "" || s === "-") return null;
+  const hasComma = s.includes(",");
+  const hasDot = s.includes(".");
+  if (hasComma && hasDot) {
+    // formato BR: pontos = milhar, vírgula = decimal
+    s = s.replace(/\./g, "").replace(",", ".");
+  } else if (hasComma) {
+    // vírgula sozinha = decimal BR
+    s = s.replace(",", ".");
+  }
+  const n = Number(s);
+  return isFinite(n) ? n : 0;
+};
 const txt = (v: any) => (v == null ? null : String(v).trim() || null);
 
 function ImportacaoPage() {
