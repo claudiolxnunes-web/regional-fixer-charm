@@ -347,15 +347,32 @@ export function ImportDialog({
                 </Button>
               )}
               
-              {busy && progress.total > 0 && (
+              {progress.total > 0 && (
                 <div className="space-y-2 animate-in fade-in">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Enviando para o banco de dados...</span>
-                    <span className="font-medium">{progress.current} / {progress.total} ({progress.pct}%)</span>
+                    <span className="text-muted-foreground">
+                      {busy ? "Enviando para o banco de dados..." : "Importação concluída"}
+                    </span>
+                    <span className="font-medium">{progress.pct}%</span>
                   </div>
                   <Progress value={progress.pct} className="h-3" />
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="rounded-md border bg-muted/30 p-2">
+                      <div className="text-muted-foreground">Lidas</div>
+                      <div className="text-base font-bold tabular-nums">{progress.read}</div>
+                    </div>
+                    <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2">
+                      <div className="text-emerald-700 dark:text-emerald-400">Inseridas</div>
+                      <div className="text-base font-bold tabular-nums text-emerald-700 dark:text-emerald-400">{progress.inserted}</div>
+                    </div>
+                    <div className={`rounded-md border p-2 ${progress.failed > 0 ? "border-destructive/40 bg-destructive/10" : "bg-muted/30"}`}>
+                      <div className={progress.failed > 0 ? "text-destructive" : "text-muted-foreground"}>Falhadas</div>
+                      <div className={`text-base font-bold tabular-nums ${progress.failed > 0 ? "text-destructive" : ""}`}>{progress.failed}</div>
+                    </div>
+                  </div>
                 </div>
               )}
+
             </div>
             {errors.length > 0 && (
               <Card className="p-3 bg-destructive/10 border-destructive/30 max-h-40 overflow-auto">
