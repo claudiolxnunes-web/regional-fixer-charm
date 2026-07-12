@@ -259,9 +259,9 @@ export function ImportDialog({
       toast.error(e.message);
     } finally {
       setBusy(false);
-      setProgress({ current: 0, total: 0, pct: 0 });
     }
   }
+
 
   async function runAutoDetect() {
     if (!autoDetect) return;
