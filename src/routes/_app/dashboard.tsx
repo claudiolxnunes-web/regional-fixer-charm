@@ -62,10 +62,13 @@ function Dashboard() {
           <div className="h-10 w-px bg-border mx-2" />
           <div className="text-right">
             <div className="text-sm font-medium text-muted-foreground">Meta atingida</div>
-            <div className="text-2xl font-bold text-emerald-500">84%</div>
+            <div className="text-2xl font-bold text-emerald-500">
+              {narrative?.context?.goal_pct != null ? `${narrative.context.goal_pct}%` : "—"}
+            </div>
           </div>
         </div>
       </div>
+
 
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
