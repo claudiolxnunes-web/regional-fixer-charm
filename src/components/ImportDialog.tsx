@@ -230,8 +230,8 @@ export function ImportDialog({
         // Upsert/insert normal com paralelismo controlado — vital para vendas grandes.
         // Batches maiores + várias requisições simultâneas reduzem tempo total de
         // minutos para segundos e evitam a sensação de "travou".
-        const bigBatch = 500;
-        const concurrency = 5;
+        const bigBatch = 1000;
+        const concurrency = 8;
 
         const batches: Record<string, any>[][] = [];
         for (let i = 0; i < dataWithTeam.length; i += bigBatch) {
