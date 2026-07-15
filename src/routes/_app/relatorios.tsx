@@ -396,7 +396,7 @@ function Relatorios() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between gap-2">
                 <span>Mix por linha de produto</span>
-                <span className="text-xs font-normal text-muted-foreground">Clique numa barra para filtrar</span>
+                <span className="text-xs font-normal text-muted-foreground">Clique numa barra para detalhar</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="h-80">
@@ -408,7 +408,7 @@ function Relatorios() {
                   onClick={(e: any) => {
                     const name = e?.activePayload?.[0]?.payload?.name;
                     if (!name || name === "—") return;
-                    setSelLines(selLines.includes(name) ? selLines.filter((x) => x !== name) : [...selLines, name]);
+                    setDrill({ type: "line", value: name });
                   }}
                 >
                   <XAxis type="number" fontSize={11} />
