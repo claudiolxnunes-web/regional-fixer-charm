@@ -460,6 +460,7 @@ function Relatorios() {
         drill={drill}
         onClose={() => setDrill(null)}
         rows={current}
+        period={period}
       />
     </div>
   );
