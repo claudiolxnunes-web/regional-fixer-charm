@@ -76,6 +76,7 @@ function Relatorios() {
   const [selReps, setSelReps] = useState<string[]>([]);
   const [selStates, setSelStates] = useState<string[]>([]);
   const [selLines, setSelLines] = useState<string[]>([]);
+  const [drill, setDrill] = useState<{ type: "line" | "state"; value: string } | null>(null);
 
   const { data: allSales, isLoading } = useQuery({
     queryKey: ["sales-report", period],
