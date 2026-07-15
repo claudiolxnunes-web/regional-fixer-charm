@@ -131,6 +131,70 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "list_opportunities",
+        "title": "Listar oportunidades",
+        "description": "Lista oportunidades comerciais visíveis para o usuário autenticado. Filtra por estágio e retorna valor, cliente e responsável.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "stage": {
+              "type": "string",
+              "description": "Filtrar por estágio (ex.: qualificacao, proposta, ganha, perdida)."
+            },
+            "client_code": {
+              "type": "string",
+              "description": "Filtrar por código do cliente."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Máximo de resultados (padrão 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_quotes",
+        "title": "Listar propostas / cotações",
+        "description": "Lista propostas (quotes) visíveis para o usuário autenticado, com filtros por status e cliente.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Filtrar por status (ex.: rascunho, enviada, aprovada, recusada)."
+            },
+            "client_code": {
+              "type": "string",
+              "description": "Filtrar por código do cliente."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Máximo de resultados (padrão 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }
