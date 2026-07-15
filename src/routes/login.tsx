@@ -17,8 +17,12 @@ import logo from "@/assets/logo.png";
 export const Route = createFileRoute("/login")({
   component: LoginPage,
   validateSearch: (search: Record<string, unknown>) => {
+    const rawNext = typeof search.next === "string" ? search.next : undefined;
+    // Only allow same-origin relative paths.
+    const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : undefined;
     return {
       invite: (search.invite as string) || undefined,
+      next,
     };
   },
   head: () => ({
@@ -72,12 +76,16 @@ function LoginPage() {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/dashboard" });
+        if (search.next) {
+          window.location.href = search.next;
+        } else {
+          navigate({ to: "/dashboard" });
+        }
       } else {
         const { error } = await supabase.auth.signUp({
           email, password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}${search.next ?? "/dashboard"}`,
             data: { 
               full_name: name,
               role: role,
@@ -104,15 +112,21 @@ function LoginPage() {
   async function onGoogle() {
     setLoading(true);
     try {
+      const redirectBase = window.location.origin;
+      const redirectUri = search.next ? `${redirectBase}${search.next}` : redirectBase;
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: redirectUri,
       });
       if (result.error) {
         toast.error((result.error as any).message ?? "Falha no login com Google");
         return;
       }
       if (result.redirected) return; // browser will navigate
-      navigate({ to: "/dashboard" });
+      if (search.next) {
+        window.location.href = search.next;
+      } else {
+        navigate({ to: "/dashboard" });
+      }
     } finally {
       setLoading(false);
     }
