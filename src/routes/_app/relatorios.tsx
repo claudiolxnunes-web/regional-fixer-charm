@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid, Legend } from "recharts";
-import { Download, BarChart3, Filter } from "lucide-react";
+import { Download, BarChart3, Filter, DollarSign, Receipt, TrendingUp, Users } from "lucide-react";
 import { KpiCard } from "@/components/crm/KpiCard";
 import { formatCurrencyCompact } from "@/utils/formatters";
 
