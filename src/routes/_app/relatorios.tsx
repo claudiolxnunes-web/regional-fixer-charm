@@ -465,14 +465,42 @@ function Relatorios() {
   );
 }
 
+function formatDateBR(date: string | null) {
+  if (!date) return "—";
+  const [y, m, d] = date.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function DrillKpiCard({ icon: Icon, label, value, sub }: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  sub?: string;
+}) {
+  return (
+    <div className="rounded-lg border bg-card p-3 flex items-start gap-3">
+      <div className="mt-0.5 rounded-md bg-primary/10 p-1.5 text-primary shrink-0">
+        <Icon className="size-4" />
+      </div>
+      <div className="min-w-0">
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="text-base font-semibold break-words">{value}</div>
+        {sub && <div className="text-[10px] text-muted-foreground mt-0.5">{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
 function DrillDownSheet({
   drill,
   onClose,
   rows,
+  period,
 }: {
   drill: { type: "line" | "state"; value: string } | null;
   onClose: () => void;
   rows: SaleRow[];
+  period: string;
 }) {
   const filtered = useMemo(() => {
     if (!drill) return [];
@@ -493,38 +521,45 @@ function DrillDownSheet({
 
   return (
     <Sheet open={!!drill} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>
-            {drill?.type === "line" ? "Linha" : "UF"}: {drill?.value}
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-4 sm:p-6">
+        <SheetHeader className="space-y-2">
+          <SheetTitle className="flex flex-wrap items-center gap-2 text-left">
+            <span className="text-muted-foreground font-medium text-base">
+              {drill?.type === "line" ? "Linha" : "UF"}
+            </span>
+            <Badge variant="secondary" className="text-sm font-semibold">
+              {drill?.value}
+            </Badge>
           </SheetTitle>
-          <SheetDescription>
-            {filtered.length.toLocaleString("pt-BR")} linhas de venda no período.
+          <SheetDescription className="text-left">
+            {filtered.length.toLocaleString("pt-BR")} linhas de venda nos últimos {period} meses.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <KpiCard label="Faturamento" value={`R$ ${formatCurrencyCompact(totalRevenue)}`} />
-          <KpiCard label="Notas" value={invoices.toLocaleString("pt-BR")} />
-          <KpiCard label="Ticket médio" value={`R$ ${formatCurrencyCompact(avgTicket)}`} />
-          <KpiCard label="Clientes" value={clients.toLocaleString("pt-BR")} />
+        <div className="grid grid-cols-2 gap-3 mt-5">
+          <DrillKpiCard icon={DollarSign} label="Faturamento" value={`R$ ${formatCurrencyCompact(totalRevenue)}`} />
+          <DrillKpiCard icon={Receipt} label="Notas" value={invoices.toLocaleString("pt-BR")} />
+          <DrillKpiCard icon={TrendingUp} label="Ticket médio" value={`R$ ${formatCurrencyCompact(avgTicket)}`} />
+          <DrillKpiCard icon={Users} label="Clientes" value={clients.toLocaleString("pt-BR")} />
         </div>
 
-        <div className="mt-6 rounded-md border">
+        <div className="mt-6 rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Rep.</TableHead>
-                <TableHead>{drill?.type === "line" ? "UF" : "Linha"}</TableHead>
-                <TableHead className="text-right">Receita</TableHead>
+                <TableHead className="whitespace-nowrap min-w-[90px]">Data</TableHead>
+                <TableHead className="whitespace-nowrap min-w-[160px]">Cliente</TableHead>
+                <TableHead className="whitespace-nowrap min-w-[120px]">Rep.</TableHead>
+                <TableHead className="whitespace-nowrap min-w-[80px]">
+                  {drill?.type === "line" ? "UF" : "Linha"}
+                </TableHead>
+                <TableHead className="text-right whitespace-nowrap min-w-[100px]">Receita</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.slice(0, 200).map((r, i) => (
-                <TableRow key={i}>
-                  <TableCell className="whitespace-nowrap text-xs">{r.invoice_date ?? "—"}</TableCell>
+                <TableRow key={`${r.invoice_number ?? "nf"}-${r.client_id ?? r.client_name ?? "cli"}-${r.invoice_date ?? "dt"}-${i}`}>
+                  <TableCell className="whitespace-nowrap text-xs">{formatDateBR(r.invoice_date)}</TableCell>
                   <TableCell className="text-xs">{r.client_name ?? "—"}</TableCell>
                   <TableCell className="text-xs">{r.representative ?? r.rep_code ?? "—"}</TableCell>
                   <TableCell className="text-xs">
