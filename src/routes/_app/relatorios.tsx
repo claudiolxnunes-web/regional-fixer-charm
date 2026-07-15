@@ -427,7 +427,7 @@ function Relatorios() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between gap-2">
                 <span>Faturamento por UF</span>
-                <span className="text-xs font-normal text-muted-foreground">Clique numa barra para filtrar</span>
+                <span className="text-xs font-normal text-muted-foreground">Clique numa barra para detalhar</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="h-80">
@@ -437,7 +437,7 @@ function Relatorios() {
                   onClick={(e: any) => {
                     const name = e?.activePayload?.[0]?.payload?.name;
                     if (!name || name === "—") return;
-                    setSelStates(selStates.includes(name) ? selStates.filter((x) => x !== name) : [...selStates, name]);
+                    setDrill({ type: "state", value: name });
                   }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
@@ -455,6 +455,95 @@ function Relatorios() {
           Dados agregados a partir de {current.length.toLocaleString("pt-BR")} linhas de venda no período{hasFilters ? " (com filtros aplicados)" : ""}. Volume em kg.
         </p>
       </>)}
+
+      <DrillDownSheet
+        drill={drill}
+        onClose={() => setDrill(null)}
+        rows={current}
+      />
     </div>
+  );
+}
+
+function DrillDownSheet({
+  drill,
+  onClose,
+  rows,
+}: {
+  drill: { type: "line" | "state"; value: string } | null;
+  onClose: () => void;
+  rows: SaleRow[];
+}) {
+  const filtered = useMemo(() => {
+    if (!drill) return [];
+    return rows.filter((r) =>
+      drill.type === "line" ? (r.line ?? r.product_group) === drill.value : r.state === drill.value,
+    );
+  }, [drill, rows]);
+
+  const totalRevenue = filtered.reduce((s, r) => s + Number(r.revenue ?? 0), 0);
+  const invoices = new Set(filtered.map((r) => r.invoice_number).filter(Boolean)).size || filtered.length;
+  const clients = new Set(filtered.map((r) => r.client_id ?? r.client_name).filter(Boolean)).size;
+  const avgTicket = invoices > 0 ? totalRevenue / invoices : 0;
+
+  const sorted = useMemo(
+    () => [...filtered].sort((a, b) => (b.invoice_date ?? "").localeCompare(a.invoice_date ?? "")),
+    [filtered],
+  );
+
+  return (
+    <Sheet open={!!drill} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>
+            {drill?.type === "line" ? "Linha" : "UF"}: {drill?.value}
+          </SheetTitle>
+          <SheetDescription>
+            {filtered.length.toLocaleString("pt-BR")} linhas de venda no período.
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <KpiCard label="Faturamento" value={`R$ ${formatCurrencyCompact(totalRevenue)}`} />
+          <KpiCard label="Notas" value={invoices.toLocaleString("pt-BR")} />
+          <KpiCard label="Ticket médio" value={`R$ ${formatCurrencyCompact(avgTicket)}`} />
+          <KpiCard label="Clientes" value={clients.toLocaleString("pt-BR")} />
+        </div>
+
+        <div className="mt-6 rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Rep.</TableHead>
+                <TableHead>{drill?.type === "line" ? "UF" : "Linha"}</TableHead>
+                <TableHead className="text-right">Receita</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sorted.slice(0, 200).map((r, i) => (
+                <TableRow key={i}>
+                  <TableCell className="whitespace-nowrap text-xs">{r.invoice_date ?? "—"}</TableCell>
+                  <TableCell className="text-xs">{r.client_name ?? "—"}</TableCell>
+                  <TableCell className="text-xs">{r.representative ?? r.rep_code ?? "—"}</TableCell>
+                  <TableCell className="text-xs">
+                    {drill?.type === "line" ? (r.state ?? "—") : (r.line ?? r.product_group ?? "—")}
+                  </TableCell>
+                  <TableCell className="text-right text-xs whitespace-nowrap">
+                    R$ {Number(r.revenue ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {sorted.length > 200 && (
+            <div className="p-2 text-xs text-muted-foreground text-center border-t">
+              Mostrando 200 de {sorted.length.toLocaleString("pt-BR")} linhas.
+            </div>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
