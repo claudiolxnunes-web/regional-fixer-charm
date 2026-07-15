@@ -390,10 +390,24 @@ function Relatorios() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card>
-            <CardHeader><CardTitle>Mix por linha de produto</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between gap-2">
+                <span>Mix por linha de produto</span>
+                <span className="text-xs font-normal text-muted-foreground">Clique numa barra para filtrar</span>
+              </CardTitle>
+            </CardHeader>
             <CardContent className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={byLine} layout="vertical" margin={{ left: 80 }}>
+                <BarChart
+                  data={byLine}
+                  layout="vertical"
+                  margin={{ left: 80 }}
+                  onClick={(e: any) => {
+                    const name = e?.activePayload?.[0]?.payload?.name;
+                    if (!name || name === "—") return;
+                    setSelLines(selLines.includes(name) ? selLines.filter((x) => x !== name) : [...selLines, name]);
+                  }}
+                >
                   <XAxis type="number" fontSize={11} />
                   <YAxis type="category" dataKey="name" fontSize={11} width={120} />
                   <Tooltip
@@ -401,21 +415,33 @@ function Relatorios() {
                       [`R$ ${Number(v).toLocaleString("pt-BR")} (${p.payload.pct.toFixed(1)}%)`, "Receita"]
                     }
                   />
-                  <Bar dataKey="revenue" fill="var(--chart-3, var(--primary))" />
+                  <Bar dataKey="revenue" fill="var(--chart-3, var(--primary))" cursor="pointer" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>Faturamento por UF</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between gap-2">
+                <span>Faturamento por UF</span>
+                <span className="text-xs font-normal text-muted-foreground">Clique numa barra para filtrar</span>
+              </CardTitle>
+            </CardHeader>
             <CardContent className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={byState}>
+                <BarChart
+                  data={byState}
+                  onClick={(e: any) => {
+                    const name = e?.activePayload?.[0]?.payload?.name;
+                    if (!name || name === "—") return;
+                    setSelStates(selStates.includes(name) ? selStates.filter((x) => x !== name) : [...selStates, name]);
+                  }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" fontSize={11} />
                   <YAxis fontSize={11} />
                   <Tooltip formatter={(v: any) => `R$ ${Number(v).toLocaleString("pt-BR")}`} />
-                  <Bar dataKey="revenue" fill="var(--chart-4, var(--primary))" />
+                  <Bar dataKey="revenue" fill="var(--chart-4, var(--primary))" cursor="pointer" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
