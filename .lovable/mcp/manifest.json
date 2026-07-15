@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "sdk_version": "0.22.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://kpkdggpwwjtrmeywfaaw.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "agrogestao-crm-mcp",
+      "version": "0.1.0",
+      "title": "AgroGestão CRM"
+    },
+    "tools": [
+      {
+        "name": "list_clients",
+        "title": "Listar clientes",
+        "description": "Lista clientes visíveis para o usuário autenticado no AgroGestão CRM. Suporta busca por nome/código e filtros por classe ABC ou estado.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "description": "Texto de busca por nome ou código do cliente."
+            },
+            "abc_class": {
+              "type": "string",
+              "enum": [
+                "A",
+                "B",
+                "C"
+              ],
+              "description": "Filtrar por classe ABC."
+            },
+            "state": {
+              "type": "string",
+              "description": "Sigla do estado (UF)."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Máximo de resultados (padrão 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_recent_sales",
+        "title": "Vendas recentes",
+        "description": "Retorna vendas recentes do AgroGestão CRM (últimos N dias) visíveis para o usuário autenticado. Útil para acompanhar faturamento, clientes e representantes ativos.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365,
+              "description": "Janela em dias (padrão 30)."
+            },
+            "client_code": {
+              "type": "string",
+              "description": "Filtrar por código do cliente."
+            },
+            "representative": {
+              "type": "string",
+              "description": "Filtrar por representante ou rep_code."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "description": "Máximo de linhas (padrão 100)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_alerts",
+        "title": "Listar alertas",
+        "description": "Lista alertas comerciais (ex.: cliente inativo, queda de compra) visíveis para o usuário autenticado. Filtra por severidade e status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "severity": {
+              "type": "string",
+              "enum": [
+                "high",
+                "medium",
+                "low"
+              ],
+              "description": "Filtrar por severidade."
+            },
+            "status": {
+              "type": "string",
+              "description": "Filtrar por status (ex.: open, dismissed)."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Máximo de alertas (padrão 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
