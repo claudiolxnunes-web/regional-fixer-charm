@@ -24,7 +24,7 @@ export const wipeTable = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const targets = data.table === "all" ? ["sales", "open_orders", "clients"] : [data.table];
     for (const t of targets) {
-      const { error } = await supabaseAdmin.from(t).delete().not("id", "is", null);
+      const { error } = await (supabaseAdmin as any).from(t).delete().not("id", "is", null);
       if (error) throw new Error(`${t}: ${error.message}`);
     }
     return { ok: true, tables: targets };

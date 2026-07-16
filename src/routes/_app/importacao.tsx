@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -9,6 +10,11 @@ import { GoalsImportDialog } from "@/components/GoalsImportDialog";
 import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target, RefreshCw, FileInput } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { wipeTable } from "@/lib/admin-wipe.functions";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/importacao")({ component: ImportacaoPage });
 
