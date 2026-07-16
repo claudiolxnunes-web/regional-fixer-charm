@@ -783,6 +783,36 @@ export type Database = {
           },
         ]
       }
+      job_runs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          id: string
+          job_name: string
+          result: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          job_name: string
+          result?: Json | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          job_name?: string
+          result?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
       nutrition_alerts: {
         Row: {
           alert_date: string

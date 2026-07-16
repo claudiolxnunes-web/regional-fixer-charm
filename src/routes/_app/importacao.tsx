@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -9,6 +10,11 @@ import { GoalsImportDialog } from "@/components/GoalsImportDialog";
 import { FileSpreadsheet, Users, Building2, Package, ShoppingCart, Upload, FileText, TrendingUp, Trash2, AlertTriangle, Target, RefreshCw, FileInput } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { wipeTable } from "@/lib/admin-wipe.functions";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/importacao")({ component: ImportacaoPage });
 
@@ -361,57 +367,82 @@ function ImportacaoPage() {
   );
 }
 
+type WipeTarget = "sales" | "open_orders" | "clients" | "all";
+
 function DangerZone() {
   const qc = useQueryClient();
+  const wipeFn = useServerFn(wipeTable);
+  const [pending, setPending] = useState<{ table: WipeTarget; label: string } | null>(null);
+
   const wipe = useMutation({
-    mutationFn: async (table: "sales" | "open_orders" | "clients" | "all") => {
-      const targets = table === "all" ? ["sales", "open_orders", "clients"] : [table];
-      for (const t of targets) {
-        const { error } = await (supabase as any).from(t).delete().not("id", "is", null);
-        if (error) throw error;
-      }
-    },
+    mutationFn: (table: WipeTarget) => wipeFn({ data: { table } }),
     onSuccess: (_d, table) => {
       toast.success(table === "all" ? "Base zerada" : `Tabela ${table} esvaziada`);
       qc.invalidateQueries();
+      setPending(null);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => {
+      toast.error(e?.message ?? "Falha ao apagar");
+      setPending(null);
+    },
   });
 
-  const ask = (label: string, table: "sales" | "open_orders" | "clients" | "all") => {
-    if (confirm(`Tem certeza que deseja apagar TODOS os registros de ${label}? Esta ação não pode ser desfeita.`)) {
-      wipe.mutate(table);
-    }
-  };
+  const ask = (label: string, table: WipeTarget) => setPending({ table, label });
 
   return (
-    <Card className="p-5 border-destructive/30 bg-destructive/5">
-      <div className="flex items-start gap-3">
-        <AlertTriangle className="size-5 text-destructive mt-0.5" />
-        <div className="flex-1 space-y-3">
-          <div>
-            <h3 className="font-medium text-destructive">Zona de perigo — limpar base</h3>
-            <p className="text-sm text-muted-foreground">
-              Use para apagar dados importados antes de uma nova carga limpa. A ação é irreversível.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => ask("Vendas", "sales")} disabled={wipe.isPending}>
-              <Trash2 className="size-4 mr-1.5" /> Limpar Vendas
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => ask("Carteira de Pedidos", "open_orders")} disabled={wipe.isPending}>
-              <Trash2 className="size-4 mr-1.5" /> Limpar Pedidos
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => ask("Clientes", "clients")} disabled={wipe.isPending}>
-              <Trash2 className="size-4 mr-1.5" /> Limpar Clientes
-            </Button>
-            <Button variant="destructive" size="sm" onClick={() => ask("toda a base (clientes + vendas + pedidos)", "all")} disabled={wipe.isPending}>
-              <Trash2 className="size-4 mr-1.5" /> Limpar TUDO
-            </Button>
+    <>
+      <Card className="p-5 border-destructive/30 bg-destructive/5">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="size-5 text-destructive mt-0.5" />
+          <div className="flex-1 space-y-3">
+            <div>
+              <h3 className="font-medium text-destructive">Zona de perigo — limpar base</h3>
+              <p className="text-sm text-muted-foreground">
+                Use para apagar dados importados antes de uma nova carga limpa. A ação é irreversível e restrita a administradores.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => ask("Vendas", "sales")} disabled={wipe.isPending}>
+                <Trash2 className="size-4 mr-1.5" /> Limpar Vendas
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => ask("Carteira de Pedidos", "open_orders")} disabled={wipe.isPending}>
+                <Trash2 className="size-4 mr-1.5" /> Limpar Pedidos
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => ask("Clientes", "clients")} disabled={wipe.isPending}>
+                <Trash2 className="size-4 mr-1.5" /> Limpar Clientes
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => ask("toda a base (clientes + vendas + pedidos)", "all")} disabled={wipe.isPending}>
+                <Trash2 className="size-4 mr-1.5" /> Limpar TUDO
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+
+      <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar {pending?.label}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. Todos os registros serão removidos permanentemente. Apenas administradores podem executar esta ação.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={wipe.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (pending) wipe.mutate(pending.table);
+              }}
+              disabled={wipe.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {wipe.isPending ? "Apagando..." : "Sim, apagar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
