@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 import { sendWhatsApp } from "@/lib/whatsapp.server";
+import { verifyCronSecret, serviceClient, logJobRun } from "@/lib/cron.server";
 
 const SEV_LABEL: Record<string, string> = {
   high: "🔴 ALTA",
@@ -19,18 +19,15 @@ const TYPE_LABEL: Record<string, string> = {
 export const Route = createFileRoute("/api/public/hooks/run-alerts")({
   server: {
     handlers: {
-      POST: async () => {
-        const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-        const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        if (!url || !key) {
-          return new Response(JSON.stringify({ error: "missing env" }), { status: 500 });
-        }
-        const supabase = createClient(url, key, {
-          auth: { autoRefreshToken: false, persistSession: false },
-        });
+      POST: async ({ request }) => {
+        const unauth = verifyCronSecret(request);
+        if (unauth) return unauth;
+        const startedAt = Date.now();
+        const supabase = serviceClient();
 
         const { data: counts, error } = await supabase.rpc("generate_all_alerts");
         if (error) {
+          await logJobRun("run-alerts", startedAt, "error", null, error.message);
           return new Response(JSON.stringify({ error: error.message }), { status: 500 });
         }
 
@@ -106,15 +103,9 @@ export const Route = createFileRoute("/api/public/hooks/run-alerts")({
           console.error("WhatsApp dispatch error", e);
         }
 
-        return new Response(
-          JSON.stringify({
-            ok: true,
-            counts,
-            whatsapp: { sent: waSent, errors: waErrors },
-            ts: new Date().toISOString(),
-          }),
-          { headers: { "Content-Type": "application/json" } }
-        );
+        const result = { ok: true, counts, whatsapp: { sent: waSent, errors: waErrors }, ts: new Date().toISOString() };
+        await logJobRun("run-alerts", startedAt, "error" in result ? "error" : "success", result);
+        return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json" } });
       },
     },
   },

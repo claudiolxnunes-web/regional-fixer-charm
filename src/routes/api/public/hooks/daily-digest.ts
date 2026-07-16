@@ -1,19 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 import { sendResendEmail, wrap } from "@/lib/email.server";
+import { verifyCronSecret, serviceClient, logJobRun } from "@/lib/cron.server";
 
 // Cron diário: envia para cada gestor (admin/manager) um resumo dos alertas
 // novos + número de relatórios diários enviados pelos representantes do time.
 export const Route = createFileRoute("/api/public/hooks/daily-digest")({
   server: {
     handlers: {
-      POST: async () => {
-        const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-        const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        if (!url || !key) return new Response("missing env", { status: 500 });
-        const sb = createClient(url, key, {
-          auth: { autoRefreshToken: false, persistSession: false },
-        });
+      POST: async ({ request }) => {
+        const unauth = verifyCronSecret(request);
+        if (unauth) return unauth;
+        const startedAt = Date.now();
+        const sb = serviceClient();
 
         // Carrega gestores agrupados por team
         const { data: members } = await sb
@@ -93,7 +91,9 @@ export const Route = createFileRoute("/api/public/hooks/daily-digest")({
           }
         }
 
-        return new Response(JSON.stringify({ ok: true, sent }), {
+        const result = { ok: true, sent };
+        await logJobRun("daily-digest", startedAt, "success", result);
+        return new Response(JSON.stringify(result), {
           headers: { "Content-Type": "application/json" },
         });
       },
