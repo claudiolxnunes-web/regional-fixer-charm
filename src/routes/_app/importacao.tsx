@@ -254,7 +254,7 @@ function ImportacaoPage() {
                 { header: "Subsolução", field: "subsolution", transform: txt },
                 { header: "Linha", field: "line", transform: txt },
                 { header: "GRV", field: "grv", transform: txt },
-                { header: "GNV", field: "gnv", transform: txt },
+                { header: "GNV", field: "gnv", transform: txt, aliases: ["GEV"] },
                 { header: "Mês/Ano", field: "month_year", transform: txt },
                 { header: "Filial", field: "branch", transform: txt },
                 { header: "Cód CFOP", field: "cfop", transform: txt },
