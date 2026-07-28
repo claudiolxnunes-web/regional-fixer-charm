@@ -20,6 +20,8 @@ export type ColumnMap = {
   required?: boolean;
   /** Transform value (e.g. uppercase, parse number) */
   transform?: (v: any) => any;
+  /** Alternate header names accepted for this column */
+  aliases?: string[];
 };
 
 type Props = {
