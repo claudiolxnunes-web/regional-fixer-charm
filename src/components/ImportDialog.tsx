@@ -358,9 +358,9 @@ export function ImportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full justify-center">
-          <Upload className="size-4 mr-2 shrink-0" />
-          <span className="truncate">{triggerLabel}</span>
+        <Button variant="outline" size="sm" className="w-full min-w-0 justify-center px-2">
+          <Upload className="size-4 mr-1.5 shrink-0" />
+          <span className="truncate text-xs">{triggerLabel}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl">
