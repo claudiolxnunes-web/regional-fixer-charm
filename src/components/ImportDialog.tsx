@@ -20,6 +20,8 @@ export type ColumnMap = {
   required?: boolean;
   /** Transform value (e.g. uppercase, parse number) */
   transform?: (v: any) => any;
+  /** Alternate header names accepted for this column */
+  aliases?: string[];
 };
 
 type Props = {
@@ -78,7 +80,10 @@ export function ImportDialog({
     const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: null });
 
     const headerMap = new Map<string, ColumnMap>();
-    columns.forEach((c) => headerMap.set(norm(c.header), c));
+    columns.forEach((c) => {
+      headerMap.set(norm(c.header), c);
+      c.aliases?.forEach((a) => headerMap.set(norm(a), c));
+    });
 
     const errs: string[] = [];
     const out: Record<string, any>[] = [];
