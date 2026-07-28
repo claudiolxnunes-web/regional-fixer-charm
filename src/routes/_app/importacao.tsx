@@ -450,13 +450,13 @@ function ImportCard({
   icon, title, description, action,
 }: { icon: React.ReactNode; title: string; description: string; action: React.ReactNode }) {
   return (
-    <Card className="p-5 flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-md bg-primary/10 text-primary">{icon}</div>
-        <h3 className="font-medium">{title}</h3>
+    <Card className="p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">{icon}</div>
+        <h3 className="font-medium truncate">{title}</h3>
       </div>
-      <p className="text-sm text-muted-foreground flex-1">{description}</p>
-      <div>{action}</div>
+      <p className="text-sm text-muted-foreground flex-1 break-words">{description}</p>
+      <div className="w-full min-w-0 [&_button]:w-full [&_button]:min-w-0">{action}</div>
     </Card>
   );
 }
