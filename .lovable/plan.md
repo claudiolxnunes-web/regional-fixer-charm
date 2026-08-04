@@ -1,40 +1,45 @@
-# Ajustar visual e layout do painel lateral de drill-down
+# Exportação completa do projeto
 
-## Contexto
-O painel lateral (`DrillDownSheet`) em `/relatorios` já está funcional: abre ao clicar numa barra dos gráficos de "Mix por linha" ou "Faturamento por UF", mostra KPIs do recorte e uma tabela com as linhas de venda. Ajustamos agora o visual e a disposição para deixar o painel mais claro, responsivo e alinhado ao design system do app.
+Para ter uma cópia 100% replicável do projeto além do código-fonte, você precisa dos seguintes artefatos:
 
-## O que será ajustado
+## 1. Código-fonte e configuração de build (já existe)
+- `src/` — componentes, rotas, hooks, server functions, utilitários
+- `public/` — assets, PWA manifest, LLMs.txt, robots.txt
+- `package.json`, `vite.config.ts`, `tsconfig.json`, `wrangler.jsonc`, `components.json`
+- Lockfile de dependências (`bun.lockb` ou `package-lock.json`)
 
-1. **Header do painel**
-   - Usar `Badge` para destacar o nome da linha/UF selecionada.
-   - Adicionar subtítulo com o total de linhas de venda e o período ativo.
+## 2. Schema e políticas do banco (parcialmente existe)
+- `supabase/migrations/` — 60 migrações com tabelas, RLS, funções e triggers
+- `supabase/config.toml` — configuração do projeto Cloud
 
-2. **Grid de KPIs**
-   - Manter 2 colunas em mobile, mas ajustar padding e espaçamento para não ficar apertado.
-   - Adicionar cor/ícone sutil para diferenciar os KPIs do painel dos KPIs da página principal.
-   - Garantir que os valores grandes quebrem linha corretamente (`break-words`).
+## 3. Edge Functions (já existe)
+- `supabase/functions/evolution-connect/index.ts` — integração WhatsApp/Evolution
+- `supabase/functions/migrate-helper/index.ts` — helper de migração
 
-3. **Tabela do recorte**
-   - Garantir scroll horizontal quando necessário (evitar corte de colunas em telas estreitas).
-   - Formatar data no padrão `DD/MM/AAAA` em vez de `YYYY-MM-DD`.
-   - Ajustar larguras das colunas: Data, Cliente, Representante, UF/Linha, Receita.
-   - Substituir `key={i}` por chave composta (`invoice_number` + `client_id` + `invoice_date`).
+## 4. Dados do banco (não está no repositório)
+- CSVs ou SQL INSERTs de todas as tabelas (`sales`, `clients`, `open_orders`, `representatives`, `alerts`, etc.)
+- 33 tabelas no schema `public`
 
-4. **Feedback visual de clique nos gráficos**
-   - Adicionar `cursor="pointer"` já existe nas barras; confirmar que o tooltip indica ação clicável.
-   - Opcionalmente mostrar um pequeno texto hint abaixo do título dos gráficos (já existe, apenas revisar).
+## 5. Segredos e variáveis de ambiente (não devem ir no ZIP)
+- `.env` / `.env.production` — publishable keys e tokens de pagamento
+- Secrets do Cloud: `SUPABASE_SERVICE_ROLE_KEY`, `EVOLUTION_API_KEY`, `CRON_SECRET`, `RESEND_API_KEY`, `LOVABLE_API_KEY`
+- Esses devem ser reconfigurados manualmente no destino, nunca exportados em texto plano
 
-5. **Responsividade geral do Sheet**
-   - Manter `w-full sm:max-w-2xl`, mas revisar padding interno para mobile.
-   - Verificar se o conteúdo cabe bem em telas pequenas sem scroll geral desconfortável.
+## 6. Arquivos de Storage (não está no repositório)
+- Buckets privados: `database_export_24_07_26`, `database_export_25_07_26`
+- Eventuais avatares, logos, anexos de clientes, etc.
 
-## Fora de escopo
-- Não alterar a lógica de agregação dos dados.
-- Não adicionar novos KPIs, top clientes/reps ou export CSV no painel (só visual/layout).
-- Não alterar outros gráficos ou filtros da página `/relatorios`.
-- Não mudar o design system global (tokens, cores, fontes) — ajustes locais no painel apenas.
+## 7. Configuração de Auth (não está no repositório)
+- Provedores habilitados (Email, Google, etc.)
+- Templates de e-mail e SMS
+- Configuração de HIBP e confirmação de e-mail
 
-## Validação
-- Build do projeto passa sem erros.
-- Preview de /relatorios mostra o painel com novo layout, header destacado, data formatada e tabela responsiva.
-- Clique nos gráficos continua abrindo o painel corretamente.
+## Proposta
+Gerar um pacote completo contendo:
+- Código fonte compactado
+- Schema SQL completo (mesclando todas as migrações)
+- Dados do banco em CSV/SQL
+- Lista de secrets e variáveis que precisam ser reconfiguradas no destino
+- Instruções de deploy e restauração
+
+Não será gerado: tokens, chaves privadas ou senhas.
