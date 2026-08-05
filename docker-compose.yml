@@ -1,0 +1,25 @@
+services:
+  agrogestao:
+    image: node:22-alpine
+    container_name: agrogestao
+    restart: unless-stopped
+    working_dir: /app
+    command: node .output/server/index.mjs
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+    volumes:
+      - ./.output:/app/.output:ro
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=evolution_evo-net
+      - traefik.http.routers.agrogestao.rule=Host(`agrogestao.bpfconsult.com.br`)
+      - traefik.http.routers.agrogestao.entrypoints=websecure
+      - traefik.http.routers.agrogestao.tls.certresolver=le
+      - traefik.http.services.agrogestao.loadbalancer.server.port=3000
+    networks:
+      - evo-net
+networks:
+  evo-net:
+    name: evolution_evo-net
+    external: true
