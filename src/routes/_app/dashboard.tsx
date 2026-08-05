@@ -202,7 +202,7 @@ function Dashboard() {
               <div className="space-y-6">
                 {loadingBench ? (
                   <div className="h-40 flex items-center justify-center"><Loader2 className="animate-spin" /></div>
-                ) : benchmark?.rows.slice(0, 5).map((r: any, i: number) => (
+                ) : (benchmark?.rows ?? []).slice(0, 5).map((r: any, i: number) => (
                   <div key={r.rep} className="relative">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
